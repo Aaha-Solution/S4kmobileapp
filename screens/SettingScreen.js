@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Alert } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../Store/userSlice';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const menuItems = [
   { icon: 'person-outline', label: 'Profile', screen: 'Profile' },
@@ -12,7 +14,8 @@ const menuItems = [
 ];
 
 const SettingsScreen = ({ route, navigation }) => {
-  const { username } = route.params || { username: 'Guest User' };
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
 
   const handleLogout = () => {
     Alert.alert(
@@ -26,7 +29,7 @@ const SettingsScreen = ({ route, navigation }) => {
         {
           text: 'Logout',
           onPress: () => {
-            setIsLoggedIn(false);
+            dispatch(logout());
             navigation.goBack();
           },
         },
@@ -45,8 +48,8 @@ const SettingsScreen = ({ route, navigation }) => {
             resizeMode="cover"
           />
           <View>
-            <Text style={styles.name}>{username}</Text>
-            <Text style={styles.email}>{username === 'Guest User' ? 'guest@example.com' : `${username}@example.com`}</Text>
+            <Text style={styles.name}>{user.firstname} {user.surename}</Text>
+            <Text style={styles.email}>{user.firstname === 'Guest User' ? 'guest@example.com' : `${user.firstname}@example.com`}</Text>
           </View>
         </View>
       </View>
@@ -65,10 +68,10 @@ const SettingsScreen = ({ route, navigation }) => {
             }}
           >
             <View style={styles.iconLabel}>
-              <Ionicons name={item.icon} size={22} color="#5A5A5A" />
+              <Icon name={item.icon} size={22} color="#5A5A5A" />
               <Text style={styles.label}>{item.label}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#B0B0B0" />
+            <Icon name="chevron-forward" size={20} color="#B0B0B0" />
           </Pressable>
         ))}
       </ScrollView>
@@ -76,37 +79,34 @@ const SettingsScreen = ({ route, navigation }) => {
   );
 };
 
-export default SettingsScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F8F8',
   },
   header: {
-    marginTop: -10,
+    marginTop: -20,
     paddingVertical: 30,
     paddingHorizontal: 20,
-    paddingLeft: 30,
-  //   backgroundColor: '#7F00FF',
-     borderBottomLeftRadius: 20,
-     borderBottomRightRadius: 20,
-     alignContent: 'center',
-     alignItems: 'center',
-     justifyContent: 'center',
-   },
+    //backgroundColor: '#7F00FF',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    alignItems:'center',
+    justifyContent:'center',
+  },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 20,
+    
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     marginRight: 15,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: 'Black',
   },
   name: {
     color: 'Black',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   menuContainer: {
-    marginTop: 20,
+    marginTop: 10,
   },
   menuItem: {
     backgroundColor: '#fff',
@@ -148,4 +148,5 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
-  
+
+export default SettingsScreen;

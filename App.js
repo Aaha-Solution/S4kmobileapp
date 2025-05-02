@@ -2,14 +2,15 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
-import store from './store';
+import { store } from './Store';
 import SplashScreen from './screens/SplashScreen';
-import NotificationScreen from './screens/NotificationScreen';
-import SettingsScreen from './screens/SettingScreen';
+import LoginScreen from './screens/LoginScreen';
+import SettingScreen from './screens/SettingScreen';
 import AccountScreen from './screens/AccountScreen';
 import SupportScreen from './screens/SupportScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProfileScreen from './screens/ProfileScreen';
+import NotificationScreen from './screens/NotificationScreen';
 
 const Stack = createStackNavigator(); 
 
@@ -17,11 +18,11 @@ const App = () => (
   <Provider store={store}>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Setting" screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="SplashScreen" component={SplashScreen} /> */}
-        {/* <Stack.Screen name="Login" component={LoginScreen} />  */}
+        {/* <Stack.Screen name="SplashScreen" component={SplashScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} /> */}
         <Stack.Screen 
           name="Setting" 
-          component={SettingsScreen}
+          component={SettingScreen}
           options={({ navigation }) => ({
             headerShown: true, 
             headerTitle: 'Setting',

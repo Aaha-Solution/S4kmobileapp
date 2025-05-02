@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { login } from '../store/userSlice';
-import PressableButton from '../component/PressableButton';
-import CustomTextInput from '../component/CustomTextInput';
+import { login } from '../Store/userSlice';
+import PressableButton from '../Components/PressableButton';
+import CustomTextInput from '../Components/CustomTextInput';
+
 const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
