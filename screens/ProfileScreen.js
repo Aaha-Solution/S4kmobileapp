@@ -1,0 +1,211 @@
+import React, { useState } from 'react';
+import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const ProfileScreen = ({ route, navigation }) => {
+    const [firstname, setFirstName] = useState(route.params?.username || 'Guest User');
+    const [surename, setSureName] = useState('');
+    const [address, setAddress] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [dateError, setDateError] = useState('');
+
+    const validateDate = (date) => {
+        // Remove any non-numeric characters
+        const cleanedDate = date.replace(/[^\d]/g, '');
+        
+        // Format the date as user types
+        let formattedDate = '';
+        if (cleanedDate.length > 0) {
+            formattedDate = cleanedDate.slice(0, 2);
+            if (cleanedDate.length > 2) {
+                formattedDate += '/' + cleanedDate.slice(2, 4);
+                if (cleanedDate.length > 4) {
+                    formattedDate += '/' + cleanedDate.slice(4, 8);
+                }
+            }
+        }
+
+        // Validate the date
+        if (formattedDate.length === 10) {
+            const [day, month, year] = formattedDate.split('/').map(Number);
+            const date = new Date(year, month - 1, day);
+            
+            // Check if the date is valid
+            if (isNaN(date.getTime()) || 
+                date.getDate() !== day || 
+                date.getMonth() !== month - 1 || 
+                date.getFullYear() !== year) {
+                setDateError('Please enter a valid date');
+            } else {
+                setDateError('');
+            }
+        } else if (formattedDate.length > 0) {
+            setDateError('Please complete the date');
+        } else {
+            setDateError('');
+        }
+
+        return formattedDate;
+    };
+
+    const handleDateChange = (text) => {
+        const formattedDate = validateDate(text);
+        setDateOfBirth(formattedDate);
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView>
+                <View style={styles.header}>
+                    <Image
+                        source={{ uri: 'https://www.shutterstock.com/image-vector/anime-boy-character-isolated-icon-260nw-2199560737.jpg' }}
+                        style={styles.avatar}
+                        resizeMode="cover"
+                    />
+                    <Text style={styles.name}>{firstname} {surename}</Text>
+                </View>
+
+                <View style={styles.formContainer}>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>First Name</Text>
+                        <TextInput
+                            style={styles.firstnameinput}
+                            value={firstname}
+                            onChangeText={setFirstName}
+                            placeholder="Enter your first name"
+                        />
+                        <Text style={styles.label}>Sure Name</Text>
+                        <TextInput
+                            style={styles.surenameinput}
+                            value={surename}
+                            onChangeText={setSureName}
+                            placeholder="Enter your sure name"
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Date of Birth</Text>
+                        <TextInput
+                            style={[styles.dateinput, dateError ? styles.errorInput : null]}
+                            value={dateOfBirth}
+                            onChangeText={handleDateChange}
+                            placeholder="DD/MM/YYYY"
+                            keyboardType="numeric"
+                            maxLength={10}
+                        />
+                        {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Address</Text>
+                        <TextInput
+                            style={[styles.addressinput]}
+                            value={address}
+                            onChangeText={setAddress}
+                            placeholder="Type your Address"
+                            multiline
+                            numberOfLines={5}
+                        />
+                    </View>
+
+                    <Pressable 
+                        style={[styles.saveButton, dateError ? styles.disabledButton : null]}
+                        disabled={dateError ? true : false}
+                    >
+                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                    </Pressable>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F8F8F8',
+    },
+    header: {
+        alignItems: 'center',
+        paddingVertical: 20,
+    },
+    avatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 10,
+    },
+    name: {
+        flexDirection: 'row',
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    formContainer: {
+        padding: 20,
+    },
+    inputGroup: {
+        marginBottom: 20,
+    },
+    label: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 8,
+    },
+    firstnameinput: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginBottom: 20,
+    },
+    surenameinput: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    dateinput: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    errorInput: {
+        borderColor: 'red',
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 5,
+    },
+    addressinput: {
+        height: 100,
+        textAlignVertical: 'top',
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    saveButton: {
+        backgroundColor: '#7F00FF',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+});
+
+export default ProfileScreen;
