@@ -5,8 +5,9 @@ import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const menuItems = [
-  { icon: 'person-outline', label: 'Profile', screen: 'Profile' },
+  { icon: 'person-outline', label: 'Profile', screen: 'EditProfile' },
   { icon: 'person-outline', label: 'Account', screen: 'Account' },
+  
   { icon: 'notifications-outline', label: 'Notifications', screen: 'Notifications' },
   { icon: 'help-circle-outline', label: 'Support', screen: 'Support' },
   { icon: 'share-social-outline', label: 'Share', screen: 'Share' },
@@ -75,6 +76,7 @@ const SettingsScreen = ({ route, navigation }) => {
           </Pressable>
         ))}
       </ScrollView>
+      
     </SafeAreaView>
   );
 };

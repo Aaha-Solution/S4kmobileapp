@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ProfileScreen = ({ route, navigation }) => {
+
+ 
+const EditProfileScreen = ({ route, navigation }) => {
     const [firstname, setFirstName] = useState(route.params?.username || 'Guest User');
     const [surename, setSureName] = useState('');
     const [address, setAddress] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [dateError, setDateError] = useState('');
+    const [phone, setPhone] = useState('');
+
 
     const validateDate = (date) => {
         // Remove any non-numeric characters
@@ -96,6 +100,17 @@ const ProfileScreen = ({ route, navigation }) => {
                         {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
                     </View>
 
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Phone Number</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={phone}
+                            onChangeText={setPhone}
+                            placeholder="Enter your phone number"
+                            keyboardType="phone-pad"
+                        />
+                    </View>
+
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Address</Text>
                         <TextInput
@@ -108,12 +123,7 @@ const ProfileScreen = ({ route, navigation }) => {
                         />
                     </View>
 
-                    <Pressable 
-                        style={[styles.saveButton, dateError ? styles.disabledButton : null]}
-                        disabled={dateError ? true : false}
-                    >
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
-                    </Pressable>
+                   
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -182,6 +192,15 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 5,
     },
+    input: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginBottom: 20,
+      },
+
     addressinput: {
         height: 100,
         textAlignVertical: 'top',
@@ -208,4 +227,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProfileScreen;
+export default EditProfileScreen;

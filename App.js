@@ -9,7 +9,7 @@ import SettingScreen from './screens/SettingScreen';
 import AccountScreen from './screens/AccountScreen';
 import SupportScreen from './screens/SupportScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ProfileScreen from './screens/ProfileScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
 
 const Stack = createStackNavigator(); 
@@ -97,8 +97,8 @@ const App = () => (
         />
 
         <Stack.Screen
-          name="Profile"
-          component={ProfileScreen}
+          name="EditProfile"
+          component={EditProfileScreen}
           options={({ navigation }) => ({
             headerShown: true,
             headerTitle: 'Profile',

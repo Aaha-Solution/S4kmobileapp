@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 const AccountScreen = ({ route, navigation }) => {
   const { username } = route.params || { username: 'Guest User' };
-  const [name, setName] = useState(username);
-  const [email, setEmail] = useState(username === 'Guest User' ? 'guest@example.com' : `${username}@example.com`);
-  const [phone, setPhone] = useState('+1 234 567 8900');
+   const [name, setName] = useState(username);
+  // const [email, setEmail] = useState(username === 'Guest User' ? 'guest@example.com' : `${username}@example.com`);
+  // const [phone, setPhone] = useState('');
 
+  const menuItems = [
+    { icon: 'person-outline', label: 'Profile', screen: 'EditProfile'},
+    { icon: 'lock-closed-outline', label: 'Change Password', screen: 'Change Password' },
+  ];
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -23,25 +29,36 @@ const AccountScreen = ({ route, navigation }) => {
         </View>
       </View>
 
-      <View style={styles.formContainer}>
+      <ScrollView style={styles.menuContainer}>
+        {menuItems.map((item, index) => (
+          <Pressable 
+            key={index} 
+            style={styles.menuItem}
+            onPress={() => {
+              if (item.label === 'Log out') {
+                handleLogout();
+              } else {
+                navigation.navigate(item.screen);
+              }
+            }}
+          >
+            <View style={styles.iconLabel}>
+              <Icon name={item.icon} size={22} color="#5A5A5A" />
+              <Text style={styles.label}>{item.label}</Text>
+            </View>
+            <Icon name="chevron-forward" size={20} color="#B0B0B0" />
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      {/* <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Full Name</Text>
           <TextInput
             style={styles.input}
             value={name}
-            onChangeText={setName}
+            onChangeText={setUsername}
             placeholder="Enter your full name"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            keyboardType="email-address"
           />
         </View>
 
@@ -56,10 +73,23 @@ const AccountScreen = ({ route, navigation }) => {
           />
         </View>
 
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+          />
+        </View>
+
         <Pressable style={styles.saveButton}>
           <Text style={styles.saveButtonText}>Save Changes</Text>
         </Pressable>
-      </View>
+
+      </View> */}
+
     </ScrollView>
   );
 };
@@ -89,6 +119,36 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#fff',
   },
+  menuContainer: {
+    marginTop: 10,
+  },
+  menuItem: {
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    marginBottom: 10,
+    borderRadius: 12,
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+  },
+  iconLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    marginLeft: 15,
+    fontSize: 16,
+    color: '#333',
+  },
   editButton: {
     position: 'absolute',
     bottom: 0,
@@ -105,9 +165,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
+    marginLeft: 15,
     fontSize: 16,
     color: '#333',
-    marginBottom: 8,
   },
   input: {
     backgroundColor: '#fff',
