@@ -5,12 +5,10 @@ import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const menuItems = [
-  { icon: 'person-outline', label: 'Profile', screen: 'EditProfile' },
-  { icon: 'person-outline', label: 'Account', screen: 'Account' },
   
+  { icon: 'person-outline', label: 'Account', screen: 'Account' },
   { icon: 'notifications-outline', label: 'Notifications', screen: 'Notifications' },
   { icon: 'help-circle-outline', label: 'Support', screen: 'Support' },
-  { icon: 'share-social-outline', label: 'Share', screen: 'Share' },
   { icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
 
@@ -69,10 +67,10 @@ const SettingsScreen = ({ route, navigation }) => {
             }}
           >
             <View style={styles.iconLabel}>
-              <Icon name={item.icon} size={22} color="#5A5A5A" />
+              <Icon name={item.icon} size={22} color="Black" />
               <Text style={styles.label}>{item.label}</Text>
             </View>
-            <Icon name="chevron-forward" size={20} color="#B0B0B0" />
+            <Icon name="chevron-forward" size={20} color="Black" />
           </Pressable>
         ))}
       </ScrollView>
@@ -121,9 +119,10 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     marginTop: 10,
+    
   },
   menuItem: {
-    backgroundColor: '#fff',
+    backgroundColor:'#663399',
     marginHorizontal: 20,
     marginBottom: 10,
     borderRadius: 12,
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
   label: {
     marginLeft: 15,
     fontSize: 16,
-    color: '#333',
+    color: 'Black',
   },
 });
 

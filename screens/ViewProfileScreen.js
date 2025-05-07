@@ -1,0 +1,132 @@
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import PressableButton from '../Components/PressableButton';
+
+const ViewProfileScreen = ({ route, navigation }) => {
+  const [firstname] = useState(route.params?.username || 'Guest User');
+  const [surename] = useState(route.params?.surename || '');
+  const [address] = useState(route.params?.address || 'No Address');
+  const [dateOfBirth] = useState(route.params?.dateOfBirth || 'No Date of Birth');
+  const [phone] = useState(route.params?.phone || 'No Phone Number');
+
+  const handleEditPress = () => {
+    navigation.navigate('EditProfile', {
+      username: firstname,
+      surename: surename,
+      dateOfBirth: dateOfBirth,
+      phone: phone,
+      address: address
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <View style={styles.header}>
+          <View style={styles.profileContainer}>
+            <Image
+              source={{
+                uri: 'https://www.shutterstock.com/image-vector/anime-boy-character-isolated-icon-260nw-2199560737.jpg',
+              }}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+            <Pressable style={styles.editButton} disabled>
+              <Ionicons name="camera" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        </View>
+
+        <Text style={styles.name}>{firstname}</Text>
+
+        <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>First Name</Text>
+            <Text style={styles.readonlyText}>{firstname}</Text>
+
+            <Text style={styles.label}>Sure Name</Text>
+            <Text style={styles.readonlyText}>{surename}</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Date of Birth</Text>
+            <Text style={styles.readonlyText}>{dateOfBirth}</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Phone Number</Text>
+            <Text style={styles.readonlyText}>{phone}</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Address</Text>
+            <Text style={[styles.readonlyText, { minHeight: 80 }]}>{address}</Text>
+          </View>
+
+          <PressableButton 
+            style={styles.saveButton} 
+            title="Edit" 
+            onPress={handleEditPress} 
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F8F8',
+  },
+  header: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  profileContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  editButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#8A2BE2',
+    padding: 8,
+    borderRadius: 20,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'purple',
+    paddingLeft: 20,
+    marginBottom: 10,
+  },
+  formContainer: {
+    padding: 20,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 8,
+  },
+  readonlyText: {
+    backgroundColor: '#f1f1f1',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    color: '#333',
+  },
+});
+
+export default ViewProfileScreen;

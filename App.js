@@ -11,6 +11,9 @@ import SupportScreen from './screens/SupportScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
+import ViewProfileScreen from './screens/ViewProfileScreen';
+import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
+
 
 const Stack = createStackNavigator(); 
 
@@ -101,7 +104,7 @@ const App = () => (
           component={EditProfileScreen}
           options={({ navigation }) => ({
             headerShown: true,
-            headerTitle: 'Profile',
+            headerTitle: 'Edit Profile',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <Ionicons 
@@ -114,6 +117,47 @@ const App = () => (
             )
           })}
         />
+
+        <Stack.Screen
+          name="ViewProfile"
+          component={ViewProfileScreen}
+          options={({ navigation }) => ({
+            headerShown: true,
+            headerTitle: 'View Profile',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <Ionicons 
+                name="arrow-back" 
+                size={24}
+                color="black"
+                style={{marginLeft: 10}}
+                onPress={() => navigation.goBack()}
+              />
+            )
+          })}
+        />
+            
+        <Stack.Screen
+          name="ChangePasswordScreen"
+          component={ChangePasswordScreen}
+          options={({ navigation }) => ({
+            headerShown: true,
+            headerTitle: 'Change Password',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <Ionicons 
+                name="arrow-back" 
+                size={24}
+                color="black"
+                style={{marginLeft: 10}}
+                onPress={() => navigation.goBack()}
+              />
+            )
+          })}
+        />
+        
+            
+        
         
       </Stack.Navigator>
     </NavigationContainer>

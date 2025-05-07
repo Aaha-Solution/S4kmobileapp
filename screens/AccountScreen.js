@@ -7,12 +7,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const AccountScreen = ({ route, navigation }) => {
   const { username } = route.params || { username: 'Guest User' };
    const [name, setName] = useState(username);
-  // const [email, setEmail] = useState(username === 'Guest User' ? 'guest@example.com' : `${username}@example.com`);
-  // const [phone, setPhone] = useState('');
+
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Profile', screen: 'EditProfile'},
-    { icon: 'lock-closed-outline', label: 'Change Password', screen: 'Change Password' },
+    { icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { username: name }},
+    { icon: 'lock-closed-outline', label: 'Change Password', screen: 'ChangePasswordScreen' },
   ];
   return (
     <ScrollView style={styles.container}>
@@ -29,6 +28,7 @@ const AccountScreen = ({ route, navigation }) => {
         </View>
       </View>
 
+      {/* list item */}
       <ScrollView style={styles.menuContainer}>
         {menuItems.map((item, index) => (
           <Pressable 
@@ -38,7 +38,7 @@ const AccountScreen = ({ route, navigation }) => {
               if (item.label === 'Log out') {
                 handleLogout();
               } else {
-                navigation.navigate(item.screen);
+                navigation.navigate(item.screen, item.params);
               }
             }}
           >
@@ -51,44 +51,7 @@ const AccountScreen = ({ route, navigation }) => {
         ))}
       </ScrollView>
 
-      {/* <View style={styles.formContainer}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Full Name</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setUsername}
-            placeholder="Enter your full name"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="Enter your phone number"
-            keyboardType="phone-pad"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-          />
-        </View>
-
-        <Pressable style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </Pressable>
-
-      </View> */}
+      
 
     </ScrollView>
   );
@@ -102,11 +65,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   header: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    backgroundColor: '#7F00FF',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   profileContainer: {
     alignItems: 'center',
@@ -163,11 +123,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 20,
-  },
-  label: {
-    marginLeft: 15,
-    fontSize: 16,
-    color: '#333',
   },
   input: {
     backgroundColor: '#fff',

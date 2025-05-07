@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
+import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-
+import Icon from 'react-native-vector-icons/Ionicons';
+import PressableButton from '../Components/PressableButton';
  
-const EditProfileScreen = ({ route, navigation }) => {
-    const [firstname, setFirstName] = useState(route.params?.username || 'Guest User');
-    const [surename, setSureName] = useState('');
-    const [address, setAddress] = useState('');
-    const [dateOfBirth, setDateOfBirth] = useState('');
+const EditProfileScreen = ({ route, navigation, }) => {
+    const [firstname, setFirstName] = useState(route.params?.username);
+    const [surename, setSureName] = useState(route.params?.surename);
+    const [address, setAddress] = useState(route.params?.address);
+    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth);
     const [dateError, setDateError] = useState('');
-    const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState(route.params?.phone);
 
 
     const validateDate = (date) => {
@@ -57,19 +57,39 @@ const EditProfileScreen = ({ route, navigation }) => {
         setDateOfBirth(formattedDate);
     };
 
+    const isValid = firstname && surename && dateOfBirth && phone && address;
+
+    const handleSave = () => {
+        if(isValid) {
+            Alert.alert('Profile saved successfully');
+            navigation.navigate('Account');
+        }else{
+            Alert.alert('Please fill in all fields');
+        }
+    };
+
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <View style={styles.header}>
+            <View style={styles.header}>
+                <View style={styles.profileContainer}>
                     <Image
                         source={{ uri: 'https://www.shutterstock.com/image-vector/anime-boy-character-isolated-icon-260nw-2199560737.jpg' }}
                         style={styles.avatar}
                         resizeMode="cover"
                     />
-                    <Text style={styles.name}>{firstname} {surename}</Text>
+                    <Pressable style={styles.editButton}>
+                         <Ionicons name="camera" size={20} color="#fff" />
+                    </Pressable>
+
                 </View>
+            </View>
+
+                
 
                 <View style={styles.formContainer}>
+                   
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>First Name</Text>
                         <TextInput
@@ -123,9 +143,15 @@ const EditProfileScreen = ({ route, navigation }) => {
                         />
                     </View>
 
+                    <PressableButton style={styles.saveButton} title="Save" onPress={handleSave} />
                    
                 </View>
+
+               
+         
+
             </ScrollView>
+
         </SafeAreaView>
     );
 };
@@ -145,13 +171,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         marginBottom: 10,
     },
-    name: {
-        flexDirection: 'row',
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    formContainer: {
+        formContainer: {
         padding: 20,
     },
     inputGroup: {
@@ -161,7 +181,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
         marginBottom: 8,
-    },
+    }, editButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: '#8A2BE2',
+        padding: 8,
+        borderRadius: 20,
+      },
     firstnameinput: {
         backgroundColor: '#fff',
         padding: 12,
@@ -211,20 +238,22 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
     },
     saveButton: {
-        backgroundColor: '#7F00FF',
-        padding: 15,
+        backgroundColor: 'purple',
+        padding: 10,
+        paddingHorizontal: 20,
         borderRadius: 8,
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 10,
     },
     disabledButton: {
         backgroundColor: '#ccc',
     },
     saveButtonText: {
-        color: '#fff',
+        color: 'Black',
         fontSize: 16,
         fontWeight: 'bold',
     },
+   
 });
 
 export default EditProfileScreen;
