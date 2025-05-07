@@ -15,19 +15,20 @@ const PressableButton = ({ title, onPress, style }) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#800080', // 🟣 Purple
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 6,
+    backgroundColor: '#800080',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
     alignItems: 'center',
-    width: '180%', // full-width button like "Apply"
-    maxWidth: 100, // optional: limit size on big screens
-    alignSelf: 'center', // center the button horizontally
+    justifyContent: 'center',
+    minWidth: 180, // ✅ fixed good-looking width
+    alignSelf: 'center',
   },
   text: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
   pressed: {
     opacity: 0.7,

@@ -4,6 +4,8 @@ const initialState = {
   isLoggedIn: false,
   username: '',
   selectedLanguage: null,
+  email: '',        
+  otp: '', 
 };
 
 const userSlice = createSlice({
@@ -22,8 +24,14 @@ const userSlice = createSlice({
       state.username = '';
       state.selectedLanguage = null;
     },
+    setEmail: (state, action) => {
+      state.email = action.payload;
+    },
+    setOTP: (state, action) => {
+      state.otp = action.payload;
+    },
   },
 });
 
-export const { login, selectLanguage, logout } = userSlice.actions;
+export const { login, selectLanguage, logout, setEmail, setOTP } = userSlice.actions;
 export default userSlice.reducer;

@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     color: '#000',
     backgroundColor: '#fff',
     paddingRight: 40, // extra space for the icon
+    width: '100%', // This makes it responsive inside its container
   },
   icon: {
     position: 'absolute',
