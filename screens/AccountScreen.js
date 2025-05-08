@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import profile_avatar from '../assets/image/profile_avatar.png';
+import LinearGradient from 'react-native-linear-gradient';
 
 const AccountScreen = ({ route, navigation }) => {
   const { username } = route.params || { username: 'Guest User' };
@@ -14,46 +15,52 @@ const AccountScreen = ({ route, navigation }) => {
     { icon: 'lock-closed-outline', label: 'Change Password', screen: 'ChangePasswordScreen' },
   ];
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.profileContainer}>
-          <Image
-            source={{ uri: 'https://www.shutterstock.com/image-vector/anime-boy-character-isolated-icon-260nw-2199560737.jpg' }}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-          <Pressable style={styles.editButton}>
-            <Ionicons name="camera" size={20} color="#fff" />
-          </Pressable>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.profileContainer}>
+            <Image
+              source={profile_avatar}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+            <Text style={styles.name}>My Account</Text>
+          </View>
         </View>
-      </View>
 
-      {/* list item */}
-      <ScrollView style={styles.menuContainer}>
-        {menuItems.map((item, index) => (
-          <Pressable 
-            key={index} 
-            style={styles.menuItem}
-            onPress={() => {
-              if (item.label === 'Log out') {
-                handleLogout();
-              } else {
-                navigation.navigate(item.screen, item.params);
-              }
-            }}
-          >
-            <View style={styles.iconLabel}>
-              <Icon name={item.icon} size={22} color="#5A5A5A" />
-              <Text style={styles.label}>{item.label}</Text>
-            </View>
-            <Icon name="chevron-forward" size={20} color="#B0B0B0" />
-          </Pressable>
-        ))}
+        {/* list item */}
+        <ScrollView style={styles.menuContainer}>
+          {menuItems.map((item, index) => (
+            <Pressable 
+              key={index} 
+              style={styles.menuItem}
+              onPress={() => {
+                if (item.label === 'Log out') {
+                  handleLogout();
+                } else {
+                  navigation.navigate(item.screen, item.params);
+                }
+              }}
+            >
+              <View style={styles.iconLabel}>
+                <Icon name={item.icon} size={22} color="#5A5A5A" />
+                <Text style={styles.label}>{item.label}</Text>
+              </View>
+              <Icon name="chevron-forward" size={20} color="#B0B0B0" />
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        
+
       </ScrollView>
-
-      
-
-    </ScrollView>
+    </View>
   );
 };
 
@@ -78,6 +85,11 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 3,
     borderColor: '#fff',
+  },
+  name: {
+    color: 'Black',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   menuContainer: {
     marginTop: 10,

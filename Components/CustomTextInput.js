@@ -26,20 +26,26 @@ const CustomTextInput = ({ value, onChangeText, placeholder, secureTextEntry = f
 
 const styles = StyleSheet.create({
   inputContainer: {
-    width: 350,
-    marginBottom: 15,
-    position: 'relative',
+    marginTop: 10,
+    marginBottom: 20,
+    
   },
   input: {
-    width: '100%',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 12,
-    fontSize: 16,
-    color: '#000',
     backgroundColor: '#fff',
-    paddingRight: 40, // extra space for the icon
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    fontSize: 16,
+    color: '#333',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
   },
   icon: {
     position: 'absolute',

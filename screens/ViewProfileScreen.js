@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
+import profile_avatar from '../assets/image/profile_avatar.png';
+import LinearGradient from 'react-native-linear-gradient';
+
 
 const ViewProfileScreen = ({ route, navigation }) => {
   const [firstname] = useState(route.params?.username || 'Guest User');
@@ -21,64 +24,69 @@ const ViewProfileScreen = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.header}>
-          <View style={styles.profileContainer}>
-            <Image
-              source={{
-                uri: 'https://www.shutterstock.com/image-vector/anime-boy-character-isolated-icon-260nw-2199560737.jpg',
-              }}
-              style={styles.avatar}
-              resizeMode="cover"
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView style={styles.container}>
+        <ScrollView>
+          <View style={styles.header}>
+            <View style={styles.profileContainer}>
+              <Image
+                source={profile_avatar}
+                style={styles.avatar}
+                resizeMode="cover"
+              />
+              
+            </View>
+          </View>
+
+          <Text style={styles.name}>{firstname}</Text>
+
+          <View style={styles.formContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>First Name</Text>
+              <Text style={styles.readonlyText}>{firstname}</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Sure Name</Text>
+              <Text style={styles.readonlyText}>{surename}</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Date of Birth</Text>
+              <Text style={styles.readonlyText}>{dateOfBirth}</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Phone Number</Text>
+              <Text style={styles.readonlyText}>{phone}</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Address</Text>
+              <Text style={[styles.readonlyText, { minHeight: 80 }]}>{address}</Text>
+            </View>
+
+            <PressableButton 
+              style={styles.saveButton} 
+              title="Edit" 
+              onPress={handleEditPress} 
             />
-            <Pressable style={styles.editButton} disabled>
-              <Ionicons name="camera" size={20} color="#fff" />
-            </Pressable>
           </View>
-        </View>
-
-        <Text style={styles.name}>{firstname}</Text>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>First Name</Text>
-            <Text style={styles.readonlyText}>{firstname}</Text>
-
-            <Text style={styles.label}>Sure Name</Text>
-            <Text style={styles.readonlyText}>{surename}</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Date of Birth</Text>
-            <Text style={styles.readonlyText}>{dateOfBirth}</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone Number</Text>
-            <Text style={styles.readonlyText}>{phone}</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Address</Text>
-            <Text style={[styles.readonlyText, { minHeight: 80 }]}>{address}</Text>
-          </View>
-
-          <PressableButton 
-            style={styles.saveButton} 
-            title="Edit" 
-            onPress={handleEditPress} 
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
   },
   header: {
     alignItems: 'center',

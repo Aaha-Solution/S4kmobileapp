@@ -28,8 +28,12 @@ const App = () => (
           component={SettingScreen}
           options={({ navigation }) => ({
             headerShown: true, 
+            headerTransparent: true,
             headerTitle: 'Setting',
             headerTitleAlign: 'center',
+            headerStyle: {
+              backgroundColor: '#f3e6db',
+            },
             headerLeft: () => (
               <Ionicons 
                 name="arrow-back" 

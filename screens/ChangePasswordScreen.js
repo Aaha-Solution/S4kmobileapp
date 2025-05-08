@@ -1,12 +1,33 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TextInput, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable } from 'react-native';
 import PressableButton from '../Components/PressableButton';
-import CustomTextInput from '../Components/CustomTextInput';    
+import Icon from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
+
 const ChangePasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isCurrentPasswordVisible, setCurrentPasswordVisible] = useState(false);
+  const [isNewPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [isCurrentPasswordValid, setIsCurrentPasswordValid] = useState(false);
+
+  const validateCurrentPassword = (password) => {
+    // Add your current password validation logic here
+    // For example, check against stored password
+    if (password.length >= 6) {
+      setIsCurrentPasswordValid(true);
+    } else {
+      setIsCurrentPasswordValid(false);
+    }
+  };
+
+  const handleCurrentPasswordChange = (text) => {
+    setCurrentPassword(text);
+    validateCurrentPassword(text);
+  };
 
   const handleChangePassword = () => {
     if (!email || !currentPassword || !newPassword || !confirmPassword) {
@@ -16,6 +37,16 @@ const ChangePasswordScreen = ({ navigation }) => {
 
     if (!email.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // Password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      Alert.alert(
+        'Error',
+        'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character'
+      );
       return;
     }
 
@@ -37,68 +68,115 @@ const ChangePasswordScreen = ({ navigation }) => {
     );
   };
 
+    const handleCancel = () => {
+      navigation.goBack();
+    };
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.formContainer}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>E-Mail</Text>
-         <CustomTextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your E-Mail"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <ScrollView style={styles.container}>
+        <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>E-Mail</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your E-Mail"
+              secureTextEntry={false}
+              placeholderTextColor="#999"
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Current Password</Text>
-         <CustomTextInput
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-            placeholder="Enter your current password"
-            secureTextEntry={true}
-          />
-        </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Current Password</Text>
+            <TextInput
+              style={styles.input}
+              value={currentPassword}
+              onChangeText={handleCurrentPasswordChange}
+              placeholder="Enter current password"
+              secureTextEntry={!isCurrentPasswordVisible}
+              placeholderTextColor="#999"
+            />
+            <Pressable style={styles.icon} onPress={() => setCurrentPasswordVisible(!isCurrentPasswordVisible)}>
+              <Icon name={isCurrentPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
+            </Pressable>
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>New Password</Text>
-          <TextInput
-            style={styles.input}
-            value={newPassword}
-            onChangeText={setNewPassword}
-            placeholder="Enter new password"
-            secureTextEntry
-            placeholderTextColor="#999"
-          />
-        </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>New Password</Text>
+            <TextInput
+              style={[styles.input, !isCurrentPasswordValid && styles.disabledInput]}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="Enter new password"
+              secureTextEntry={!isNewPasswordVisible}
+              placeholderTextColor="#999"
+              editable={isCurrentPasswordValid}
+            />
+            <Pressable 
+              style={[styles.icon, !isCurrentPasswordValid && styles.disabledIcon]} 
+              onPress={() => isCurrentPasswordValid && setNewPasswordVisible(!isNewPasswordVisible)}
+            >
+              <Icon 
+                name={isNewPasswordVisible ? 'eye-off' : 'eye'} 
+                size={20} 
+                color={isCurrentPasswordValid ? "#888" : "#ccc"} 
+              />
+            </Pressable>
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Confirm New Password</Text>
-          <TextInput
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            placeholder="Confirm new password"
-            secureTextEntry
-            placeholderTextColor="#999"
-          />
-        </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm New Password</Text>
+            <TextInput
+              style={[styles.input, !isCurrentPasswordValid && styles.disabledInput]}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Confirm new password"
+              secureTextEntry={!isConfirmPasswordVisible}
+              placeholderTextColor="#999"
+              editable={isCurrentPasswordValid}
+            />
+            <Pressable 
+              style={[styles.icon, !isCurrentPasswordValid && styles.disabledIcon]} 
+              onPress={() => isCurrentPasswordValid && setConfirmPasswordVisible(!isConfirmPasswordVisible)}
+            >
+              <Icon 
+                name={isConfirmPasswordVisible ? 'eye-off' : 'eye'} 
+                size={20} 
+                color={isCurrentPasswordValid ? "#888" : "#ccc"} 
+              />
+            </Pressable>
+          </View>
 
-        <PressableButton
-          style={styles.saveButton}
-          title="Change Password"
-          onPress={handleChangePassword}
-        />
-      </View>
-    </ScrollView>
+          <View style={styles.buttonContainer}>
+          <PressableButton
+            style={[styles.saveButton, !isCurrentPasswordValid && styles.disabledButton]}
+            title="Update"
+            onPress={handleChangePassword}
+          />
+          <PressableButton
+            style={[styles.cancelButton, !isCurrentPasswordValid && styles.disabledButton]}
+            title="Cancel"
+            onPress={handleCancel}
+          />
+
+          </View>
+         
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
   },
   formContainer: {
     padding: 20,
@@ -106,6 +184,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     marginBottom: 20,
+    position: 'relative',
   },
   label: {
     fontSize: 16,
@@ -130,9 +209,28 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
+  disabledInput: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#ddd',
+    color: '#999',
+  },
+  icon: {
+    position: 'absolute',
+    right: 15,
+    top: 45,
+    zIndex: 1,
+  },
+  disabledIcon: {
+    opacity: 0.5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
   saveButton: {
     backgroundColor: '#8A2BE2',
-    padding: 15,
+    padding: 10,
     width: '100%',
     paddingVertical: 15,
     borderRadius: 12,
@@ -146,6 +244,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+    opacity: 0.7,
   }
 });
 
