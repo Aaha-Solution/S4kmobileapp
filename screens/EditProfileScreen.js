@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, Scro
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
- 
+import LinearGradient from 'react-native-linear-gradient';
 const EditProfileScreen = ({ route, navigation, }) => {
     const [firstname, setFirstName] = useState(route.params?.username);
     const [surename, setSureName] = useState(route.params?.surename);
@@ -70,6 +70,13 @@ const EditProfileScreen = ({ route, navigation, }) => {
 
 
     return (
+        <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[ '#E0B0FF', '#ffffff']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
         <SafeAreaView style={styles.container}>
             <ScrollView>
             <View style={styles.header}>
@@ -153,6 +160,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
             </ScrollView>
 
         </SafeAreaView>
+        </View>
     );
 };
 

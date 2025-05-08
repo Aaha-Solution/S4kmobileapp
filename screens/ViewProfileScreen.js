@@ -26,7 +26,7 @@ const ViewProfileScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        colors={[ '#E0B0FF', '#ffffff']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 20,
+    marginTop: 110,
   },
   profileContainer: {
     position: 'relative',
@@ -113,8 +114,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'purple',
-    paddingLeft: 20,
     marginBottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
   },
   formContainer: {
     padding: 20,
@@ -124,11 +127,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#666',
+    color: 'black',
     marginBottom: 8,
   },
   readonlyText: {
-    backgroundColor: '#f1f1f1',
+    backgroundColor: 'white',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,

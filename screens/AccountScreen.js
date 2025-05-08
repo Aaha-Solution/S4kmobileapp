@@ -17,7 +17,7 @@ const AccountScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        colors={[ '#E0B0FF', '#ffffff']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}

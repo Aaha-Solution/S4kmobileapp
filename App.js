@@ -32,7 +32,7 @@ const App = () => (
             headerTitle: 'Setting',
             headerTitleAlign: 'center',
             headerStyle: {
-              backgroundColor: '#f3e6db',
+              backgroundColor: '#E0B0FF',
             },
             headerLeft: () => (
               <Ionicons 
@@ -127,8 +127,12 @@ const App = () => (
           component={ViewProfileScreen}
           options={({ navigation }) => ({
             headerShown: true,
-            headerTitle: 'View Profile',
+            headerTitle: 'Profile',
             headerTitleAlign: 'center',
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: '#E0B0FF',
+            },
             headerLeft: () => (
               <Ionicons 
                 name="arrow-back" 
