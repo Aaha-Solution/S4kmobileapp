@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
-import { useDispatch } from 'react-redux';                    
-import { setEmail as setEmailRedux } from '../store/userSlice';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
+import { useDispatch } from 'react-redux';
+import { setEmail as setReduxEmail } from '../store/userSlice'; // Renamed to avoid conflict
 
 const ForgotPasswordScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [email, setEmailState] = useState('');  // Renamed to `setEmailState` to avoid conflict
   const [error, setError] = useState('');
+  const dispatch = useDispatch();
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const dispatch = useDispatch(); 
 
   useEffect(() => {
     Animated.loop(
@@ -29,41 +29,26 @@ const ForgotPasswordScreen = ({ navigation }) => {
       ])
     ).start();
   }, []);
+
   const isValidEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
-  }
-  const handleLogin = async () => {
-    if (!username || !password) {
-        alert('Please enter both email and password');
-        return;
+  };
+
+  const handleSendOTP = () => {
+    if (!email.trim()) {
+      setError('Please enter your email.');
+    } else if (!isValidEmail(email)) {
+      setError('Please enter a valid email address.');
+    } else {
+      setError('');
+      dispatch(setReduxEmail(email)); // Save email in Redux
+      navigation.navigate('OTPVerification'); 
     }
+  };
 
-    try {
-        const response = await fetch('http://localhost/smile4kids/api/login.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            dispatch(login(data.user)); // Save user to Redux
-            navigation.navigate('LanguageSelection'); // Or your next screen
-        } else {
-            alert(data.message || 'Login failed');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        alert('Something went wrong. Please try again.');
-    }
-};
   return (
     <LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
-
       {/* Top Back Button */}
       <View style={styles.header}>
         <Pressable
@@ -72,6 +57,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
             { opacity: pressed ? 0.6 : 1 },
           ]}
           onPress={() => navigation.goBack()}
+          accessibilityLabel="Go Back"
         >
           <Ionicons name="arrow-back" size={28} color="#4B0082" />
         </Pressable>
@@ -95,19 +81,20 @@ const ForgotPasswordScreen = ({ navigation }) => {
               placeholder="Email"
               value={email}
               onChangeText={text => {
-                setEmail(text);
-                setError('');
+                setEmailState(text);  // Update email state
+                setError('');  // Clear error on input change
               }}
               keyboardType="email-address"
+              accessibilityLabel="Email Input"
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
-
 
           <PressableButton
             title="Get OTP"
             onPress={handleSendOTP}
             style={{ marginTop: 15 }}
+            accessibilityLabel="Get OTP Button"
           />
         </View>
       </View>
@@ -131,9 +118,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: -150, // Use a negative value to move it up slightly
+    marginTop: -150,
   },
-
 
   titleRow: {
     flexDirection: 'row',
@@ -163,21 +149,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputContainer: {
-    marginBottom: 8, // spacing between input+error and the next button
+    marginBottom: 8,
   },
   card: {
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },   // Increased vertical shadow
-    shadowOpacity: 1,                     // Slightly more visible shadow
-    shadowRadius: 8,                         // Softer edges
-    elevation: 10,                           // Android elevation must be increased to match
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 10,
     width: '100%',
     alignSelf: 'center',
   },
-
 });
 
 export default ForgotPasswordScreen;
+

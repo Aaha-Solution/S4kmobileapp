@@ -6,9 +6,10 @@ import store from './store';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
-import OTPVerificationScreen from './screens/OTPVerificationScreen'; 
+import OTPVerificationScreen from './screens/OTPVerificationScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
+import AgeSelectionScreen from './screens/AgeSelectionScreen';
 const Stack = createStackNavigator(); // ✅ You need this line
 
 const App = () => (
@@ -20,7 +21,31 @@ const App = () => (
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
         <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-        <Stack.Screen name="LanguageSelectionScreen" component={LanguageSelectionScreen} />
+        <Stack.Screen
+          name="LanguageSelectionScreen"
+          component={LanguageSelectionScreen}
+          options={{
+            headerShown: true,
+            title: 'Select Language',
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#b388eb' },
+            headerTintColor: '#fff',
+            headerTitleStyle: { fontWeight: 'bold' },
+            headerLeft: () => null, // 👈 This removes the back button
+          }}
+        />
+        <Stack.Screen
+          name="AgeSelectionScreen"
+          component={AgeSelectionScreen}
+          options={{
+            headerShown: true,
+            title: 'Select Age Group',
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#b388eb' },
+            headerTintColor: '#fff', // Title and back arrow color
+            headerTitleStyle: { fontWeight: 'bold' },
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   </Provider>

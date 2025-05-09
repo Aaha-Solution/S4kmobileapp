@@ -17,11 +17,48 @@ const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [usernameError, setUsernameError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const dispatch = useDispatch();
 
-    const handleLogin = () => {
-        if (username.trim()) {
-            dispatch(login({ username })); // Assuming login expects a payload
+    const handleLogin = async () => {
+        setUsernameError('');
+        setPasswordError('');
+
+        if (!username || !password) {
+            if (!username) setUsernameError('Email is required');
+            if (!password) setPasswordError('Password is required');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                dispatch(login(data.user));
+                navigation.navigate('LanguageSelectionScreen');
+            } else {
+                // Assuming backend returns errors per field
+                if (data.errors) {
+                    if (data.errors.username) setUsernameError(data.errors.username);
+                    if (data.errors.password) setPasswordError(data.errors.password);
+                } else {
+                    // Fallback for generic message
+                    setUsernameError('Invalid email');
+                    setPasswordError('Invalid password');
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setPasswordError('Something went wrong. Please try again.');
         }
     };
 
@@ -32,32 +69,44 @@ const LoginScreen = ({ navigation }) => {
             resizeMode="cover"
         >
             <View style={styles.container}>
-
                 <Image
                     source={require('../assets/image/splash.png')}
                     style={styles.logo}
                 />
 
                 <View style={{ marginTop: -10 }}>
-                    <Text style={{ fontSize: 18, color: '#00000' }}>Email:</Text>
+                    <Text style={styles.label}>Email:</Text>
                     <CustomTextInput
                         value={username}
-                        onChangeText={setUsername}
+                        onChangeText={(text) => {
+                            setUsername(text);
+                            if (usernameError) setUsernameError('');
+                        }}
                         placeholder="Enter E-mail"
                     />
-                    <Text style={{ fontSize: 18, color: '#00000' }}>Password:</Text>
+                    {usernameError ? (
+                        <Text style={styles.errorText}>{usernameError}</Text>
+                    ) : null}
+
+                    <Text style={styles.label}>Password:</Text>
                     <CustomTextInput
                         value={password}
-                        onChangeText={setPassword}
+                        onChangeText={(text) => {
+                            setPassword(text);
+                            if (passwordError) setPasswordError('');
+                        }}
                         placeholder="Enter Password"
                         secureTextEntry={true}
                     />
+                    {passwordError ? (
+                        <Text style={styles.errorText}>{passwordError}</Text>
+                    ) : null}
                 </View>
 
                 <PressableButton
                     title="Login"
                     onPress={handleLogin}
-                    style={{ marginTop: 10 }} // Add spacing below the inputs
+                    style={{ marginTop: 10 }}
                 />
 
                 {/* Remember Me & Forgot Password */}
@@ -83,13 +132,16 @@ const LoginScreen = ({ navigation }) => {
 
                     <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
                         {({ pressed }) => (
-                            <Text style={[styles.forgotText, { color: pressed ? 'white' : 'black' }]}>
+                            <Text
+                                style={[
+                                    styles.forgotText,
+                                    { color: pressed ? 'white' : 'black' },
+                                ]}
+                            >
                                 Forgot Password?
                             </Text>
                         )}
                     </Pressable>
-
-
                 </View>
             </View>
         </ImageBackground>
@@ -109,14 +161,24 @@ const styles = StyleSheet.create({
         width: 170,
         height: 150,
         alignSelf: 'center',
-        marginTop: -200,    // Added to move it slightly up
+        marginTop: -200,
         resizeMode: 'contain',
     },
-
-
     background: {
         flex: 1,
         justifyContent: 'center',
+    },
+    label: {
+        fontSize: 18,
+        color: '#000',
+        marginBottom: 4,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 4,
+        marginBottom: 8,
+        marginLeft: 5,
     },
     optionsRow: {
         flexDirection: 'row',
@@ -125,7 +187,6 @@ const styles = StyleSheet.create({
         marginTop: 25,
         paddingHorizontal: 10,
     },
-
     rememberMe: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -149,10 +210,9 @@ const styles = StyleSheet.create({
     optionText: {
         fontSize: 14,
         color: 'black',
-        textAlign: 'left',       // Aligns text to the left
-        alignSelf: 'flex-start', // Positions the text element to the left of its container
+        textAlign: 'left',
+        alignSelf: 'flex-start',
     },
-
     forgotText: {
         fontSize: 14,
         color: 'black',

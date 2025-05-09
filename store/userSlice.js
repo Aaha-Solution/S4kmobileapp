@@ -4,8 +4,10 @@ const initialState = {
   isLoggedIn: false,
   username: '',
   selectedLanguage: null,
-  email: '',        
-  otp: '', 
+  selectedAgeGroup: null,
+  email: '',
+  otp: '',
+  purchasedVideos: [],
 };
 
 const userSlice = createSlice({
@@ -16,13 +18,18 @@ const userSlice = createSlice({
       state.isLoggedIn = true;
       state.username = action.payload;
     },
-    selectLanguage: (state, action) => {
+    setLanguage: (state, action) => {
       state.selectedLanguage = action.payload;
+    },
+    setAgeGroup: (state, action) => {
+      state.selectedAgeGroup = action.payload;
     },
     logout: (state) => {
       state.isLoggedIn = false;
       state.username = '';
       state.selectedLanguage = null;
+      state.selectedAgeGroup = null;
+      state.purchasedVideos = [];
     },
     setEmail: (state, action) => {
       state.email = action.payload;
@@ -30,8 +37,27 @@ const userSlice = createSlice({
     setOTP: (state, action) => {
       state.otp = action.payload;
     },
+    addPurchasedVideo: (state, action) => {
+      if (!state.purchasedVideos.includes(action.payload)) {
+        state.purchasedVideos.push(action.payload);
+      }
+    },
+    resetSelections: (state) => {
+      state.selectedLanguage = null;
+      state.selectedAgeGroup = null;
+    },
   },
 });
 
-export const { login, selectLanguage, logout, setEmail, setOTP } = userSlice.actions;
+export const {
+  login,
+  setLanguage,
+  setAgeGroup,
+  logout,
+  setEmail,
+  setOTP,
+  addPurchasedVideo,
+  resetSelections,
+} = userSlice.actions;
+
 export default userSlice.reducer;

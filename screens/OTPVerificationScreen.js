@@ -52,8 +52,6 @@ const OTPVerificationScreen = ({ navigation }) => {
       setError('Invalid OTP. Please try again.');
     }
   };
-
-
   return (
     <LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
       <View style={styles.header}>
@@ -121,7 +119,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 17,
     color: '#333',
-    marginBottom: 30,
+    marginBottom: 30
   },
   otpContainer: {
     flexDirection: 'row',

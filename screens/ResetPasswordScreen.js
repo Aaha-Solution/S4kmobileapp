@@ -79,6 +79,7 @@ const ResetPasswordScreen = ({route}) => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
+            marginTop: -150, // Use a negative value to move it up slightly
           },
           title: {
             fontSize: 26,

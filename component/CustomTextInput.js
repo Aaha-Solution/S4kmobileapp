@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { TextInput, StyleSheet, View, Pressable } from 'react-native';
+import { TextInput, StyleSheet, View, Pressable, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const CustomTextInput = ({ value, onChangeText, placeholder, secureTextEntry = false, style }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   return (
-    <View style={styles.inputContainer}>
+    <View style={[styles.inputContainer, styles.shadow]}>
       <TextInput
         style={[styles.input, style]}
         value={value}
@@ -29,23 +29,35 @@ const styles = StyleSheet.create({
     width: 350,
     marginBottom: 15,
     position: 'relative',
+    borderRadius: 6,
+    backgroundColor: '#fff',
   },
   input: {
     width: '100%',
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#aaa',
     borderRadius: 6,
     fontSize: 16,
     color: '#000',
     backgroundColor: '#fff',
-    paddingRight: 40, // extra space for the icon
-    width: '100%', // This makes it responsive inside its container
+    paddingRight: 40, // Space for eye icon
   },
   icon: {
     position: 'absolute',
     right: 10,
     top: '35%',
+  },
+  shadow: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
 
