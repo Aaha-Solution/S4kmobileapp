@@ -2,12 +2,13 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   isLoggedIn: false,
-  username: '',
+  user: {
+    firstname: 'Guest User',
+    surename: '',
+    dateOfBirth: '',
+    address: '',
+  },
   selectedLanguage: null,
-  selectedAgeGroup: null,
-  email: '',
-  otp: '',
-  purchasedVideos: [],
 };
 
 const userSlice = createSlice({
@@ -16,48 +17,21 @@ const userSlice = createSlice({
   reducers: {
     login: (state, action) => {
       state.isLoggedIn = true;
-      state.username = action.payload;
+      state.user.firstname = action.payload;
     },
-    setLanguage: (state, action) => {
+    selectLanguage: (state, action) => {
       state.selectedLanguage = action.payload;
-    },
-    setAgeGroup: (state, action) => {
-      state.selectedAgeGroup = action.payload;
     },
     logout: (state) => {
       state.isLoggedIn = false;
-      state.username = '';
+      state.user = initialState.user;
       state.selectedLanguage = null;
-      state.selectedAgeGroup = null;
-      state.purchasedVideos = [];
     },
-    setEmail: (state, action) => {
-      state.email = action.payload;
-    },
-    setOTP: (state, action) => {
-      state.otp = action.payload;
-    },
-    addPurchasedVideo: (state, action) => {
-      if (!state.purchasedVideos.includes(action.payload)) {
-        state.purchasedVideos.push(action.payload);
-      }
-    },
-    resetSelections: (state) => {
-      state.selectedLanguage = null;
-      state.selectedAgeGroup = null;
+    updateProfile: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
     },
   },
 });
 
-export const {
-  login,
-  setLanguage,
-  setAgeGroup,
-  logout,
-  setEmail,
-  setOTP,
-  addPurchasedVideo,
-  resetSelections,
-} = userSlice.actions;
-
+export const { login, selectLanguage, logout, updateProfile } = userSlice.actions;
 export default userSlice.reducer;
