@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
+import { useSelector,useDispatch } from 'react-redux';
+import { setProfile } from '../Store/userSlice';
 import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 const EditProfileScreen = ({ route, navigation, }) => {
-    const [firstname, setFirstName] = useState(route.params?.username);
-    const [surename, setSureName] = useState(route.params?.surename);
-    const [address, setAddress] = useState(route.params?.address);
-    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth);
+
+    const profile=useSelector((state)=>state.user.user)
+
+    const [firstname, setFirstName] = useState(profile.firstname );
+    const [surename, setSureName] = useState(profile.surename);
+    const [address, setAddress] = useState(profile.address);
+    const [dateOfBirth, setDateOfBirth] = useState(profile.dateOfBirth);
     const [dateError, setDateError] = useState('');
-    const [phone, setPhone] = useState(route.params?.phone);
+    const [phone, setPhone] = useState(profile.phone);
+    const [phoneerror,setPhoneerroe]=useState('')
 
 
     const validateDate = (date) => {
@@ -33,6 +39,8 @@ const EditProfileScreen = ({ route, navigation, }) => {
         if (formattedDate.length === 10) {
             const [day, month, year] = formattedDate.split('/').map(Number);
             const date = new Date(year, month - 1, day);
+            const currentDate = new Date();
+            const minDate = new Date(1900, 0, 1); // Minimum date: January 1, 1900
             
             // Check if the date is valid
             if (isNaN(date.getTime()) || 
@@ -40,11 +48,24 @@ const EditProfileScreen = ({ route, navigation, }) => {
                 date.getMonth() !== month - 1 || 
                 date.getFullYear() !== year) {
                 setDateError('Please enter a valid date');
-            } else {
+            } 
+            // Check if date is in the future
+            else if (date > currentDate) {
+                setDateError('Date of birth cannot be in the future');
+            }
+            // Check if date is too old
+            else if (date < minDate) {
+                setDateError('Date of birth cannot be before 1900');
+            }
+            // Check if age is reasonable (e.g., not older than 120 years)
+            else if (currentDate.getFullYear() - year > 120) {
+                setDateError('Please enter a valid date of birth');
+            }
+            else {
                 setDateError('');
             }
         } else if (formattedDate.length > 0) {
-            setDateError('Please complete the date');
+            setDateError('Please complete the date (DD/MM/YYYY)');
         } else {
             setDateError('');
         }
@@ -53,21 +74,49 @@ const EditProfileScreen = ({ route, navigation, }) => {
     };
 
     const handleDateChange = (text) => {
-        const formattedDate = validateDate(text);
+        // Only allow numbers and forward slashes
+        const cleanedText = text.replace(/[^\d/]/g, '');
+        const formattedDate = validateDate(cleanedText);
         setDateOfBirth(formattedDate);
     };
+    
+    const dispatch = useDispatch();
 
     const isValid = firstname && surename && dateOfBirth && phone && address;
 
     const handleSave = () => {
         if(isValid) {
+            dispatch(setProfile({
+                firstname,
+                surename,
+                dateOfBirth,
+                address,
+                phone
+            }));
             Alert.alert('Profile saved successfully');
-            navigation.navigate('Account');
+            navigation.navigate('ViewProfile');
         }else{
             Alert.alert('Please fill in all fields');
         }
     };
 
+
+    const ValidatePhone = (phone)=>{
+            const phoneRegex = /^(\+?\d{1,2})?(\s|\-)?(\(?\d{3}\)?|\d{3})(\s|\-)?\d{3}(\s|\-)?\d{4}$/;
+
+            if(!phoneRegex.test(phone)){
+                setPhoneerroe('Please enter a valid phone number')
+            }else{
+                setPhoneerroe('')
+            }
+    };
+    
+    const handlePhoneChange = (text) => {
+        setPhone(text);
+        ValidatePhone(text); // Validate phone number on change
+    };
+
+    
 
     return (
         <View style={{ flex: 1 }}>
@@ -94,8 +143,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
             </View>
 
                 
-
-                <View style={styles.formContainer}>
+               <View style={styles.formContainer}>
                    
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>First Name</Text>
@@ -105,7 +153,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
                             onChangeText={setFirstName}
                             placeholder="Enter your first name"
                         />
-                        <Text style={styles.label}>Sure Name</Text>
+                        <Text style={styles.label}>SureName</Text>
                         <TextInput
                             style={styles.surenameinput}
                             value={surename}
@@ -132,10 +180,11 @@ const EditProfileScreen = ({ route, navigation, }) => {
                         <TextInput
                             style={styles.input}
                             value={phone}
-                            onChangeText={setPhone}
+                            onChangeText={handlePhoneChange}
                             placeholder="Enter your phone number"
                             keyboardType="phone-pad"
                         />
+                         {phoneerror ? <Text style={styles.errorText}>{phoneerror}</Text> : null}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -150,7 +199,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
                         />
                     </View>
 
-                    <PressableButton style={styles.saveButton} title="Save" onPress={handleSave} />
+                    <PressableButton style={styles.saveButton} title="Save" onPress={handleSave} disabled={!isValid || !!dateError || !!phoneerror} />
                    
                 </View>
 
@@ -167,11 +216,12 @@ const EditProfileScreen = ({ route, navigation, }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8',
+        
     },
     header: {
         alignItems: 'center',
-        paddingVertical: 20,
+        paddingVertical: 10,
+        marginTop: 110,
     },
     avatar: {
         width: 100,
@@ -187,7 +237,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 16,
-        color: '#666',
+        color: 'Black',
         marginBottom: 8,
     }, editButton: {
         position: 'absolute',

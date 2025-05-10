@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';  
+import { useSelector } from 'react-redux';
+import { setProfile } from '../Store/userSlice';
 import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 
 
+
 const ViewProfileScreen = ({ route, navigation }) => {
-  const [firstname] = useState(route.params?.username || 'Guest User');
-  const [surename] = useState(route.params?.surename || '');
-  const [address] = useState(route.params?.address || 'No Address');
-  const [dateOfBirth] = useState(route.params?.dateOfBirth || 'No Date of Birth');
-  const [phone] = useState(route.params?.phone || 'No Phone Number');
+const [isValid, setIsValid] = useState(false);
+
+// Update validation logic based on form fields
+useEffect(() => {
+  const isFormValid = firstname && surename && address && dateOfBirth && phone;
+  setIsValid(isFormValid);
+}, [firstname, surename, address, dateOfBirth, phone]);
+
+ const { firstname, surename, address, dateOfBirth, phone } = useSelector((state) => state.user.user);
+
+
 
   const handleEditPress = () => {
-    navigation.navigate('EditProfile', {
-      username: firstname,
-      surename: surename,
-      dateOfBirth: dateOfBirth,
-      phone: phone,
-      address: address
-    });
+    navigation.navigate('EditProfile');
   };
 
   return (

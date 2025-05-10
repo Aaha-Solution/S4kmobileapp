@@ -2,11 +2,11 @@ import React, {useEffect} from 'react';
 import {View, Image, StyleSheet} from 'react-native';
  
 const SplashScreen = ({navigation}) => {
-    useEffect(() =>{
+     useEffect(() =>{
      setTimeout (() =>{
-        navigation.replace('Setting');
-     }, 2000)   
-    }, []);
+        navigation.replace('Login');
+      }, 2000)   
+     }, []);
  return(
     <View style = {styles .container}>
         <Image source={require('../assets/image/splash.png')} style={styles.image}/>

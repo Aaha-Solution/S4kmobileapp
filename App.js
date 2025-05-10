@@ -2,12 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
-import { store } from './Store';
+import store from './Store';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import SettingScreen from './screens/SettingScreen';
 import AccountScreen from './screens/AccountScreen';
-import SupportScreen from './screens/SupportScreen';
+import AboutScreen from './screens/AboutScreen.js';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
@@ -21,8 +21,17 @@ const App = () => (
   <Provider store={store}>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Setting" screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="SplashScreen" component={SplashScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} /> */}
+        
+        <Stack.Screen 
+        name="SplashScreen" 
+        component={SplashScreen}
+         />
+
+       <Stack.Screen
+        name="Login"
+         component={LoginScreen}
+        />
+
         <Stack.Screen 
           name="Setting" 
           component={SettingScreen}
@@ -72,6 +81,10 @@ const App = () => (
             headerShown: true, 
             headerTitle: 'Account',
             headerTitleAlign: 'center',
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: '#E0B0FF',
+            },
             headerLeft: () => (
               <Ionicons 
                 name="arrow-back" 
@@ -85,11 +98,11 @@ const App = () => (
         />
 
         <Stack.Screen 
-          name="Support" 
-          component={SupportScreen}
+          name="About" 
+          component={AboutScreen}
           options={({ navigation }) => ({
             headerShown: true, 
-            headerTitle: 'Support',
+            headerTitle: 'About',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <Ionicons 
@@ -110,8 +123,12 @@ const App = () => (
             headerShown: true,
             headerTitle: 'Edit Profile',
             headerTitleAlign: 'center',
+            headerTransparent: true,
+            headerStyle:{
+              backgroundColor: '#E0B0FF',
+            },
             headerLeft: () => (
-              <Ionicons 
+              <Ionicons
                 name="arrow-back" 
                 size={24}
                 color="black"

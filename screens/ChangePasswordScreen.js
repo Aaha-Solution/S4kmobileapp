@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable } from 
 import PressableButton from '../Components/PressableButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChangePasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -29,7 +30,17 @@ const ChangePasswordScreen = ({ navigation }) => {
     validateCurrentPassword(text);
   };
 
-  const handleChangePassword = () => {
+  const savePassword = async (newPassword) => {
+    try {
+      await AsyncStorage.setItem('userPassword', newPassword);
+      return true;
+    } catch (error) {
+      console.error('Error saving password:', error);
+      return false;
+    }
+  };
+
+  const handleChangePassword = async () => {
     if (!email || !currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -54,31 +65,39 @@ const ChangePasswordScreen = ({ navigation }) => {
       Alert.alert('Error', 'New passwords do not match');
       return;
     }
+    else if (currentPassword === newPassword) {
+      Alert.alert('Error', 'New password cannot be the same as the current password');
+      return;
+    }
 
-    // Add password change logic here
-    Alert.alert(
-      'Success',
-      'Password changed successfully',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack()
-        }
-      ]
-    );
+    // Save the new password
+    const saved = await savePassword(newPassword);
+    if (saved) {
+      Alert.alert(
+        'Success',
+        'Password changed successfully',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack()
+          }
+        ]
+      );
+    } else {
+      Alert.alert('Error', 'Failed to save password. Please try again.');
+    }
   };
 
     const handleCancel = () => {
       navigation.goBack();
     };
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+    <LinearGradient
+      colors={['#E0B0FF', '#ffffff']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={styles.gradientContainer}
+    >
       <ScrollView style={styles.container}>
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
@@ -155,28 +174,31 @@ const ChangePasswordScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.buttonContainer}>
-          <PressableButton
-            style={[styles.saveButton, !isCurrentPasswordValid && styles.disabledButton]}
+         
+         <PressableButton
+            style={[styles.saveButton, !isCurrentPasswordValid && styles.disabledButton, {width: '40%'}]}
             title="Update"
             onPress={handleChangePassword}
           />
           <PressableButton
-            style={[styles.cancelButton, !isCurrentPasswordValid && styles.disabledButton]}
+            style={[styles.cancelButton, !isCurrentPasswordValid && styles.disabledButton, {width: '40%'}]}
             title="Cancel"
             onPress={handleCancel}
           />
-
           </View>
-         
         </View>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   formContainer: {
     padding: 20,
@@ -231,19 +253,16 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: '#8A2BE2',
     padding: 10,
-    width: '100%',
+    width: '40%',
     paddingVertical: 15,
     borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#8A2BE2',
+    padding: 10,
+    width: '40%',
+    paddingVertical: 15,
+    borderRadius: 12,
   },
   disabledButton: {
     backgroundColor: '#ccc',

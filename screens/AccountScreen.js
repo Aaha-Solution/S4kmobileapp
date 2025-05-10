@@ -56,9 +56,7 @@ const AccountScreen = ({ route, navigation }) => {
             </Pressable>
           ))}
         </ScrollView>
-
         
-
       </ScrollView>
     </View>
   );
@@ -69,11 +67,11 @@ export default AccountScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
   },
   header: {
     alignItems: 'center',
     paddingVertical: 20,
+    marginTop: 100,
   },
   profileContainer: {
     alignItems: 'center',

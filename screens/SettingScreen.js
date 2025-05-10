@@ -18,25 +18,49 @@ const SettingsScreen = ({ route, navigation }) => {
 	const user = useSelector((state) => state.user.user);
 
 	const handleLogout = () => {
-		Alert.alert(
-			'Logout',
-			'Are you sure you want to logout?',
-			[
-				{
-					text: 'Cancel',
-					style: 'cancel',
-				},
-				{
-					text: 'Logout',
-					onPress: () => {
-						dispatch(logout()); 
-						navigation.goBack();
-					},
-				},
-			],
-			{ cancelable: false }
-		);
-	};
+  Alert.alert(
+    'Logout',
+    'Are you sure you want to logout?',
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        onPress: async () => {
+          try {
+            const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
+              method: 'GET', // or 'GET' depending on API
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              // Add body if needed, e.g. user token or ID
+              // body: JSON.stringify({ userId: user.id }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+              dispatch(logout());
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'SplashScreen' }],
+              });
+            } else {
+              Alert.alert('Logout Failed', result.message || 'Something went wrong.');
+            }
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Error', 'Failed to logout. Please try again.');
+          }
+        },
+      },
+    ],
+    { cancelable: false }
+  );
+};
+
 
 	return (
 		<View style={{ flex: 1 }}>

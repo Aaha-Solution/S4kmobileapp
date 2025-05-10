@@ -13,7 +13,7 @@ const LoginScreen = ({ navigation }) => {
     const handleLogin = () => {
         if (username.trim()) { 
             dispatch(login({ username}))
-            navigation.navigate('SettingScreen', { username })
+            navigation.navigate('Setting', { username })
         }
     };
     return (

@@ -7,6 +7,7 @@ const initialState = {
     surename: '',
     dateOfBirth: '',
     address: '',
+    phone:'',
   },
   selectedLanguage: null,
 };
@@ -30,8 +31,11 @@ const userSlice = createSlice({
     updateProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload };
     },
-  },
+    setProfile:(state,action)=>{
+    state.user ={...state,...action.payload};
+  }
+}
 });
 
-export const { login, selectLanguage, logout, updateProfile } = userSlice.actions;
+export const { login, selectLanguage, logout, updateProfile,setProfile } = userSlice.actions;
 export default userSlice.reducer;
