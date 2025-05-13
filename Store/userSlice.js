@@ -9,6 +9,8 @@ const initialState = {
     address: '',
   },
   selectedLanguage: null,
+  selectedAgeGroup: null,
+  email: null,
 };
 
 const userSlice = createSlice({
@@ -17,15 +19,23 @@ const userSlice = createSlice({
   reducers: {
     login: (state, action) => {
       state.isLoggedIn = true;
-      state.user.firstname = action.payload;
+      state.user = { ...state.user, ...action.payload };
     },
-    selectLanguage: (state, action) => {
+    setLanguage: (state, action) => {
       state.selectedLanguage = action.payload;
+    },
+    setAgeGroup: (state, action) => {
+      state.selectedAgeGroup = action.payload;
+    },
+    setEmail: (state, action) => {
+      state.email = action.payload;
     },
     logout: (state) => {
       state.isLoggedIn = false;
       state.user = initialState.user;
       state.selectedLanguage = null;
+      state.selectedAgeGroup = null;
+      state.email = null;
     },
     updateProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload };
@@ -33,5 +43,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { login, selectLanguage, logout, updateProfile } = userSlice.actions;
+export const { login, setLanguage, setAgeGroup, setEmail, logout, updateProfile } = userSlice.actions;
 export default userSlice.reducer;
