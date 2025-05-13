@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-const SupportScreen = ({ navigation }) => {
+const AboutScreen = ({ navigation }) => {
   const menuItems = [
     { label: 'Explore Topics', icon: 'compass', screen: 'Explore' },
     { label: 'Notifications', icon: 'bell', screen: 'Notifications' },
@@ -74,4 +74,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SupportScreen;
+export default AboutScreen;

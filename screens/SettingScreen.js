@@ -5,18 +5,18 @@ import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
+import { CommonActions } from '@react-navigation/native';
 
 const menuItems = [
 	{ icon: 'person-outline', label: 'Account', screen: 'Account' },
 	{ icon: 'notifications-outline', label: 'Notifications', screen: 'Notifications' },
-	{ icon: 'help-circle-outline', label: 'Support', screen: 'Support' },
+	{ icon: 'help-circle-outline', label: 'About', screen: 'About' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
 
 const SettingsScreen = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
-
 	const handleLogout = () => {
 		Alert.alert(
 			'Logout',
@@ -28,15 +28,43 @@ const SettingsScreen = ({ route, navigation }) => {
 				},
 				{
 					text: 'Logout',
-					onPress: () => {
-						dispatch(logout()); 
-						navigation.goBack();
+					onPress: async () => {
+						try {
+							// Ensure no space in URL
+							const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify(), // Replace with actual user ID if needed
+							});
+	
+							if (!response.ok) {
+								throw new Error('Logout failed');
+							}
+	
+							const result = await response.json();
+							console.log('Logout success:', result);
+	
+							dispatch(logout()); // Clear Redux state
+							navigation.dispatch(
+								CommonActions.reset({
+									index: 0,
+									routes: [{ name: 'Login' }],
+								})
+							);
+	
+						} catch (error) {
+							console.error('Logout error:', error);
+							Alert.alert('Error', 'Network error during logout');
+						}
 					},
 				},
 			],
 			{ cancelable: false }
 		);
 	};
+	
 
 	return (
 		<View style={{ flex: 1 }}>

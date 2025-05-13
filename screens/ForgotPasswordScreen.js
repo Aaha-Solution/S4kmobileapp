@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import { useDispatch } from 'react-redux';
-import { setEmail as setReduxEmail } from '../store/userSlice'; // Renamed to avoid conflict
+import { setEmail as setReduxEmail } from '../Store/userSlice'; // Renamed to avoid conflict
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmailState] = useState('');  // Renamed to `setEmailState` to avoid conflict

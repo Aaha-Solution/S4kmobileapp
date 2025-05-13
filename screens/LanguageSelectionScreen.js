@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList,Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
-import { setLanguage } from '../store/userSlice';
+import { setLanguage } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 
 const languagesData = [

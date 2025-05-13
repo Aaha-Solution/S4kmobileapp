@@ -8,7 +8,7 @@ import {
     Image
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { login } from '../store/userSlice';
+import { login } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';

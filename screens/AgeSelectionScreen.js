@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setAgeGroup } from '../store/userSlice';
+import { setAgeGroup } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 
 const ageGroups = [
@@ -19,7 +19,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 
   const handleNext = () => {
     if (selectedAgeGroup) {
-      navigation.navigate('VideoScreen');  // 👈 navigate to video screen here
+      navigation.navigate('Setting');  // 👈 navigate to video screen here
     } else {
       Alert.alert('Selection Required', 'Please select an age group before proceeding.');
     }
