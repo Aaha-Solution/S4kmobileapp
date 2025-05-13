@@ -64,87 +64,61 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <ImageBackground
-            source={require('../assets/image/gradient1.png')}
-            style={styles.background}
-            resizeMode="cover"
-        >
-            <View style={styles.container}>
-                <Image
-                    source={require('../assets/image/splash.png')}
-                    style={styles.logo}
-                />
-
-                <View style={{ marginTop: -10 }}>
-                    <Text style={styles.label}>Email:</Text>
-                    <CustomTextInput
-                        value={username}
-                        onChangeText={(text) => {
-                            setUsername(text);
-                            if (usernameError) setUsernameError('');
-                        }}
-                        placeholder="Enter E-mail"
-                    />
-                    {usernameError ? (
-                        <Text style={styles.errorText}>{usernameError}</Text>
-                    ) : null}
-
-                    <Text style={styles.label}>Password:</Text>
-                    <CustomTextInput
-                        value={password}
-                        onChangeText={(text) => {
-                            setPassword(text);
-                            if (passwordError) setPasswordError('');
-                        }}
-                        placeholder="Enter Password"
-                        secureTextEntry={true}
-                    />
-                    {passwordError ? (
-                        <Text style={styles.errorText}>{passwordError}</Text>
-                    ) : null}
-                </View>
-
-                <PressableButton
-                    title="Login"
-                    onPress={handleLogin}
-                    style={{ marginTop: 10 }}
-                />
-
-                {/* Remember Me & Forgot Password */}
-                <View style={styles.optionsRow}>
-                    <View style={styles.leftOption}>
-                        <Pressable
-                            style={styles.rememberMe}
-                            onPress={() => setRememberMe(!rememberMe)}
-                        >
-                            <View
-                                style={[
-                                    styles.checkbox,
-                                    rememberMe && styles.checkboxChecked,
-                                ]}
-                            >
-                                {rememberMe && (
-                                    <Icon name="check" size={12} color="white" />
-                                )}
-                            </View>
-                            <Text style={styles.optionText}>Remember Me</Text>
-                        </Pressable>
-                    </View>
-
-                    <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
-                        {({ pressed }) => (
-                            <Text
-                                style={[
-                                    styles.forgotText,
-                                    { color: pressed ? 'white' : 'black' },
-                                ]}
-                            >
-                                Forgot Password?
-                            </Text>
+        source={require('../assets/image/kids_bg.png')} // Replace with your kids-style background
+        style={styles.background}
+        resizeMode="cover"
+    >
+        <View style={styles.container}>
+            <Image
+                source={require('../assets/image/splash.png')}
+                style={styles.logo}
+            />
+    
+            <CustomTextInput
+                value={username}
+                onChangeText={(text) => {
+                    setUsername(text);
+                    if (usernameError) setUsernameError('');
+                }}
+                placeholder="Username"
+            />
+            {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+    
+            <CustomTextInput
+                value={password}
+                onChangeText={(text) => {
+                    setPassword(text);
+                    if (passwordError) setPasswordError('');
+                }}
+                placeholder="Password"
+                secureTextEntry={true}
+            />
+            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+    
+            <PressableButton
+                title="GO"
+                onPress={handleLogin}
+                style={styles.goButton}
+            />
+    
+            <View style={styles.rememberContainer}>
+                <Pressable
+                    style={styles.rememberMe}
+                    onPress={() => setRememberMe(!rememberMe)}
+                >
+                    <View
+                        style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
+                    >
+                        {rememberMe && (
+                            <Icon name="check" size={12} color="white" />
                         )}
-                    </Pressable>
-                </View>
+                    </View>
+                    <Text style={styles.optionText}>Remember Me</Text>
+                </Pressable>
             </View>
-        </ImageBackground>
+        </View>
+    </ImageBackground>
+    
     );
 };
 
@@ -213,10 +187,19 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         alignSelf: 'flex-start',
     },
-    forgotText: {
-        fontSize: 14,
-        color: 'black',
+    goButton: {
+        marginTop: 20,
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        alignSelf: 'center',
     },
+    
+    rememberContainer: {
+        marginTop: 15,
+        alignItems: 'center',
+    },
+    
 });
 
 export default LoginScreen;

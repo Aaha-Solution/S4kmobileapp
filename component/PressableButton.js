@@ -15,7 +15,7 @@ const PressableButton = ({ title, onPress, style }) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#800080',
+    backgroundColor: '#F4A950',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,

@@ -34,10 +34,9 @@ const App = () => (
 					name="LanguageSelectionScreen"
 					component={LanguageSelectionScreen}
 					options={{
-						headerShown: true,
-						title: 'Select Language',
+						headerShown: false,
 						headerTitleAlign: 'center',
-						headerStyle: { backgroundColor: '#b388eb' },
+						headerStyle: { backgroundColor: '#F2766B' },
 						headerTintColor: '#fff',
 						headerTitleStyle: { fontWeight: 'bold' },
 						headerLeft: () => null, // 👈 This removes the back button
