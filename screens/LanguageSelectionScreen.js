@@ -4,28 +4,51 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   Alert,
-  ImageBackground,
-  Image,
+  Animated,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
+import LinearGradient from 'react-native-linear-gradient';
 
 const languagesData = [
-  { id: '1', name: 'Hindi (हिन्दी)' },
-  { id: '2', name: 'Panjabi (ਪੰਜਾਬੀ)' },
-  { id: '3', name: 'Gujarati (ગુજરાતી)' },
+  { id: '1', label: 'Hindi (हिन्दी)', value: 'Hindi (हिन्दी)' },
+  { id: '2', label: 'Punjabi (ਪੰਜਾਬੀ)', value: 'Punjabi (ਪੰਜਾਬੀ)' },
+  { id: '3', label: 'Gujarati (गुजराती)', value: 'Gujarati (गुजराती)' },
 ];
 
 const LanguageSelectionScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const selectedLanguage = useSelector((state) => state.user.selectedLanguage);
+  const [animations, setAnimations] = useState(
+    languagesData.reduce((acc, lang) => {
+      acc[lang.id] = new Animated.Value(1);
+      return acc;
+    }, {})
+  );
 
-  const toggleLanguage = (lang) => {
-    dispatch(setLanguage(lang));
+  const animateSelection = (id) => {
+    const anim = animations[id];
+    if (!anim) return;
+    Animated.sequence([
+      Animated.timing(anim, {
+        toValue: 1.05,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(anim, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const toggleLanguage = (item) => {
+    animateSelection(item.id);
+    dispatch(setLanguage(item.value));
   };
 
   const handleNextPress = () => {
@@ -36,114 +59,100 @@ const LanguageSelectionScreen = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item, index }) => {
-    const isSelected = selectedLanguage === item.name;
-    const isLast = index === languagesData.length - 1;
-    const isOddCount = languagesData.length % 2 !== 0;
-
-    const itemStyle = [
-      styles.languageBox,
-      isSelected && styles.selectedBox,
-      isOddCount && isLast && styles.centeredLastItem,
-    ];
-
+  const renderItem = ({ item }) => {
+    const isSelected = selectedLanguage === item.value;
     return (
-      <TouchableOpacity style={itemStyle} onPress={() => toggleLanguage(item.name)}>
-        <Text style={styles.languageText}>{item.name}</Text>
-        {isSelected && (
-          <Icon name="check-circle" size={20} color="#F2766B" style={styles.icon} />
-        )}
+      <TouchableOpacity onPress={() => toggleLanguage(item)} style={{ width: '100%', alignItems: 'center' }}>
+        <Animated.View
+          style={[
+            styles.languageBox,
+            isSelected && styles.selectedBox,
+            { transform: [{ scale: animations[item.id] }] },
+          ]}
+        >
+          <Text style={styles.languageText}>{item.label}</Text>
+          {isSelected && (
+            <Icon name="check" size={24} color="#9346D2" style={styles.icon} />
+          )}
+        </Animated.View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/image/kids_bg.png')}
-      style={styles.background}
-    >
-      <View style={styles.container}>
-        <Text style={styles.heading}>Choose Your Language</Text>
+    <LinearGradient colors={['#9346D2', '#5BC3F5']} style={styles.container}>
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Let’s Pick a Language!</Text>
 
         <FlatList
           data={languagesData}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.grid}
+          contentContainerStyle={styles.languageList}
+          numColumns={1}
         />
 
-        <PressableButton
-          title="Next"
-          onPress={handleNextPress}
-          style={styles.nextButton}
-        />
-
+        <PressableButton title="Next" onPress={handleNextPress} style={styles.nextButton} />
       </View>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
   },
-  heading: {
-    textAlign: 'center',
-    fontSize: 26,
+  innerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 180, // pushed downward
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#F2766B',
-    marginBottom: 20,
+    color: '#fff',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  grid: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 10,
+  languageList: {
+    width: '100%',
+    alignItems: 'center',
   },
   languageBox: {
-    width: '45%',
-    aspectRatio: 1,
-    backgroundColor: '#F9D6A1',
-    margin: 10,
-    borderRadius: 18,
-    alignItems: 'center',
+    width: '90%',
+    height: 70,
+    backgroundColor: '#ffffff',
+    marginVertical: 10,
+    borderRadius: 20,
     justifyContent: 'center',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    flexDirection: 'row',
   },
   selectedBox: {
-    backgroundColor: '#F4A950',
-    borderWidth: 2,
-    borderColor: '#F2766B',
+    backgroundColor: '#5BC3F5',
+    borderWidth: 1,
+    borderColor: '#fff',
+    shadowColor: '#fff',
   },
   languageText: {
-    color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
     textAlign: 'center',
+    flex: 1,
   },
   icon: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
-  centeredLastItem: {
-    marginLeft: '27.5%',
+    marginLeft: 10,
   },
   nextButton: {
-    padding: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
     borderRadius: 25,
-    marginVertical: 20,
+    marginBottom: 60,
   },
- 
 });
 
 export default LanguageSelectionScreen;

@@ -4,9 +4,9 @@ import {
     StyleSheet,
     Text,
     Pressable,
-    ImageBackground,
     Image
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
 import { login } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -46,12 +46,10 @@ const LoginScreen = ({ navigation }) => {
                 dispatch(login(data.user));
                 navigation.navigate('LanguageSelectionScreen');
             } else {
-                // Assuming backend returns errors per field
                 if (data.errors) {
                     if (data.errors.username) setUsernameError(data.errors.username);
                     if (data.errors.password) setPasswordError(data.errors.password);
                 } else {
-                    // Fallback for generic message
                     setUsernameError('Invalid email');
                     setPasswordError('Invalid password');
                 }
@@ -63,89 +61,80 @@ const LoginScreen = ({ navigation }) => {
     };
 
     return (
-        <ImageBackground
-        source={require('../assets/image/kids_bg.png')} // Replace with your kids-style background
-        style={styles.background}
-        resizeMode="cover"
-    >
-        <View style={styles.container}>
-            <Image
-                source={require('../assets/image/splash.png')}
-                style={styles.logo}
-            />
-    
-            <CustomTextInput
-                value={username}
-                onChangeText={(text) => {
-                    setUsername(text);
-                    if (usernameError) setUsernameError('');
-                }}
-                placeholder="Username"
-            />
-            {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
-    
-            <CustomTextInput
-                value={password}
-                onChangeText={(text) => {
-                    setPassword(text);
-                    if (passwordError) setPasswordError('');
-                }}
-                placeholder="Password"
-                secureTextEntry={true}
-            />
-            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-    
-            <PressableButton
-                title="GO"
-                onPress={handleLogin}
-                style={styles.goButton}
-            />
-    
-            <View style={styles.rememberContainer}>
-                <Pressable
-                    style={styles.rememberMe}
-                    onPress={() => setRememberMe(!rememberMe)}
-                >
-                    <View
-                        style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
+        <LinearGradient
+            colors={['#9346D2', '#5BC3F5']}
+            style={styles.background}
+        >
+            <View style={styles.container}>
+                <Image
+                    source={require('../assets/image/splash.png')}
+                    style={styles.logo}
+                />
+
+                <CustomTextInput
+                    value={username}
+                    onChangeText={(text) => {
+                        setUsername(text);
+                        if (usernameError) setUsernameError('');
+                    }}
+                    placeholder="Username"
+                />
+                {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+
+                <CustomTextInput
+                    value={password}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        if (passwordError) setPasswordError('');
+                    }}
+                    placeholder="Password"
+                    secureTextEntry={true}
+                />
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+                <PressableButton
+                    title="GO"
+                    onPress={handleLogin}
+                    style={styles.goButton}
+                />
+
+                <View style={styles.rememberContainer}>
+                    <Pressable
+                        style={styles.rememberMe}
+                        onPress={() => setRememberMe(!rememberMe)}
                     >
-                        {rememberMe && (
-                            <Icon name="check" size={12} color="white" />
-                        )}
-                    </View>
-                    <Text style={styles.optionText}>Remember Me</Text>
-                </Pressable>
+                        <View
+                            style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
+                        >
+                            {rememberMe && (
+                                <Icon name="check" size={12} color="white" />
+                            )}
+                        </View>
+                        <Text style={styles.optionText}>Remember Me</Text>
+                    </Pressable>
+                </View>
             </View>
-        </View>
-    </ImageBackground>
-    
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    background: {
         flex: 1,
         justifyContent: 'center',
+    },
+    container: {
+        backgroundColor: 'rgba(255,255,255,0.2)', // transparent white
+        borderRadius: 15,
         padding: 20,
-        marginHorizontal: 20,
-        marginTop: 80,
-        borderRadius: 10,
+        margin: 20,
     },
     logo: {
         width: 170,
         height: 150,
         alignSelf: 'center',
-        marginTop: -200,
+        marginBottom: 30,
         resizeMode: 'contain',
-    },
-    background: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    label: {
-        fontSize: 18,
-        color: '#000',
-        marginBottom: 4,
     },
     errorText: {
         color: 'red',
@@ -153,13 +142,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginBottom: 8,
         marginLeft: 5,
-    },
-    optionsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 25,
-        paddingHorizontal: 10,
     },
     rememberMe: {
         flexDirection: 'row',
@@ -185,7 +167,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         textAlign: 'left',
-        alignSelf: 'flex-start',
     },
     goButton: {
         marginTop: 20,
@@ -194,13 +175,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         alignSelf: 'center',
     },
-    
     rememberContainer: {
         marginTop: 15,
         alignItems: 'center',
     },
-    
 });
 
 export default LoginScreen;
-
