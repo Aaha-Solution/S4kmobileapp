@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Alert, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
@@ -6,17 +6,46 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const menuItems = [
-	{ icon: 'person-outline', label: 'Account', screen: 'Account' },
-	{ icon: 'notifications-outline', label: 'Notifications', screen: 'Notifications' },
+	{ icon: 'person-outline', label: 'Profile', screen: 'ViewProfile' },
 	{ icon: 'help-circle-outline', label: 'About', screen: 'About' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
 
 const SettingsScreen = ({ route, navigation }) => {
+	const { selectedAvatar } = route.params || {};
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
+	const [currentAvatar, setCurrentAvatar] = useState(profile_avatar);
+
+	useEffect(() => {
+		loadAvatar();
+	}, []);
+
+	useEffect(() => {
+		if (selectedAvatar) {
+			setCurrentAvatar(selectedAvatar);
+			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
+		}
+	}, [selectedAvatar]);
+
+	const loadAvatar = async () => {
+		try {
+			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+			if (savedAvatar) {
+				const parsedAvatar = JSON.parse(savedAvatar);
+				setCurrentAvatar(parsedAvatar);
+			} else {
+				setCurrentAvatar(profile_avatar);
+			}
+		} catch (error) {
+			console.log('Error loading avatar:', error);
+			
+		}
+	};
+
 	const handleLogout = () => {
 		Alert.alert(
 			'Logout',
@@ -30,13 +59,12 @@ const SettingsScreen = ({ route, navigation }) => {
 					text: 'Logout',
 					onPress: async () => {
 						try {
-							// Ensure no space in URL
-							const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
+							const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/logout.php', {
 								method: 'POST',
 								headers: {
 									'Content-Type': 'application/json',
 								},
-								body: JSON.stringify(), // Replace with actual user ID if needed
+								body: JSON.stringify({ user_id: user.id }), // Add user ID if available
 							});
 	
 							if (!response.ok) {
@@ -56,7 +84,15 @@ const SettingsScreen = ({ route, navigation }) => {
 	
 						} catch (error) {
 							console.error('Logout error:', error);
-							Alert.alert('Error', 'Network error during logout');
+							Alert.alert("Logout Failed")
+							// // Even if the API call fails, still log out locally
+							// dispatch(logout());
+							// navigation.dispatch(
+							// 	CommonActions.reset({
+							// 		index: 0,
+							// 		routes: [{ name: 'Login' }],
+							// 	})
+							// );
 						}
 					},
 				},
@@ -78,7 +114,7 @@ const SettingsScreen = ({ route, navigation }) => {
 				<View style={styles.header}>
 					<View style={styles.profileContainer}>
 						<Image
-							source={profile_avatar}
+							source={currentAvatar}
 							style={styles.avatar}
 							resizeMode="cover"
 						/>
