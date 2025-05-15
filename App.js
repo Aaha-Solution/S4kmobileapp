@@ -18,6 +18,7 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
+import VideoListScreen from './screens/VideoListScreen.js';
 
 const Stack = createStackNavigator();
 
@@ -194,7 +195,7 @@ const App = () => (
 						)
 					})}
 				/>
-
+				<Stack.Screen name="VideoListScreen" component={VideoListScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>

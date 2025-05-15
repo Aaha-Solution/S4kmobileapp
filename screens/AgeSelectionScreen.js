@@ -20,7 +20,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 
   const handleNext = () => {
     if (selectedAgeGroup) {
-      navigation.navigate('Setting');
+      navigation.navigate('VideoListScreen');
     } else {
       Alert.alert('Selection Required', 'Please select an age group before proceeding.');
     }
