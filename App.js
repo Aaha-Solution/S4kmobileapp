@@ -18,8 +18,8 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
-import VideoListScreen from './screens/VideoListScreen.js';
-import VideoPlayerScreen from './screens/VideoPlayerScreen';
+
+import BottomTabNavigator from './navigation/BottomTabNavigator';
 
 const Stack = createStackNavigator();
 
@@ -37,12 +37,12 @@ const App = () => (
 					component={LanguageSelectionScreen}
 					options={{
 						headerShown: true,
-						title:'Language ',
+						title: 'Language',
 						headerTitleAlign: 'center',
 						headerStyle: { backgroundColor: '#b388eb' },
 						headerTintColor: '#fff',
 						headerTitleStyle: { fontWeight: 'bold' },
-						headerLeft: () => null, // 👈 This removes the back button
+						headerLeft: () => null,
 					}}
 				/>
 				<Stack.Screen
@@ -53,10 +53,11 @@ const App = () => (
 						title: 'Age Group',
 						headerTitleAlign: 'center',
 						headerStyle: { backgroundColor: '#b388eb' },
-						headerTintColor: '#fff', // Title and back arrow color
+						headerTintColor: '#fff',
 						headerTitleStyle: { fontWeight: 'bold' },
 					}}
 				/>
+				<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 				<Stack.Screen
 					name="Setting"
 					component={SettingScreen}
@@ -72,14 +73,13 @@ const App = () => (
 							<Ionicons
 								name="arrow-back"
 								size={24}
-								color="black"
+								color="black" 
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate('VideoListScreen')}
+								onPress={() => navigation.navigate('MainTabs')}
 							/>
 						)
 					})}
 				/>
-
 				<Stack.Screen
 					name="Notifications"
 					component={NotificationScreen}
@@ -98,7 +98,6 @@ const App = () => (
 						)
 					})}
 				/>
-
 				<Stack.Screen
 					name="Account"
 					component={AccountScreen}
@@ -117,7 +116,6 @@ const App = () => (
 						)
 					})}
 				/>
-
 				<Stack.Screen
 					name="About"
 					component={AboutScreen}
@@ -136,7 +134,6 @@ const App = () => (
 						)
 					})}
 				/>
-
 				<Stack.Screen
 					name="EditProfile"
 					component={EditProfileScreen}
@@ -154,8 +151,7 @@ const App = () => (
 							/>
 						)
 					})}
-				/>
-
+				/> 
 				<Stack.Screen
 					name="ViewProfile"
 					component={ViewProfileScreen}
@@ -178,7 +174,6 @@ const App = () => (
 						)
 					})}
 				/>
-
 				<Stack.Screen
 					name="ChangePasswordScreen"
 					component={ChangePasswordScreen}
@@ -197,17 +192,9 @@ const App = () => (
 						)
 					})}
 				/>
-				<Stack.Screen
-					name="VideoListScreen"
-					component={VideoListScreen}
-					options={{ headerShown: true ,
-					headerTitleAlign: 'center',
-					headerLeft: () => null,
-              	}} 
-				/>
-				<Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>
 );
+
 export default App;
