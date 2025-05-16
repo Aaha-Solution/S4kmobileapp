@@ -101,6 +101,7 @@ const LanguageSelectionScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignContent:'center'
   },
   innerContainer: {
     flex: 1,
@@ -108,11 +109,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 180, // pushed downward
     justifyContent: 'space-between',
+    alignContent:'center',
+    justifyContent:'center'
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1e1afb',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -150,8 +153,8 @@ const styles = StyleSheet.create({
   nextButton: {
     paddingVertical: 15,
     paddingHorizontal: 40,
-    borderRadius: 25,
-    marginBottom: 60,
+    borderRadius: 10,
+    marginBottom: 200,
   },
 });
 

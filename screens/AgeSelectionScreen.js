@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: -20, // shift upward from center (you can tweak this value)
+   // paddingTop: -20, // shift upward from center (you can tweak this value)
   },
   
   ageBox: {
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#9346D2',
     borderRadius: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 40,
+    paddingVertical: 15,
   },
 });
 

@@ -35,9 +35,10 @@ const App = () => (
 					name="LanguageSelectionScreen"
 					component={LanguageSelectionScreen}
 					options={{
-						headerShown: false,
+						headerShown: true,
+						title:'Language ',
 						headerTitleAlign: 'center',
-						headerStyle: { backgroundColor: '#F2766B' },
+						headerStyle: { backgroundColor: '#b388eb' },
 						headerTintColor: '#fff',
 						headerTitleStyle: { fontWeight: 'bold' },
 						headerLeft: () => null, // 👈 This removes the back button
@@ -48,7 +49,7 @@ const App = () => (
 					component={AgeSelectionScreen}
 					options={{
 						headerShown: true,
-						title: 'Select Age Group',
+						title: 'Age Group',
 						headerTitleAlign: 'center',
 						headerStyle: { backgroundColor: '#b388eb' },
 						headerTintColor: '#fff', // Title and back arrow color
@@ -72,7 +73,7 @@ const App = () => (
 								size={24}
 								color="black"
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
+								onPress={() => navigation.navigate('VideoListScreen')}
 							/>
 						)
 					})}
@@ -110,7 +111,7 @@ const App = () => (
 								size={24}
 								color="black"
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
+								onPress={() => navigation.navigate('Setting')}
 							/>
 						)
 					})}
@@ -129,7 +130,7 @@ const App = () => (
 								size={24}
 								color="black"
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
+								onPress={() => navigation.navigate('Setting')}
 							/>
 						)
 					})}
@@ -171,7 +172,7 @@ const App = () => (
 								size={24}
 								color="black"
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
+								onPress={() => navigation.navigate('Setting')}
 							/>
 						)
 					})}
@@ -199,7 +200,7 @@ const App = () => (
 					name="VideoListScreen"
 					component={VideoListScreen}
 					options={{ headerShown: true ,
-					headerTitleAlign: 'center',
+					headerTitleAlign: 'center',  
 					headerLeft: () => null,
               	}} 
 				/>
