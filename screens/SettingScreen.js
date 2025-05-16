@@ -4,21 +4,34 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
+import avatar1 from '../assets/image/avatar1.png';
+import avatar2 from '../assets/image/avatar2.png';
+import avatar3 from '../assets/image/avatar3.png';
+import avatar4 from '../assets/image/avatar4.png';
+import avatar5 from '../assets/image/avatar5.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const avatarMap = {
+	1: avatar1,
+	2: avatar2,
+	3: avatar3,
+	4: avatar4,
+	5: avatar5
+};
 
 const menuItems = [
 	{ icon: 'person-outline', label: 'Profile', screen: 'ViewProfile' },
 	{ icon: 'help-circle-outline', label: 'About', screen: 'About' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
-
+  
 const SettingsScreen = ({ route, navigation }) => {
 	const { selectedAvatar } = route.params || {};
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
-	const [currentAvatar, setCurrentAvatar] = useState(profile_avatar);
+	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 
 	useEffect(() => {
 		loadAvatar();
@@ -26,7 +39,7 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	useEffect(() => {
 		if (selectedAvatar) {
-			setCurrentAvatar(selectedAvatar);
+			setTempSelectedAvatar(selectedAvatar);
 			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
 		}
 	}, [selectedAvatar]);
@@ -36,15 +49,24 @@ const SettingsScreen = ({ route, navigation }) => {
 			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
 			if (savedAvatar) {
 				const parsedAvatar = JSON.parse(savedAvatar);
-				setCurrentAvatar(parsedAvatar);
+				setTempSelectedAvatar(parsedAvatar);
 			} else {
-				setCurrentAvatar(profile_avatar);
+				setTempSelectedAvatar(profile_avatar);
 			}
 		} catch (error) {
 			console.log('Error loading avatar:', error);
-			
+			setTempSelectedAvatar(profile_avatar);
 		}
 	};
+
+	// Add focus listener to reload avatar when screen comes into focus
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('focus', () => {
+			loadAvatar();
+		});
+
+		return unsubscribe;
+	}, [navigation]);
 
 	const handleLogout = () => {
 		Alert.alert(
@@ -64,7 +86,7 @@ const SettingsScreen = ({ route, navigation }) => {
 								headers: {
 									'Content-Type': 'application/json',
 								},
-								body: JSON.stringify({ user_id: user.id }), // Add user ID if available
+								body: JSON.stringify({ user_id: user.id }),
 							});
 	
 							if (!response.ok) {
@@ -74,7 +96,7 @@ const SettingsScreen = ({ route, navigation }) => {
 							const result = await response.json();
 							console.log('Logout success:', result);
 	
-							dispatch(logout()); // Clear Redux state
+							dispatch(logout());
 							navigation.dispatch(
 								CommonActions.reset({
 									index: 0,
@@ -85,14 +107,6 @@ const SettingsScreen = ({ route, navigation }) => {
 						} catch (error) {
 							console.error('Logout error:', error);
 							Alert.alert("Logout Failed")
-							// // Even if the API call fails, still log out locally
-							// dispatch(logout());
-							// navigation.dispatch(
-							// 	CommonActions.reset({
-							// 		index: 0,
-							// 		routes: [{ name: 'Login' }],
-							// 	})
-							// );
 						}
 					},
 				},
@@ -114,9 +128,10 @@ const SettingsScreen = ({ route, navigation }) => {
 				<View style={styles.header}>
 					<View style={styles.profileContainer}>
 						<Image
-							source={currentAvatar}
+							source={tempSelectedAvatar}
 							style={styles.avatar}
 							resizeMode="cover"
+							onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 						/>
 						<View>
 							<Text style={styles.name}>{user.firstname} {user.surename}</Text>
