@@ -19,6 +19,7 @@ import NotificationScreen from './screens/NotificationScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoListScreen from './screens/VideoListScreen.js';
+import VideoPlayerScreen from './screens/VideoPlayerScreen';
 
 const Stack = createStackNavigator();
 
@@ -198,12 +199,13 @@ const App = () => (
 				<Stack.Screen
 					name="VideoListScreen"
 					component={VideoListScreen}
-					options={{ headerShown: true ,
-					headerTitleAlign: 'center',
-					headerLeft: () => null,
-              	}} 
+					options={{
+						headerShown: true,
+						headerTitleAlign: 'center',
+						headerLeft: () => null,
+					}}
 				/>
-
+				<Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>

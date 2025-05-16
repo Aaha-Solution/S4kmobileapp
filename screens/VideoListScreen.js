@@ -1,10 +1,10 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-
+// Video data
 const videoData = {
   'Hindi (हिन्दी)': {
     'Pre-Prep (4–6 years)': [
@@ -26,50 +26,57 @@ const videoData = {
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
     'Pre-Prep (4–6 years)': [
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
     ],
     'Junior (7–10 years)': [
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-        require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
     ],
   },
   'Gujarati (गुजराती)': {
     'Pre-Prep (4–6 years)': [
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
     ],
     'Junior (7–10 years)': [
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-        require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
     ],
   },
 };
 
-const VideoListScreen = ({ navigation }) => {
-  const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-  const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+// Language short labels
+const languageLabels = {
+  'Gujarati (गुजराती)': 'Gujarat',
+  'Punjabi (ਪੰਜਾਬੀ)': 'Punjab',
+  'Hindi (हिन्दी)': 'Hindi',
+};
 
-  const videos = videoData[selectedLanguage]?.[selectedAgeGroup] || [];
+const VideoListScreen = ({ navigation }) => {
+  const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+  const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+  const [language, setLanguage] = useState(selectedLanguage || 'Hindi (हिन्दी)');
+
+  const videos = videoData[language]?.[selectedAgeGroup] || [];
 
   const handleVideoPress = (videoUri) => {
-    // Navigate to video player screen later
     navigation.navigate('VideoPlayer', { videoUri });
   };
 
@@ -77,7 +84,6 @@ const VideoListScreen = ({ navigation }) => {
     navigation.navigate('Setting');
   };
 
-  // Add Settings icon to header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Home',
@@ -97,14 +103,33 @@ const VideoListScreen = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <LinearGradient colors={['#9346D2', '#5BC3F5']} style={styles.container}>
+    <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
+      
+      {/* Language Buttons - Even Spaced */}
+      <View style={styles.languageRow}>
+        {Object.keys(languageLabels).map((langKey) => (
+          <TouchableOpacity
+            key={langKey}
+            style={[
+              styles.languageButton,
+              language === langKey && styles.languageButtonActive,
+            ]}
+            onPress={() => setLanguage(langKey)}
+          >
+            <Text style={styles.languageButtonText}>{languageLabels[langKey]}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Video Grid */}
       <FlatList
         data={videos}
         keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.list}
+        numColumns={2}
+        contentContainerStyle={styles.gridContainer}
         renderItem={({ item, index }) => (
           <TouchableOpacity style={styles.videoItem} onPress={() => handleVideoPress(item)}>
-            <Icon name="play-circle-fill" size={32} color="#9346D2" />
+            <Icon name="play-circle-fill" size={40} color="#9346D2" />
             <Text style={styles.videoText}>Video {index + 1}</Text>
           </TouchableOpacity>
         )}
@@ -116,24 +141,45 @@ const VideoListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
-    paddingHorizontal: 20,
   },
-  list: {
-    paddingBottom: 60,
+  languageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  languageButton: {
+    backgroundColor: 'black',
+    paddingVertical: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+  },
+  languageButtonActive: {
+    backgroundColor: '#9346D2',
+  },
+  languageButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  gridContainer: {
+    padding: 10,
   },
   videoItem: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginVertical: 10,
-    borderRadius: 15,
-    flexDirection: 'row',
+    backgroundColor: '#d3d3d3',
+    flex: 1,
+    aspectRatio: 1,
+    margin: 8,
+    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   videoText: {
-    fontSize: 18,
-    marginLeft: 15,
+    marginTop: 10,
     fontWeight: '600',
+    fontSize: 16,
   },
 });
 
