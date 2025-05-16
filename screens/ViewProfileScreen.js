@@ -12,6 +12,7 @@ const ViewProfileScreen = ({ route, navigation }) => {
 	const [address] = useState(route.params?.address || 'Type Here');
 	const [dateOfBirth] = useState(route.params?.dateOfBirth || 'DD/MM/YYYY');
 	const [phone] = useState(route.params?.phone || '+91 9999999999');
+	const [email] = useState(route.params?.email || 'example@gmail.com');
 	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -144,6 +145,11 @@ const ViewProfileScreen = ({ route, navigation }) => {
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Sure Name</Text>
 							<Text style={styles.readonlyText}>{surename}</Text>
+						</View>
+
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>E-Mail</Text>
+							<Text style={styles.readonlyText}>{email}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>

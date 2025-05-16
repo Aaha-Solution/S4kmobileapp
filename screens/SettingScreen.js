@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 	},
 	menuContainer: {
-		marginTop: 10,
+		marginTop: 5,
 	},
 	menuItem: {
 		backgroundColor: 'white',

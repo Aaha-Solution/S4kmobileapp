@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
@@ -76,31 +76,14 @@ const VideoListScreen = ({ navigation }) => {
 
   const videos = videoData[language]?.[selectedAgeGroup] || [];
 
+    useEffect(()=>{
+      console.log('VideoListScreen mounted')
+    })
   const handleVideoPress = (videoUri) => {
     navigation.navigate('VideoPlayer', { videoUri });
   };
 
-  const goToSettings = () => {
-    navigation.navigate('Setting');
-  };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Home',
-      headerRight: () => (
-        <TouchableOpacity onPress={goToSettings} style={{ marginRight: 15 }}>
-          <Icon name="settings" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerStyle: {
-        backgroundColor: '#9346D2',
-      },
-      headerTintColor: '#fff',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-    });
-  }, [navigation]);
 
   return (
     <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
