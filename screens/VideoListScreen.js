@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 
 const videoData = {
   'Hindi (हिन्दी)': {
@@ -68,12 +69,35 @@ const VideoListScreen = ({ navigation }) => {
   const videos = videoData[selectedLanguage]?.[selectedAgeGroup] || [];
 
   const handleVideoPress = (videoUri) => {
-    navigation.navigate('VideoPlayerScreen', { videoUri });
+    // Navigate to video player screen later
+    navigation.navigate('VideoPlayer', { videoUri });
   };
+
+  const goToSettings = () => {
+    navigation.navigate('Setting');
+  };
+
+  // Add Settings icon to header
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Home',
+      headerRight: () => (
+        <TouchableOpacity onPress={goToSettings} style={{ marginRight: 15 }}>
+          <Icon name="settings" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
+      headerStyle: {
+        backgroundColor: '#9346D2',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
 
   return (
     <LinearGradient colors={['#9346D2', '#5BC3F5']} style={styles.container}>
-      <Text style={styles.title}>Select a Video</Text>
       <FlatList
         data={videos}
         keyExtractor={(item, index) => index.toString()}
@@ -92,15 +116,8 @@ const VideoListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 10,
     paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
-    textAlign: 'center',
   },
   list: {
     paddingBottom: 60,

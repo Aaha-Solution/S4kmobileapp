@@ -195,10 +195,17 @@ const App = () => (
 						)
 					})}
 				/>
-				<Stack.Screen name="VideoListScreen" component={VideoListScreen} />
+				<Stack.Screen
+					name="VideoListScreen"
+					component={VideoListScreen}
+					options={{ headerShown: true ,
+					headerTitleAlign: 'center',
+					headerLeft: () => null,
+              	}} 
+				/>
+
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>
 );
-
 export default App;
