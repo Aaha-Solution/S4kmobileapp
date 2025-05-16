@@ -64,8 +64,8 @@ const videoData = {
 
 // Language short labels
 const languageLabels = {
-  'Gujarati (गुजराती)': 'Gujarat',
-  'Punjabi (ਪੰਜਾਬੀ)': 'Punjab',
+  'Gujarati (गुजराती)': 'Gujarati',
+  'Punjabi (ਪੰਜਾਬੀ)': 'Punjabi',
   'Hindi (हिन्दी)': 'Hindi',
 };
 
