@@ -18,7 +18,7 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import NotificationScreen from './screens/NotificationScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
-
+import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 
 const Stack = createStackNavigator();
@@ -58,6 +58,7 @@ const App = () => (
 					}}
 				/>
 				<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+				<Stack.Screen name='VideoPlayer' component={VideoPlayerScreen}/>
 				<Stack.Screen
 					name="Setting"
 					component={SettingScreen}

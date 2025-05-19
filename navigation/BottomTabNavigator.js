@@ -18,7 +18,7 @@ const BottomTabNavigator = () => (
         } else if (route.name === 'Settings') {
           iconName = focused ? 'settings' : 'settings-outline';
         } else if (route.name === 'Payment') {
-          iconName = focused ? 'logo-paypal' : 'logo-paypal-outline';
+          iconName = focused ? 'wallet' : 'wallet-outline';
         }
         return <Icon name={iconName} size={size} color={color} />;
       },
@@ -34,6 +34,11 @@ const BottomTabNavigator = () => (
     })}
   >
     <Tab.Screen
+      name="Settings"
+      component={SettingScreen}
+      options={{ title: 'Settings' }}
+    />
+    <Tab.Screen
       name="VideoListScreen"
       component={VideoListScreen}
       options={{ title: 'Home',
@@ -43,12 +48,7 @@ const BottomTabNavigator = () => (
             backgroundColor: '#E0B0FF',
         }
        }}
-    />
-    <Tab.Screen
-      name="Settings"
-      component={SettingScreen}
-      options={{ title: 'Settings' }}
-    />
+    />   
     <Tab.Screen
       name="Payment"
       component={PaymentScreen}

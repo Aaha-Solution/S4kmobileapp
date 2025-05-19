@@ -80,7 +80,7 @@ const VideoListScreen = ({ navigation }) => {
       console.log('VideoListScreen mounted')
     })
   const handleVideoPress = (videoUri) => {
-    navigation.navigate('VideoPlayer', { videoUri });
+    navigation.navigate('VideoPlayer', { videoUri: videoUri });
   };
 
 
