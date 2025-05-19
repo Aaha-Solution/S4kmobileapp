@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,20 +26,20 @@ const videoData = {
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
     'Pre-Prep (4–6 years)': [
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
     ],
     'Junior (7–10 years)': [
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
-      require('../assets/videos/punjabi/junior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
     ],
   },
   'Gujarati (गुजराती)': {
@@ -74,21 +74,26 @@ const VideoListScreen = ({ navigation }) => {
   const selectedLanguage = useSelector(state => state.user.selectedLanguage);
   const [language, setLanguage] = useState(selectedLanguage || 'Hindi (हिन्दी)');
 
+  // Get videos for the selected language and age group
   const videos = videoData[language]?.[selectedAgeGroup] || [];
 
-    useEffect(()=>{
-      console.log('VideoListScreen mounted')
-    })
+  useEffect(() => {
+    if (selectedLanguage) {
+      setLanguage(selectedLanguage);
+    }
+  }, [selectedLanguage]);
+
   const handleVideoPress = (videoUri) => {
-    navigation.navigate('VideoPlayer', { videoUri: videoUri });
+    navigation.navigate('VideoPlayer', { videoUri });
   };
 
-
+  const handleLanguageSelect = (langKey) => {
+    setLanguage(langKey);
+  };
 
   return (
     <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
-      
-      {/* Language Buttons - Even Spaced */}
+      {/* Language Buttons */}
       <View style={styles.languageRow}>
         {Object.keys(languageLabels).map((langKey) => (
           <TouchableOpacity
@@ -97,11 +102,17 @@ const VideoListScreen = ({ navigation }) => {
               styles.languageButton,
               language === langKey && styles.languageButtonActive,
             ]}
-            onPress={() => setLanguage(langKey)}
+            onPress={() => handleLanguageSelect(langKey)}
           >
             <Text style={styles.languageButtonText}>{languageLabels[langKey]}</Text>
           </TouchableOpacity>
         ))}
+      </View>
+
+      {/* Selected Language Header */}
+      <View style={styles.languageHeader}>
+        <Text style={styles.languageHeaderText}>{languageLabels[language]}</Text>
+        <Text style={styles.ageGroupText}>{selectedAgeGroup}</Text>
       </View>
 
       {/* Video Grid */}
@@ -111,12 +122,21 @@ const VideoListScreen = ({ navigation }) => {
         numColumns={2}
         contentContainerStyle={styles.gridContainer}
         renderItem={({ item, index }) => (
-          <TouchableOpacity style={styles.videoItem} onPress={() => handleVideoPress(item)}>
+          <TouchableOpacity 
+            style={styles.videoItem} 
+            onPress={() => handleVideoPress(item)}
+          >
             <Icon name="play-circle-fill" size={40} color="#9346D2" />
             <Text style={styles.videoText}>Video {index + 1}</Text>
           </TouchableOpacity>
         )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No videos available for this selection</Text>
+          </View>
+        )}
       />
+      
     </LinearGradient>
   );
 };
@@ -147,8 +167,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  languageHeader: {
+    padding: 15,
+    backgroundColor: '#9346D2',
+    marginTop: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+  },
+  languageHeaderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  ageGroupText: {
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 5,
+  },
   gridContainer: {
     padding: 10,
+    flexGrow: 1,
   },
   videoItem: {
     backgroundColor: '#d3d3d3',
@@ -163,6 +203,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontWeight: '600',
     fontSize: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

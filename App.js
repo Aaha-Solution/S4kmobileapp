@@ -59,28 +59,9 @@ const App = () => (
 				/>
 				<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 				<Stack.Screen name='VideoPlayer' component={VideoPlayerScreen}/>
-				<Stack.Screen
-					name="Setting"
-					component={SettingScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTransparent: true,
-						headerTitle: 'Setting',
-						headerTitleAlign: 'center',
-						headerStyle: {
-							backgroundColor: '#E0B0FF',
-						},
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black" 
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate('MainTabs')}
-							/>
-						)
-					})}
-				/>
+
+				   
+				
 				<Stack.Screen
 					name="Notifications"
 					component={NotificationScreen}
@@ -170,7 +151,9 @@ const App = () => (
 								size={24}
 								color="black"
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate('Setting')}
+								onPress={() => navigation.navigate('MainTabs', {
+									screen: 'Setting'
+								})}
 							/>
 						)
 					})}

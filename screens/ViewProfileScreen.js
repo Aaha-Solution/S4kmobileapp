@@ -52,8 +52,11 @@ const ViewProfileScreen = ({ route, navigation }) => {
 		try {
 			setSelectedAvatar(tempSelectedAvatar);
 			await AsyncStorage.setItem('selectedAvatar', JSON.stringify(tempSelectedAvatar));
-			navigation.navigate('Setting', {
-				selectedAvatar: tempSelectedAvatar
+			navigation.navigate('MainTabs', {
+				screen: 'Setting',
+				params: {
+					selectedAvatar: tempSelectedAvatar
+				}
 			});
 		} catch (error) {
 			console.log('Error saving avatar:', error);
