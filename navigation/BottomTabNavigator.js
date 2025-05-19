@@ -1,153 +1,198 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { useDispatch, useSelector } from 'react-redux';
+import { setAgeGroup } from '../Store/userSlice';
 
 const Tab = createBottomTabNavigator();
 
-function AgeScreen() {
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const dispatch = useDispatch();
+  const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState(selectedAgeGroup);
   const [items, setItems] = useState([
-    { label: 'Pre-Prep (4-6 years)', value: 'preprep' },
-    { label: 'Junior (7-10 years)', value: 'junior' }
+    { label: 'Pre-Prep (4-6 years)', value: 'Pre-Prep (4-6 years)' },
+    { label: 'Junior (7-10 years)', value: 'Junior (7-10 years)' },
   ]);
 
+  useEffect(() => {
+    console.log('Selected Age Group in TabBar:', selectedAgeGroup);
+    setValue(selectedAgeGroup);
+  }, [selectedAgeGroup]);
+
+  const handleOutsidePress = () => {
+    if (open) {
+      setOpen(false);
+    }
+  };
+
+  const handleAgeSelect = (selectedValue) => {
+    console.log('Age selected:', selectedValue);
+    if (selectedValue) {
+      // First dispatch the age group update
+      dispatch(setAgeGroup(selectedValue));
+      
+      // Update local state
+      setValue(selectedValue);
+      
+      // Then navigate to Home screen
+      navigation.navigate('Home');
+      
+      // Finally close the dropdown
+      setOpen(false);      
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={items}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setItems}
-        placeholder="Select Age Group"
-        style={styles.dropdown}
-        textStyle={styles.dropdownText}
-        dropDownContainerStyle={styles.dropdownContainer}
-      />
-    </View>
+    <TouchableWithoutFeedback onPress={handleOutsidePress}>
+      <View style={styles.tabBarContainer}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const label = options.tabBarLabel ?? options.title ?? route.name;
+          const isFocused = state.index === index;
+          const iconName = getIconName(route.name, isFocused);
+
+          if (route.name === 'Age') {
+            return (
+              <View key={route.key} style={styles.ageTabContainer}>
+                <TouchableOpacity
+                  onPress={() => setOpen(!open)}
+                  style={styles.tabButton}
+                >
+                  <Icon name={iconName} size={24} color={isFocused ? '#8A2BE2' : 'gray'} />
+                  <Text style={[styles.tabLabel, { color: isFocused ? '#8A2BE2' : 'gray' }]}>{label}</Text>
+                </TouchableOpacity>
+                {open && (
+                  <View style={styles.dropdownWrapper}>
+                    <DropDownPicker
+                      open={open}
+                      value={value}
+                      items={items}
+                      setOpen={setOpen}
+                      setValue={setValue}
+                      setItems={setItems}
+                      placeholder="Select Age Group"
+                      onChangeValue={handleAgeSelect}
+                      style={styles.dropdown}
+                      dropDownContainerStyle={styles.dropdownContainer}
+                      zIndex={9999}
+                    />
+                  </View>
+                )}
+              </View>
+            );
+          }
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              onPress={() => navigation.navigate(route.name)}
+              style={styles.tabButton}
+            >
+              <Icon name={iconName} size={24} color={isFocused ? '#8A2BE2' : 'gray'} />
+              <Text style={[styles.tabLabel, { color: isFocused ? '#8A2BE2' : 'gray' }]}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </TouchableWithoutFeedback>
   );
-}
+};
+
+const getIconName = (routeName, focused) => {
+  switch (routeName) {
+    case 'Home':
+      return focused ? 'home' : 'home-outline';
+    case 'Setting':
+      return focused ? 'settings' : 'settings-outline';
+    case 'Payment':
+      return focused ? 'wallet' : 'wallet-outline';
+    case 'Age':
+      return focused ? 'people' : 'people-outline';
+    default:
+      return 'ellipse';
+  }
+};
 
 const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
-      initialRouteName="VideoListScreen"
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'VideoListScreen') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Setting') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          } else if (route.name === 'Payment') {
-            iconName = focused ? 'wallet' : 'wallet-outline';
-          } else if (route.name === 'Age') {
-            iconName = focused ? 'people' : 'people-outline';
-          }
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#8A2BE2',
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          height: 60,
-          backgroundColor: '#fff',
-        },
-        headerShown: false,
-      })}
+      initialRouteName="Home"
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerStyle: { backgroundColor: '#b388eb' },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: 'bold' },
+      }}
     >
-      <Tab.Screen
-        name="Setting"
-        component={SettingScreen}
-        options={{ title: 'Setting',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: '#E0B0FF',
-          },
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 24,
-          },
-        }}
+      <Tab.Screen 
+        name="Setting" 
+        component={SettingScreen} 
+        options={{ title: 'Setting' }}
       />
-      <Tab.Screen
-        name="VideoListScreen"
-        component={VideoListScreen}
-        options={{ title: 'Home',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: '#E0B0FF',
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-          },
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 24,
-          },
-        }}
+      <Tab.Screen 
+        name="Home" 
+        component={VideoListScreen} 
+        options={{ title: 'Home' }}
       />
-      <Tab.Screen
-        name="Age"
-        component={AgeScreen}
-        options={{ title: 'Age',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: '#E0B0FF',
-          },
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 24,
-          },
-        }}
+      <Tab.Screen 
+        name="Payment" 
+        component={PaymentScreen} 
+        options={{ title: 'Payment' }}
       />
-      <Tab.Screen
-        name="Payment"
-        component={PaymentScreen}
-        options={{ title: 'Payment',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: '#E0B0FF',
-          },
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 24,
-          },
-        }}
+      <Tab.Screen 
+        name="Age" 
+        component={VideoListScreen} 
+        options={{ title: 'Age' }}
       />
     </Tab.Navigator>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  tabBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     backgroundColor: '#fff',
+    height: 60,
+    paddingTop: 5,
+    paddingBottom: 5,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  ageTabContainer: {
+    alignItems: 'center',
+    position: 'relative',
+  },
+  tabButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+  },
+  tabLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  dropdownWrapper: {
+    position: 'absolute',
+    top: -150,
+    width: 180,
+    left: -135,
+    zIndex: 1000,
   },
   dropdown: {
     borderColor: '#E0B0FF',
     borderWidth: 2,
     borderRadius: 10,
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: '#333',
+    width: 180,
   },
   dropdownContainer: {
     borderColor: '#E0B0FF',
@@ -156,4 +201,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BottomTabNavigator; 
+export default BottomTabNavigator;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
@@ -16,12 +16,12 @@ const videoData = {
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
     ],
     'Junior (7–10 years)': [
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/junior/253436_tiny.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
     ],
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
@@ -31,7 +31,7 @@ const videoData = {
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
     ],
     'Junior (7–10 years)': [
       require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
@@ -52,12 +52,12 @@ const videoData = {
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
     ],
     'Junior (7–10 years)': [
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/junior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
     ],
   },
 };
@@ -73,23 +73,51 @@ const VideoListScreen = ({ navigation }) => {
   const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
   const selectedLanguage = useSelector(state => state.user.selectedLanguage);
   const [language, setLanguage] = useState(selectedLanguage || 'Hindi (हिन्दी)');
+  const [videos, setVideos] = useState([]);
 
-  // Get videos for the selected language and age group
-  const videos = videoData[language]?.[selectedAgeGroup] || [];
-
+  // Debug log for initial render
   useEffect(() => {
+    console.log('VideoListScreen mounted');
+    console.log('Initial selectedAgeGroup:', selectedAgeGroup);
+    console.log('Initial selectedLanguage:', selectedLanguage);
+  }, []);
+
+  // Update videos when language or age group changes
+  useEffect(() => {
+    console.log('Effect triggered - Age:', selectedAgeGroup, 'Language:', language);
+    
+    if (selectedAgeGroup && language) {
+      const newVideos = videoData[language]?.[selectedAgeGroup] || [];
+      console.log('Found videos:', newVideos.length);
+      setVideos(newVideos);
+    } else {
+      console.log('Missing required data - Age:', selectedAgeGroup, 'Language:', language);
+    }
+  }, [selectedAgeGroup, language]);
+
+  // Update language when selectedLanguage changes
+  useEffect(() => {
+    console.log('Language changed in Redux:', selectedLanguage);
     if (selectedLanguage) {
       setLanguage(selectedLanguage);
     }
   }, [selectedLanguage]);
 
-  const handleVideoPress = (videoUri) => {
+  const handleVideoPress = useCallback((videoUri) => {
     navigation.navigate('VideoPlayer', { videoUri });
-  };
+  }, [navigation]);
 
-  const handleLanguageSelect = (langKey) => {
+  const handleLanguageSelect = useCallback((langKey) => {
+    console.log('Language selected:', langKey);
     setLanguage(langKey);
-  };
+  }, []);
+
+  // Debug render
+  console.log('Rendering VideoListScreen with:', {
+    selectedAgeGroup,
+    language,
+    videosCount: videos.length
+  });
 
   return (
     <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
@@ -111,14 +139,13 @@ const VideoListScreen = ({ navigation }) => {
 
       {/* Selected Language Header */}
       <View style={styles.languageHeader}>
-        <Text style={styles.languageHeaderText}>{languageLabels[language]}</Text>
-        <Text style={styles.ageGroupText}>{selectedAgeGroup}</Text>
+        <Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
       </View>
 
       {/* Video Grid */}
       <FlatList
         data={videos}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => `video-${index}`}
         numColumns={2}
         contentContainerStyle={styles.gridContainer}
         renderItem={({ item, index }) => (
@@ -132,11 +159,14 @@ const VideoListScreen = ({ navigation }) => {
         )}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No videos available for this selection</Text>
+            <Text style={styles.emptyText}>
+              {selectedAgeGroup 
+                ? 'No videos available for this selection'
+                : 'Please select an age group'}
+            </Text>
           </View>
         )}
       />
-      
     </LinearGradient>
   );
 };
@@ -168,11 +198,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   languageHeader: {
-    padding: 15,
+    paddingVertical: 10,
+    width:200,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
     backgroundColor: '#9346D2',
-    marginTop: 10,
-    marginHorizontal: 5,
-    borderRadius: 10,
+    marginTop: 20,
+    marginHorizontal: 16,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+   
   },
   languageHeaderText: {
     fontSize: 24,
@@ -183,8 +219,8 @@ const styles = StyleSheet.create({
   ageGroupText: {
     fontSize: 16,
     color: 'white',
-    textAlign: 'center',
-    marginTop: 5,
+    marginTop: 0,
+    alignSelf: 'center',
   },
   gridContainer: {
     padding: 10,
