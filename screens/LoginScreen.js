@@ -93,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
                 {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
                 <PressableButton
-                    title="GO"
+                    title="Login"
                     onPress={handleLogin}
                     style={styles.goButton}
                 />
