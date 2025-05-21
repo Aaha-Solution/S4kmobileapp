@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 // Video data
 const videoData = {
   'Hindi (हिन्दी)': {
-    'Pre-Prep (4–6 years)': [
+    'Pre-Prep (4-6 years)': [
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
@@ -15,17 +15,17 @@ const videoData = {
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
       require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
     ],
-    'Junior (7–10 years)': [
+    'Junior (7-10 years)': [
       require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
       require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
       require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
       require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
       require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
+      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'), 
     ],
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
-    'Pre-Prep (4–6 years)': [
+    'Pre-Prep (4-6 years)': [
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
@@ -33,7 +33,7 @@ const videoData = {
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
     ],
-    'Junior (7–10 years)': [
+    'Junior (7-10 years)': [
       require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
       require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
@@ -43,7 +43,7 @@ const videoData = {
     ],
   },
   'Gujarati (गुजराती)': {
-    'Pre-Prep (4–6 years)': [
+    'Pre-Prep (4-6 years)': [
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
@@ -51,7 +51,7 @@ const videoData = {
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
       require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
     ],
-    'Junior (7–10 years)': [
+    'Junior (7-10 years)': [
       require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
       require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
       require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
@@ -75,48 +75,53 @@ const VideoListScreen = ({ navigation }) => {
   const [language, setLanguage] = useState(selectedLanguage || 'Hindi (हिन्दी)');
   const [videos, setVideos] = useState([]);
 
-  // Debug log for initial render
-  useEffect(() => {
-    console.log('VideoListScreen mounted');
-    console.log('Initial selectedAgeGroup:', selectedAgeGroup);
-    console.log('Initial selectedLanguage:', selectedLanguage);
-  }, []);
-
   // Update videos when language or age group changes
   useEffect(() => {
-    console.log('Effect triggered - Age:', selectedAgeGroup, 'Language:', language);
-    
+    console.log('Updating videos - Age:', selectedAgeGroup, 'Language:', language);
     if (selectedAgeGroup && language) {
-      const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-      console.log('Found videos:', newVideos.length);
+      // Ensure we're using the exact age group string from the data
+      const ageGroupKey = selectedAgeGroup === 'Pre-Prep (4-6 years)' ? 'Pre-Prep (4-6 years)' : 'Junior (7-10 years)';
+      const newVideos = videoData[language]?.[ageGroupKey] || [];
+      console.log('Setting new videos:', newVideos.length, 'for age group:', ageGroupKey);
       setVideos(newVideos);
-    } else {
-      console.log('Missing required data - Age:', selectedAgeGroup, 'Language:', language);
     }
   }, [selectedAgeGroup, language]);
 
   // Update language when selectedLanguage changes
   useEffect(() => {
-    console.log('Language changed in Redux:', selectedLanguage);
     if (selectedLanguage) {
       setLanguage(selectedLanguage);
     }
   }, [selectedLanguage]);
+
+  // Add focus listener to refresh videos when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('Screen focused - Refreshing videos');
+      if (selectedAgeGroup && language) {
+        const newVideos = videoData[language]?.[selectedAgeGroup] || [];
+        console.log('Refreshing videos:', newVideos.length);
+        setVideos(newVideos);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, selectedAgeGroup, language]);
 
   const handleVideoPress = useCallback((videoUri) => {
     navigation.navigate('VideoPlayer', { videoUri });
   }, [navigation]);
 
   const handleLanguageSelect = useCallback((langKey) => {
-    console.log('Language selected:', langKey);
     setLanguage(langKey);
   }, []);
 
   // Debug render
-  console.log('Rendering VideoListScreen with:', {
+  console.log('Rendering VideoListScreen:', {
     selectedAgeGroup,
     language,
-    videosCount: videos.length
+    videosCount: videos.length,
+    videos: videos
   });
 
   return (
@@ -166,6 +171,7 @@ const VideoListScreen = ({ navigation }) => {
             </Text>
           </View>
         )}
+        extraData={[selectedAgeGroup, language]} // Add this to force re-render when these change
       />
     </LinearGradient>
   );

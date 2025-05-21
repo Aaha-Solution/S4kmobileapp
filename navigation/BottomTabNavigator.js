@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
 
 const Tab = createBottomTabNavigator();
-
+   
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   const dispatch = useDispatch();
   const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
@@ -22,35 +22,27 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   ]);
 
   useEffect(() => {
-    console.log('Selected Age Group in TabBar:', selectedAgeGroup);
     setValue(selectedAgeGroup);
   }, [selectedAgeGroup]);
 
-  const handleOutsidePress = () => {
-    if (open) {
-      setOpen(false);
-    }
-  };
-
   const handleAgeSelect = (selectedValue) => {
-    console.log('Age selected:', selectedValue);
-    if (selectedValue) {
-      // First dispatch the age group update
+    if (!selectedValue) return;
+    
+    try {
       dispatch(setAgeGroup(selectedValue));
-      
-      // Update local state
       setValue(selectedValue);
+      setOpen(false);
       
-      // Then navigate to Home screen
-      navigation.navigate('Home');
-      
-      // Finally close the dropdown
-      setOpen(false);      
+      setTimeout(() => {
+        navigation.navigate('Home');
+      }, 100);
+    } catch (error) {
+      console.error('Error in handleAgeSelect:', error);
     }
   };
 
   return (
-    <TouchableWithoutFeedback onPress={handleOutsidePress}>
+    <TouchableWithoutFeedback onPress={() => setOpen(false)}>
       <View style={styles.tabBarContainer}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -78,10 +70,14 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                       setValue={setValue}
                       setItems={setItems}
                       placeholder="Select Age Group"
-                      onChangeValue={handleAgeSelect}
+                      onSelectItem={(item) => handleAgeSelect(item.value)}
                       style={styles.dropdown}
                       dropDownContainerStyle={styles.dropdownContainer}
                       zIndex={9999}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        nestedScrollEnabled: true,
+                      }}
                     />
                   </View>
                 )}
@@ -133,24 +129,24 @@ const BottomTabNavigator = () => {
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     >
-      <Tab.Screen 
-        name="Setting" 
-        component={SettingScreen} 
+      <Tab.Screen
+        name="Setting"
+        component={SettingScreen}
         options={{ title: 'Setting' }}
       />
-      <Tab.Screen 
-        name="Home" 
-        component={VideoListScreen} 
+      <Tab.Screen
+        name="Home"
+        component={VideoListScreen}
         options={{ title: 'Home' }}
       />
-      <Tab.Screen 
-        name="Payment" 
-        component={PaymentScreen} 
+      <Tab.Screen
+        name="Payment"
+        component={PaymentScreen}
         options={{ title: 'Payment' }}
       />
-      <Tab.Screen 
-        name="Age" 
-        component={VideoListScreen} 
+      <Tab.Screen
+        name="Age"
+        component={VideoListScreen}
         options={{ title: 'Age' }}
       />
     </Tab.Navigator>
