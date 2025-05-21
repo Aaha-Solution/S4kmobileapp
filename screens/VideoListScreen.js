@@ -79,10 +79,8 @@ const VideoListScreen = ({ navigation }) => {
   useEffect(() => {
     console.log('Updating videos - Age:', selectedAgeGroup, 'Language:', language);
     if (selectedAgeGroup && language) {
-      // Ensure we're using the exact age group string from the data
-      const ageGroupKey = selectedAgeGroup === 'Pre-Prep (4-6 years)' ? 'Pre-Prep (4-6 years)' : 'Junior (7-10 years)';
-      const newVideos = videoData[language]?.[ageGroupKey] || [];
-      console.log('Setting new videos:', newVideos.length, 'for age group:', ageGroupKey);
+      const newVideos = videoData[language]?.[selectedAgeGroup] || [];
+      console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
       setVideos(newVideos);
     }
   }, [selectedAgeGroup, language]);
@@ -100,7 +98,7 @@ const VideoListScreen = ({ navigation }) => {
       console.log('Screen focused - Refreshing videos');
       if (selectedAgeGroup && language) {
         const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-        console.log('Refreshing videos:', newVideos.length);
+        console.log('Refreshing videos:', newVideos.length, 'for age group:', selectedAgeGroup);
         setVideos(newVideos);
       }
     });
@@ -115,14 +113,6 @@ const VideoListScreen = ({ navigation }) => {
   const handleLanguageSelect = useCallback((langKey) => {
     setLanguage(langKey);
   }, []);
-
-  // Debug render
-  console.log('Rendering VideoListScreen:', {
-    selectedAgeGroup,
-    language,
-    videosCount: videos.length,
-    videos: videos
-  });
 
   return (
     <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
@@ -171,7 +161,7 @@ const VideoListScreen = ({ navigation }) => {
             </Text>
           </View>
         )}
-        extraData={[selectedAgeGroup, language]} // Add this to force re-render when these change
+        extraData={[selectedAgeGroup, language]}
       />
     </LinearGradient>
   );

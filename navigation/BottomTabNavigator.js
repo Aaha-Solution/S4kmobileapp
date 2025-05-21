@@ -124,7 +124,7 @@ const BottomTabNavigator = () => {
       screenOptions={{
         headerShown: true,
         headerTitleAlign: 'center',
-        headerStyle: { backgroundColor: '#b388eb' },
+        headerStyle: { backgroundColor: '#b388eb',fontWeight:'bold' },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
       }}

@@ -6,8 +6,8 @@ import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 
 const ageGroups = [
-	{ id: '1', name: 'Pre-Prep (4–6 years)' },
-	{ id: '2', name: 'Junior (7–10 years)' },
+	{ id: '1', name: 'Pre-Prep (4-6 years)' },
+	{ id: '2', name: 'Junior (7-10 years)' },
 ];
 
 const AgeSelectionScreen = ({ navigation }) => {
