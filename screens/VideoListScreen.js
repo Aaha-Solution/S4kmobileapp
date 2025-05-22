@@ -8,56 +8,56 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 const videoData = {
   'Hindi (हिन्दी)': {
     'Pre-Prep (4-6 years)': [
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/hindi/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
+      require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
     ],
     'Junior (7-10 years)': [
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'),
-      require('../assets/videos/hindi/junior/1672679-hd_1280_720_38fps.mp4'), 
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
+      require('../assets/videos/hindi/junior/hindijun.mp4'), 
     ],
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
     'Pre-Prep (4-6 years)': [
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/prejunior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
+      require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
     ],
     'Junior (7-10 years)': [
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
-      require('../assets/videos/punjabi/junior/2386935-uhd_4096_2160_24fps.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
+      require('../assets/videos/punjabi/junior/punjabjun.mp4'),
     ],
   },
   'Gujarati (गुजराती)': {
     'Pre-Prep (4-6 years)': [
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
-      require('../assets/videos/gujarat/prejunior/253436_tiny.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
+      require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
     ],
     'Junior (7-10 years)': [
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
-      require('../assets/videos/gujarat/junior/3327105-hd_1920_1080_24fps.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
+      require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
     ],
   },
 };
@@ -80,7 +80,7 @@ const VideoListScreen = ({ navigation }) => {
     console.log('Updating videos - Age:', selectedAgeGroup, 'Language:', language);
     if (selectedAgeGroup && language) {
       const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-      console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+      //console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
       setVideos(newVideos);
     }
   }, [selectedAgeGroup, language]);
@@ -95,10 +95,10 @@ const VideoListScreen = ({ navigation }) => {
   // Add focus listener to refresh videos when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('Screen focused - Refreshing videos');
+      //console.log('Screen focused - Refreshing videos');
       if (selectedAgeGroup && language) {
         const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-        console.log('Refreshing videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+        //console.log('Refreshing videos:', newVideos.length, 'for age group:', selectedAgeGroup);
         setVideos(newVideos);
       }
     });

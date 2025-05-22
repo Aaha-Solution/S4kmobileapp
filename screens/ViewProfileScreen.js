@@ -38,8 +38,9 @@ const ViewProfileScreen = ({ route, navigation }) => {
 				setSelectedAvatar(parsedAvatar);
 				setTempSelectedAvatar(parsedAvatar);
 			}
-		} catch (error) {
-			console.log('Error loading avatar:', error);
+		} 
+		catch (error) {
+			//console.log('Error loading avatar:', error);
 		}
 	};
 
@@ -59,7 +60,7 @@ const ViewProfileScreen = ({ route, navigation }) => {
 				}
 			});
 		} catch (error) {
-			console.log('Error saving avatar:', error);
+			//console.log('Error saving avatar:', error);
 			Alert.alert(
 				'Error',
 				'Failed to save avatar selection. Please try again.',

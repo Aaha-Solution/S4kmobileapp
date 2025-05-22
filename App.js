@@ -59,81 +59,6 @@ const App = () => (
 				/>
 				<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 				<Stack.Screen name='VideoPlayer' component={VideoPlayerScreen}/>
-
-				   
-				
-				<Stack.Screen
-					name="Notifications"
-					component={NotificationScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'Notifications',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
-							/>
-						)
-					})}
-				/>
-				<Stack.Screen
-					name="Account"
-					component={AccountScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'Account',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate('Setting')}
-							/>
-						)
-					})}
-				/>
-				<Stack.Screen
-					name="About"
-					component={AboutScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'About',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate('Setting')}
-							/>
-						)
-					})}
-				/>
-				<Stack.Screen
-					name="EditProfile"
-					component={EditProfileScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'Edit Profile',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
-							/>
-						)
-					})}
-				/> 
 				<Stack.Screen
 					name="ViewProfile"
 					component={ViewProfileScreen}
@@ -158,27 +83,9 @@ const App = () => (
 						)
 					})}
 				/>
-				<Stack.Screen
-					name="ChangePasswordScreen"
-					component={ChangePasswordScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'Change Password',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
-							/>
-						)
-					})}
-				/>
+				
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>
 );
-
 export default App;
