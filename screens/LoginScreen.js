@@ -55,7 +55,7 @@ const LoginScreen = ({ navigation }) => {
                 }
             }
         } catch (error) {
-            console.error('Login error:', error);
+            // console.error('Login error:', error);
             setPasswordError('Something went wrong. Please try again.');
         }
     };
@@ -180,5 +180,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
 export default LoginScreen;

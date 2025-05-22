@@ -85,27 +85,9 @@ const App = () => (
 						)
 					})}
 				/>
-				<Stack.Screen
-					name="ChangePasswordScreen"
-					component={ChangePasswordScreen}
-					options={({ navigation }) => ({
-						headerShown: true,
-						headerTitle: 'Change Password',
-						headerTitleAlign: 'center',
-						headerLeft: () => (
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color="black"
-								style={{ marginLeft: 10 }}
-								onPress={() => navigation.goBack()}
-							/>
-						)
-					})}
-				/>
+				
 			</Stack.Navigator>
 		</NavigationContainer>
 	</Provider>
 );
-
 export default App;
