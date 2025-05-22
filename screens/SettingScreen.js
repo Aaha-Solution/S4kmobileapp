@@ -119,7 +119,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient
-				colors={['#E0B0FF', '#ffffff']}
+				colors={['#f9f9f9', '#fff']}
 				start={{ x: 0.5, y: 0 }}
 				end={{ x: 0.5, y: 1 }}
 				style={StyleSheet.absoluteFill}

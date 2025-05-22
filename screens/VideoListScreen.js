@@ -77,10 +77,10 @@ const VideoListScreen = ({ navigation }) => {
 
   // Update videos when language or age group changes
   useEffect(() => {
-    console.log('Updating videos - Age:', selectedAgeGroup, 'Language:', language);
+    
     if (selectedAgeGroup && language) {
       const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-      console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+     
       setVideos(newVideos);
     }
   }, [selectedAgeGroup, language]);
@@ -98,7 +98,7 @@ const VideoListScreen = ({ navigation }) => {
       console.log('Screen focused - Refreshing videos');
       if (selectedAgeGroup && language) {
         const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-        console.log('Refreshing videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+       
         setVideos(newVideos);
       }
     });
