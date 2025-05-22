@@ -21,7 +21,7 @@ const videoData = {
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
-      require('../assets/videos/hindi/junior/hindijun.mp4'), 
+      require('../assets/videos/hindi/junior/hindijun.mp4'),
     ],
   },
   'Punjabi (ਪੰਜਾਬੀ)': {
@@ -42,7 +42,7 @@ const videoData = {
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
     ],
   },
-  'Gujarati (गुजराती)': {
+  'G ujarati (गुजराती)': {
     'Pre-Prep (4-6 years)': [
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
