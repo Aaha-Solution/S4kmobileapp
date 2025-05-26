@@ -55,7 +55,6 @@ const LoginScreen = ({ navigation }) => {
                 }
             }
         } catch (error) {
-            // console.error('Login error:', error);
             setPasswordError('Something went wrong. Please try again.');
         }
     };
@@ -98,7 +97,8 @@ const LoginScreen = ({ navigation }) => {
                     style={styles.goButton}
                 />
 
-                <View style={styles.rememberContainer}>
+                {/* Remember Me and Forgot Password Side by Side */}
+                <View style={styles.bottomRow}>
                     <Pressable
                         style={styles.rememberMe}
                         onPress={() => setRememberMe(!rememberMe)}
@@ -112,7 +112,21 @@ const LoginScreen = ({ navigation }) => {
                         </View>
                         <Text style={styles.optionText}>Remember Me</Text>
                     </Pressable>
+
+                    <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
+                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                    </Pressable>
                 </View>
+
+                {/* Sign Up Button */}
+                <Pressable
+                    style={styles.signupButton}
+                    onPress={() => navigation.navigate('SignupScreen')}
+                >
+                    <Text style={styles.signupText}>
+                        Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
+                    </Text>
+                </Pressable>
             </View>
         </LinearGradient>
     );
@@ -124,7 +138,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     container: {
-        backgroundColor: 'rgba(255,255,255,0.2)', // transparent white
+        backgroundColor: 'rgba(255,255,255,0.2)',
         borderRadius: 15,
         padding: 20,
         margin: 20,
@@ -142,6 +156,20 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginBottom: 8,
         marginLeft: 5,
+    },
+    goButton: {
+        marginTop: 20,
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        alignSelf: 'center',
+    },
+    bottomRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 15,
+        paddingHorizontal: 5,
     },
     rememberMe: {
         flexDirection: 'row',
@@ -168,16 +196,23 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'left',
     },
-    goButton: {
-        marginTop: 20,
-        borderRadius: 25,
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        alignSelf: 'center',
+    forgotPasswordText: {
+        color: '#fff',
+        textDecorationLine: 'underline',
+        fontSize: 14,
     },
-    rememberContainer: {
-        marginTop: 15,
+    signupButton: {
+        marginTop: 20,
         alignItems: 'center',
     },
+    signupText: {
+        color: 'Black',
+        fontSize: 14,
+    },
+    signupLink: {
+        textDecorationLine: 'underline',
+        fontWeight: 'bold',
+    },
 });
+
 export default LoginScreen;

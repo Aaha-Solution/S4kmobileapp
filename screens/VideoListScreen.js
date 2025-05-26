@@ -15,7 +15,7 @@ const videoData = {
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
@@ -33,7 +33,7 @@ const videoData = {
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
@@ -51,7 +51,7 @@ const videoData = {
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
@@ -80,7 +80,7 @@ const VideoListScreen = ({ navigation }) => {
     
     if (selectedAgeGroup && language) {
       const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-      //console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+      console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
       setVideos(newVideos);
     }
   }, [selectedAgeGroup, language]);
