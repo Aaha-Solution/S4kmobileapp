@@ -18,7 +18,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const [value, setValue] = useState(selectedAgeGroup);
 	const [items, setItems] = useState([
 		{ label: 'Pre-Prep (4-6 years)', value: 'Pre-Prep (4-6 years)' },
-		{ label: 'Junior (7-10 years)', value: 'Junior (7-10 years)' },
+		{ label: 'Junior (7&above years)', value: 'Junior (7&above years)' },
 	]);
 
 	useEffect(() => {

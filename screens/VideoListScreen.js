@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Video data
 const videoData = {
-  'Hindi (हिन्दी)': {
+  'Hindi': {
     'Pre-Prep (4-6 years)': [
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
@@ -15,7 +15,7 @@ const videoData = {
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
     ],
-    'Junior (7-10 years)': [
+    'Junior (7&above years)': [
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
@@ -24,7 +24,7 @@ const videoData = {
       require('../assets/videos/hindi/junior/hindijun.mp4'),
     ],
   },
-  'Punjabi (ਪੰਜਾਬੀ)': {
+  'Panjabi': {
     'Pre-Prep (4-6 years)': [
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
@@ -33,7 +33,7 @@ const videoData = {
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
     ],
-    'Junior (7-10 years)': [
+    'Junior (7&above years)': [
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
@@ -42,7 +42,7 @@ const videoData = {
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
     ],
   },
-  'G ujarati (गुजराती)': {
+  'Gujarati': {
     'Pre-Prep (4-6 years)': [
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
@@ -51,7 +51,7 @@ const videoData = {
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
     ],
-    'Junior (7-10 years)': [
+    'Junior (7&above years)': [
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
@@ -64,15 +64,15 @@ const videoData = {
 
 // Language short labels
 const languageLabels = {
-  'Gujarati (गुजराती)': 'Gujarati',
-  'Punjabi (ਪੰਜਾਬੀ)': 'Punjabi',
-  'Hindi (हिन्दी)': 'Hindi',
+  'Gujarati': 'Gujarati',
+  'Panjabi': 'Panjabi',
+  'Hindi': 'Hindi',
 };
 
 const VideoListScreen = ({ navigation }) => {
   const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
   const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-  const [language, setLanguage] = useState(selectedLanguage || 'Hindi (हिन्दी)');
+  const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
   const [videos, setVideos] = useState([]);
 
   // Update videos when language or age group changes
@@ -134,7 +134,7 @@ const VideoListScreen = ({ navigation }) => {
 
       {/* Selected Language Header */}
       <View style={styles.languageHeader}>
-        <Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
+        <Text style={styles.ageGroupText}>{selectedAgeGroup ||'Select Age Group'}</Text>
       </View>
 
       {/* Video Grid */}
@@ -248,5 +248,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 export default VideoListScreen;

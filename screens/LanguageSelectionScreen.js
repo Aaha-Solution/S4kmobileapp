@@ -15,9 +15,9 @@ import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 
 const languagesData = [
-  { id: '1', label: 'Hindi (हिन्दी)', value: 'Hindi (हिन्दी)' },
-  { id: '2', label: 'Punjabi (ਪੰਜਾਬੀ)', value: 'Punjabi (ਪੰਜਾਬੀ)' },
-  { id: '3', label: 'Gujarati (गुजराती)', value: 'Gujarati (गुजराती)' },
+  { id: '1', label: 'Hindi', value: 'Hindi' },
+  { id: '2', label: 'Panjabi', value: 'Panjabi' },
+  { id: '3', label: 'Gujarati', value: 'Gujarati' },
 ];
 
 const LanguageSelectionScreen = ({ navigation }) => {

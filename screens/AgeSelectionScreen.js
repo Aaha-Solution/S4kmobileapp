@@ -7,9 +7,8 @@ import LinearGradient from 'react-native-linear-gradient';
 
 const ageGroups = [
 	{ id: '1', name: 'Pre-Prep (4-6 years)' },
-	{ id: '2', name: 'Junior (7-10 years)' },
+	{ id: '2', name: 'Junior (7 & above years)' },
 ];
-
 const AgeSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
