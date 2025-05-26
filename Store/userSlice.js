@@ -3,10 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
 	isLoggedIn: false,
 	user: {
-		firstname: 'Guest User',
+		username: 'Guest User',
 		surename: '',
 		dateOfBirth: '',
 		address: '',
+		phone: '',
+		selectedAvatar: null
 	},
 	selectedLanguage: null,
 	selectedAgeGroup: null,
@@ -32,6 +34,9 @@ const userSlice = createSlice({
 		setEmail: (state, action) => {
 			state.email = action.payload;
 		},
+		setProfile: (state, action) => {
+			state.user = { ...state.user, ...action.payload };
+		},
 		logout: (state) => {
 			state.isLoggedIn = false;
 			state.user = initialState.user;
@@ -45,5 +50,14 @@ const userSlice = createSlice({
 	},
 });
 
-export const { login, setLanguage, setAgeGroup, setEmail, logout, updateProfile } = userSlice.actions;
+export const { 
+	login, 
+	setLanguage, 
+	setAgeGroup, 
+	setEmail, 
+	logout, 
+	updateProfile,
+	setProfile 
+} = userSlice.actions;
+
 export default userSlice.reducer;

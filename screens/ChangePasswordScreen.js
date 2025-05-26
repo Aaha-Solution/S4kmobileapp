@@ -74,7 +74,7 @@ const ChangePasswordScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={['#f3e6db', '#f7f3ef', '#ffffff']}
+        colors={['#f9f9f9', '#fff']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 10,
+    maxHeight: 80,
   },
   saveButton: {
     backgroundColor: '#8A2BE2',
@@ -236,18 +237,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    flex: 1,
+    marginRight: 10,
   },
   disabledButton: {
     backgroundColor: '#ccc',
-    opacity: 0.7,
+    padding: 10,
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    flex: 1, // Make it take up equal space
+    marginLeft: 5,
   }
 });
 

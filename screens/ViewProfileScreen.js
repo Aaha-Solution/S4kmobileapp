@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
-const ViewProfileScreen = ({ route, navigation }) => {
-	const [firstname] = useState(route.params?.username || 'Guest User');
-	const [surename] = useState(route.params?.surename || '');
-	const [address] = useState(route.params?.address || 'Type Here');
-	const [dateOfBirth] = useState(route.params?.dateOfBirth || 'DD/MM/YYYY');
-	const [phone] = useState(route.params?.phone || '+91 9999999999');
-	const [email] = useState(route.params?.email || 'example@gmail.com');
+const ViewProfileScreen = ({ navigation }) => {
+	const profile = useSelector(state => state.user.user);
 	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -40,7 +37,7 @@ const ViewProfileScreen = ({ route, navigation }) => {
 			}
 		} 
 		catch (error) {
-			//console.log('Error loading avatar:', error);
+			console.log('Error loading avatar:', error);
 		}
 	};
 
@@ -49,24 +46,15 @@ const ViewProfileScreen = ({ route, navigation }) => {
 		setModalVisible(false);
 	};
 
-	const handleSavePress = async () => {
-		try {
-			setSelectedAvatar(tempSelectedAvatar);
-			await AsyncStorage.setItem('selectedAvatar', JSON.stringify(tempSelectedAvatar));
-			navigation.navigate('MainTabs', {
-				screen: 'Setting',
-				params: {
-					selectedAvatar: tempSelectedAvatar
-				}
-			});
-		} catch (error) {
-			//console.log('Error saving avatar:', error);
-			Alert.alert(
-				'Error',
-				'Failed to save avatar selection. Please try again.',
-				[{ text: 'OK' }]
-			);
-		}
+	const handleEditPress = () => {
+		navigation.navigate('EditProfileScreen', {
+			username: profile.username,
+			surename: profile.surename,
+			address: profile.address,
+			dateOfBirth: profile.dateOfBirth,
+			phone: profile.phone,
+			email: profile.email,
+		});
 	};
 
 	return (
@@ -86,12 +74,6 @@ const ViewProfileScreen = ({ route, navigation }) => {
 								style={styles.avatar}
 								resizeMode="cover"
 							/>
-							<TouchableOpacity 
-								style={styles.editButton}
-								onPress={() => setModalVisible(true)}
-							>
-								<Ionicons name="camera" size={20} color="white"/>
-							</TouchableOpacity>
 						</View>
 					</View>
 
@@ -138,43 +120,43 @@ const ViewProfileScreen = ({ route, navigation }) => {
 						</TouchableOpacity>
 					</Modal>
 
-					<Text style={styles.name}>{firstname}</Text>
+					<Text style={styles.name}>{profile.username}</Text>
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>First Name</Text>
-							<Text style={styles.readonlyText}>{firstname}</Text>
+							<Text style={styles.readonlyText}>{profile.username}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Sure Name</Text>
-							<Text style={styles.readonlyText}>{surename}</Text>
+							<Text style={styles.readonlyText}>{profile.surename}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>E-Mail</Text>
-							<Text style={styles.readonlyText}>{email}</Text>
+							<Text style={styles.readonlyText}>{profile.email || 'example@gmail.com'}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Date of Birth</Text>
-							<Text style={styles.readonlyText}>{dateOfBirth}</Text>
+							<Text style={styles.readonlyText}>{profile.dateOfBirth || 'DD/MM/YYYY'}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Phone Number</Text>
-							<Text style={styles.readonlyText}>{phone}</Text>
+							<Text style={styles.readonlyText}>{profile.phone || '+91 9999999999'}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Address</Text>
-							<Text style={[styles.readonlyText, { minHeight: 80 }]}>{address}</Text>
+							<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address || 'Type Here'}</Text>
 						</View>
 
 						<PressableButton
 							style={styles.saveButton}
-							title="Save"
-							onPress={handleSavePress}
+							title="Edit"
+							onPress={handleEditPress}
 						/>
 					</View>
 				</ScrollView>

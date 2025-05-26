@@ -48,21 +48,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
-      {/* Top Back Button */}
-      <View style={styles.header}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.backButton,
-            { opacity: pressed ? 0.6 : 1 },
-          ]}
-          onPress={() => navigation.goBack()}
-          accessibilityLabel="Go Back"
-        >
-          <Ionicons name="arrow-back" size={28} color="#4B0082" />
-        </Pressable>
-      </View>
-
+    <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
+      
       {/* Main Content */}
       <View style={styles.content}>
         <View style={styles.card}>

@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountScreen = ({ route, navigation }) => {
   const { username } = route.params || { username: 'Guest User' };
-   const [name, setName] = useState(username);
+  const [name, setName] = useState(username);
+  const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 
+  useEffect(() => {
+    loadSelectedAvatar();
+  }, []);
+
+  const loadSelectedAvatar = async () => {
+    try {
+      const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+      if (savedAvatar) {
+        setSelectedAvatar(JSON.parse(savedAvatar));
+      }
+    } catch (error) {
+      console.log('Error loading avatar:', error);
+    }
+  };
 
   const menuItems = [
     { icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { username: name }},
@@ -26,7 +42,7 @@ const AccountScreen = ({ route, navigation }) => {
         <View style={styles.header}>
           <View style={styles.profileContainer}>
             <Image
-              source={profile_avatar}
+              source={selectedAvatar}
               style={styles.avatar}
               resizeMode="cover"
             />
@@ -74,6 +90,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 20,
+    marginTop: 110,
   },
   profileContainer: {
     alignItems: 'center',

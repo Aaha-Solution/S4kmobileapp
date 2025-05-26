@@ -15,7 +15,7 @@ const videoData = {
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
       require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
       require('../assets/videos/hindi/junior/hindijun.mp4'),
@@ -33,7 +33,7 @@ const videoData = {
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
       require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
       require('../assets/videos/punjabi/junior/punjabjun.mp4'),
@@ -51,7 +51,7 @@ const videoData = {
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
       require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
     ],
-    'Junior (7&above years)': [
+    'Junior (7 & above years)': [
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
       require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
@@ -68,7 +68,7 @@ const languageLabels = {
   'Panjabi': 'Panjabi',
   'Hindi': 'Hindi',
 };
-
+ 
 const VideoListScreen = ({ navigation }) => {
   const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
   const selectedLanguage = useSelector(state => state.user.selectedLanguage);
@@ -77,10 +77,11 @@ const VideoListScreen = ({ navigation }) => {
 
   // Update videos when language or age group changes
   useEffect(() => {
-    
+    console.log('Current language:', language);
+    console.log('Current age group:', selectedAgeGroup);
     if (selectedAgeGroup && language) {
       const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-      //console.log('Setting new videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+      console.log('Available videos for', language, selectedAgeGroup, ':', newVideos.length);
       setVideos(newVideos);
     }
   }, [selectedAgeGroup, language]);
@@ -88,6 +89,7 @@ const VideoListScreen = ({ navigation }) => {
   // Update language when selectedLanguage changes
   useEffect(() => {
     if (selectedLanguage) {
+      console.log('Language changed to:', selectedLanguage);
       setLanguage(selectedLanguage);
     }
   }, [selectedLanguage]);
@@ -95,10 +97,10 @@ const VideoListScreen = ({ navigation }) => {
   // Add focus listener to refresh videos when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      //console.log('Screen focused - Refreshing videos');
+      console.log('Screen focused - Current state:', { language, selectedAgeGroup });
       if (selectedAgeGroup && language) {
         const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-        //console.log('Refreshing videos:', newVideos.length, 'for age group:', selectedAgeGroup);
+        console.log('Refreshing videos:', newVideos.length, 'for', language, selectedAgeGroup);
         setVideos(newVideos);
       }
     });
@@ -217,6 +219,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginTop: 0,
     alignSelf: 'center',
+    textAlign: 'center',
   },
   gridContainer: {
     padding: 10,

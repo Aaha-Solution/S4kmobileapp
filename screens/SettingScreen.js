@@ -22,8 +22,7 @@ const avatarMap = {
 };
 
 const menuItems = [
-	{ icon: 'person-outline', label: 'Profile', screen: 'ViewProfile' },
-	{ icon: 'help-circle-outline', label: 'About', screen: 'About' },
+	{ icon: 'people-circle-outline', label: 'Account', screen: 'AccountScreen' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
   
@@ -134,8 +133,8 @@ const SettingsScreen = ({ route, navigation }) => {
 							onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 						/>
 						<View>
-							<Text style={styles.name}>{user.firstname} {user.surename}</Text>
-							<Text style={styles.email}>{user.firstname === 'Guest User' ? 'guest@example.com' : `${user.firstname}@example.com`}</Text>
+							<Text style={styles.name}>{user.username} {user.surename}</Text>
+							<Text style={styles.email}>{user.username === 'Guest User' ? 'guest@example.com' : `${user.username}@example.com`}</Text>
 						</View>
 					</View>
 				</View>
