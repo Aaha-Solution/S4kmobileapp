@@ -22,7 +22,7 @@ const avatarMap = {
 };
 
 const menuItems = [
-	{ icon: 'people-circle-outline', label: 'Account', screen: 'AccountScreen' },
+	{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
   

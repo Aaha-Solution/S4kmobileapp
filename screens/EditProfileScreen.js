@@ -258,12 +258,8 @@ const EditProfileScreen = ({ route, navigation, }) => {
                 </View>
 
                 <PressableButton style={styles.saveButton} title="Save" onPress={handleSave} />
-               
+                
             </View>
-
-           
-     
-
             </ScrollView>
 
         </SafeAreaView>

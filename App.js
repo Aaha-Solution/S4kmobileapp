@@ -10,19 +10,20 @@ import OTPVerificationScreen from './screens/OTPVerificationScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
 import AgeSelectionScreen from './screens/AgeSelectionScreen';
-import SettingScreen from './screens/SettingScreen';
 import AccountScreen from './screens/AccountScreen';
-import AboutScreen from './screens/AboutScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EditProfileScreen from './screens/EditProfileScreen';
-import NotificationScreen from './screens/NotificationScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
+import SignupScreen from './screens/SignupScreen.js';
+
+
+
+
 
 const Stack = createStackNavigator();
-
 const App = () => (
 	<Provider store={store}>
 		<NavigationContainer>
@@ -158,6 +159,25 @@ const App = () => (
 							color="black"
 							style={{ marginLeft: 10 }}
 							onPress={() => navigation.navigate('ViewProfile')}
+						/>
+					)
+				})}/>
+				<Stack.Screen name='SignupScreen' component={SignupScreen}
+				options={({ navigation }) => ({
+					headerShown: false,
+					headerTitle: 'Signup',
+					headerTitleAlign: 'center',
+					headerTransparent: true,
+					headerStyle: {
+						backgroundColor: '#E0B0FF',
+					},
+					headerLeft: () => (
+						<Ionicons
+							name="arrow-back"
+							size={24}
+							color="black"
+							style={{ marginLeft: 10 }}
+							onPress={() => navigation.navigate('Login')}
 						/>
 					)
 				})}/>

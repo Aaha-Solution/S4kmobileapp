@@ -8,7 +8,7 @@ const initialState = {
 		dateOfBirth: '',
 		address: '',
 		phone: '',
-		selectedAvatar: null
+		selectedAvatar: 0
 	},
 	selectedLanguage: null,
 	selectedAgeGroup: null,
