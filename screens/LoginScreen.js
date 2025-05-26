@@ -206,12 +206,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     signupText: {
-        color: '#1A237E',
+        color: 'black',
         fontSize: 14,
     },
     signupLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
+        color: '#9346D2',
     },
 });
 

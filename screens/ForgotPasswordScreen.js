@@ -48,8 +48,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
-      
+    <LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
+      <View style={styles.header}>
+                <Pressable onPress={() => navigation.goBack()}>
+                  <Ionicons name="arrow-back" size={28} color="#4B0082" />
+                </Pressable>
+              </View>
       {/* Main Content */}
       <View style={styles.content}>
         <View style={styles.card}>
@@ -149,6 +153,11 @@ const styles = StyleSheet.create({
     elevation: 10,
     width: '100%',
     alignSelf: 'center',
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 10,
+    alignSelf: 'flex-start',
   },
 });
 
