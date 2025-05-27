@@ -193,11 +193,11 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: 14,
-        color: 'black',
+        color: '#512DA8',
         textAlign: 'left',
     },
     forgotPasswordText: {
-        color: '#fff',
+        color: '#512DA8',
         textDecorationLine: 'underline',
         fontSize: 14,
     },
@@ -206,12 +206,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     signupText: {
-        color: 'Black',
+        color: 'black',
         fontSize: 14,
     },
     signupLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
+        color: '#9346D2',
     },
 });
 

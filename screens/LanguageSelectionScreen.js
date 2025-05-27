@@ -8,7 +8,6 @@ import {
   Animated,
   FlatList,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
@@ -71,9 +70,6 @@ const LanguageSelectionScreen = ({ navigation }) => {
           ]}
         >
           <Text style={styles.languageText}>{item.label}</Text>
-          {isSelected && (
-            <Icon name="check" size={24} color="#9346D2" style={styles.icon} />
-          )}
         </Animated.View>
       </TouchableOpacity>
     );
@@ -146,9 +142,6 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'center',
     flex: 1,
-  },
-  icon: {
-    marginLeft: 10,
   },
   nextButton: {
     paddingVertical: 15,

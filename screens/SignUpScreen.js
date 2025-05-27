@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
     loginLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
+        color: '#9346D2',
     },
 });
 

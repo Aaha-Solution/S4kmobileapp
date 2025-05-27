@@ -17,7 +17,7 @@ import ViewProfileScreen from './screens/ViewProfileScreen';
 import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
-import SignupScreen from './screens/SignupScreen.js';
+import SignupScreen from './screens/SignUpScreen.js';
 
 
 
