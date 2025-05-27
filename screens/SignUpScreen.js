@@ -201,13 +201,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     loginText: {
-        color: '#FFFFFF',
+        color: 'black',
         fontSize: 14,
     },
     loginLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
-        color: '#FFFFFF',
+        color: '#9346D2',
     },
 });
 
