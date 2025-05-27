@@ -30,7 +30,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	const { selectedAvatar } = route.params || {};
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
-	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
+	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(avatar4);
 
 	useEffect(() => {
 		loadAvatar();
@@ -39,17 +39,22 @@ const SettingsScreen = ({ route, navigation }) => {
 	useEffect(() => {
 		if (selectedAvatar) {
 			setTempSelectedAvatar(selectedAvatar);
+			console.log('Saving selectedAvatar to AsyncStorage:', selectedAvatar);
 			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
 		}
 	}, [selectedAvatar]);
 
 	const loadAvatar = async () => {
 		try {
+			// await AsyncStorage.removeItem('selectedAvatar');
+			// console.log('User data removed');
 			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
 			if (savedAvatar) {
 				const parsedAvatar = JSON.parse(savedAvatar);
 				setTempSelectedAvatar(parsedAvatar);
+				console.log("savedAvatar",savedAvatar)
 			} else {
+				console.log('No saved avatar found, using default:', profile_avatar);
 				setTempSelectedAvatar(profile_avatar);
 			}
 		} catch (error) {

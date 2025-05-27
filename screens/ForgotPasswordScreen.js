@@ -5,10 +5,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import { useDispatch } from 'react-redux';
-import { setEmail as setReduxEmail } from '../Store/userSlice'; // Renamed to avoid conflict
-
+import { setEmail as setReduxEmail } from '../Store/userSlice'; 
 const ForgotPasswordScreen = ({ navigation }) => {
-  const [email, setEmailState] = useState('');  // Renamed to `setEmailState` to avoid conflict
+  const [email, setEmailState] = useState(''); 
   const [error, setError] = useState('');
   const dispatch = useDispatch();
   const pulseAnim = useRef(new Animated.Value(1)).current;
