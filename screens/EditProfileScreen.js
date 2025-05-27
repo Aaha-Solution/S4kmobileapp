@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
     },
     saveButton: {
-        backgroundColor: 'purple',
+        backgroundColor: '#9346D2',
         padding: 10,
         paddingHorizontal: 20,
         borderRadius: 8,

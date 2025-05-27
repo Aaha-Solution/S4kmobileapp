@@ -168,6 +168,7 @@ const ViewProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		backgroundColor: '#F8F8F8',
 	},
 	header: {
 		alignItems: 'center',
@@ -208,11 +209,11 @@ const styles = StyleSheet.create({
 	},
 	label: {
 		fontSize: 16,
-		color: 'black',
+		color: '#666',
 		marginBottom: 8,
 	},
 	readonlyText: {
-		backgroundColor: 'white',
+		backgroundColor: '#fff',
 		padding: 12,
 		borderRadius: 8,
 		borderWidth: 1,
@@ -277,10 +278,12 @@ const styles = StyleSheet.create({
 		borderColor: '#8A2BE2',
 	},
 	saveButton: {
-		backgroundColor: '#8A2BE2',
-		padding: 15,
-		borderRadius: 8,
-		alignItems: 'center',
+		backgroundColor: '#9346D2',
+		padding: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
 	},
 });
 

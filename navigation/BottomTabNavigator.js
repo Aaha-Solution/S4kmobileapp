@@ -41,8 +41,24 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		}
 	};
 
+	const handleOutsidePress = () => {
+		if (open) {
+			setOpen(false);
+		}
+	};
+
+	const handleTabPress = (route) => {
+		handleOutsidePress();
+		if (route.name === 'Age') {
+			setOpen(!open);
+			navigation.navigate('Age');
+		} else {
+			navigation.navigate(route.name);
+		}
+	};
+
 	return (
-		<TouchableWithoutFeedback onPress={() => setOpen(false)}>
+		<TouchableWithoutFeedback onPress={handleOutsidePress}>
 			<View style={styles.tabBarContainer}>
 				{state.routes.map((route, index) => {
 					const { options } = descriptors[route.key];
@@ -54,11 +70,22 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 						return (
 							<View key={route.key} style={styles.ageTabContainer}>
 								<TouchableOpacity
-									onPress={() => setOpen(!open)}
+									onPress={() => handleTabPress(route)}
 									style={styles.tabButton}
 								>
-									<Icon name={iconName} size={24} color={isFocused ? '#8A2BE2' : 'gray'} />
-									<Text style={[styles.tabLabel, { color: isFocused ? '#8A2BE2' : 'gray' }]}>{label}</Text>
+									<Icon 
+										name={iconName} 
+										size={24} 
+										color={isFocused ? '#8A2BE2' : 'gray'} 
+									/>
+									<Text 
+										style={[
+											styles.tabLabel, 
+											{ color: isFocused ? '#8A2BE2' : 'gray' }
+										]}
+									>
+										{label}
+									</Text>
 								</TouchableOpacity>
 								{open && (
 									<View style={styles.dropdownWrapper}>
@@ -88,7 +115,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 					return (
 						<TouchableOpacity
 							key={route.key}
-							onPress={() => navigation.navigate(route.name)}
+							onPress={() => handleTabPress(route)}
 							style={styles.tabButton}
 						>
 							<Icon name={iconName} size={24} color={isFocused ? '#8A2BE2' : 'gray'} />
@@ -163,10 +190,13 @@ const styles = StyleSheet.create({
 		paddingBottom: 5,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
+		position: 'relative',
+		zIndex: 1,
 	},
 	ageTabContainer: {
 		alignItems: 'center',
 		position: 'relative',
+		zIndex: 2,
 	},
 	tabButton: {
 		alignItems: 'center',
