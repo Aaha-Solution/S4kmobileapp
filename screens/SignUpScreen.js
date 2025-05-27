@@ -4,7 +4,8 @@ import {
     StyleSheet,
     Text,
     Pressable,
-    Image
+    Image,
+    Alert
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -21,6 +22,12 @@ const SignupScreen = ({ navigation }) => {
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+   
     const handleSignUp = async () => {
         setUsernameError('');
         setEmailError('');
@@ -28,13 +35,30 @@ const SignupScreen = ({ navigation }) => {
         setConfirmPasswordError('');
 
         // Basic validation
-        if (!username) setUsernameError('Username is required');
-        if (!email) setEmailError('Email is required');
-        if (!password) setPasswordError('Password is required');
-        if (!confirmPassword) setConfirmPasswordError('Please confirm your password');
-        
-        if (!username || !email || !password || !confirmPassword) return;
-
+        if (!username.trim()) {
+            setUsernameError('Username is required');
+            return;
+        }
+        if (!email.trim()) {
+            setEmailError('Email is required');
+            return;
+        }
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email');
+            return;
+        }
+        if (!password) {
+            setPasswordError('Password is required');
+            return;
+        }
+        if (password.length < 6) {
+            setPasswordError('Password must be at least 6 characters');
+            return;
+        }
+        if (!confirmPassword) {
+            setConfirmPasswordError('Please confirm your password');
+            return;
+        }
         if (password !== confirmPassword) {
             setConfirmPasswordError('Passwords do not match');
             return;
@@ -94,6 +118,7 @@ const SignupScreen = ({ navigation }) => {
                     }}
                     placeholder="Email"
                     keyboardType="email-address"
+                    autoCapitalize="none"
                 />
                 {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
@@ -127,12 +152,11 @@ const SignupScreen = ({ navigation }) => {
 
                 <Pressable
                     style={styles.loginButton}
+                    onPress={() => navigation.navigate('Login')}
                 >
                     <Text style={styles.loginText}>
                         Already have an account?{' '}
-                        <Text style={styles.loginLink} onPress={() => navigation.navigate('Login')}>
-                            Login
-                        </Text>
+                        <Text style={styles.loginLink}>Login</Text>
                     </Text>
                 </Pressable>
             </View>
@@ -159,7 +183,7 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     errorText: {
-        color: 'red',
+        color: '#FF0000',
         fontSize: 12,
         marginTop: 4,
         marginBottom: 8,
@@ -177,13 +201,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     loginText: {
-        color: 'Black',
+        color: '#FFFFFF',
         fontSize: 14,
     },
     loginLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
-        color: '#9346D2',
+        color: '#FFFFFF',
     },
 });
 
