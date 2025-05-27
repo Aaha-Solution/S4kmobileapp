@@ -19,10 +19,6 @@ import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SignupScreen from './screens/SignUpScreen.js';
 
-
-
-
-
 const Stack = createStackNavigator();
 const App = () => (
 	<Provider store={store}>
@@ -60,8 +56,6 @@ const App = () => (
 				/>
 				<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 				<Stack.Screen name='VideoPlayer' component={VideoPlayerScreen}/>
-
-				      
 				<Stack.Screen
 					name="ViewProfile"
 					component={ViewProfileScreen}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View,  StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
