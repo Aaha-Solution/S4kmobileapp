@@ -198,8 +198,7 @@ const styles = StyleSheet.create({
 		height: 100,
 		borderRadius: 50,
 		marginRight: 15,
-		//borderWidth: 2,
-		//borderColor: '#804FB3',
+		
 	},
 	name: {
 		color: '#654321',

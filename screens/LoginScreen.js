@@ -32,7 +32,7 @@ const LoginScreen = ({ navigation }) => {
         }
 
         try {
-            const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/login.php', {
+            const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/login.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
