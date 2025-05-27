@@ -76,7 +76,7 @@ const LoginScreen = ({ navigation }) => {
                         setUsername(text);
                         if (usernameError) setUsernameError('');
                     }}
-                    placeholder="Username"
+                    placeholder="E-mail id"
                 />
                 {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
