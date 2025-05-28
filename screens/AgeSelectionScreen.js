@@ -19,7 +19,11 @@ const AgeSelectionScreen = ({ navigation }) => {
 
 	const handleNext = () => {
 		if (selectedAgeGroup) {
-			navigation.navigate('MainTabs');
+			navigation.reset({
+				index: 0,
+				routes: [{ name: 'MainTabs' }],
+			}); 
+			
 		} else {
 			Alert.alert('Selection Required', 'Please select an age group before proceeding.');
 		}

@@ -4,7 +4,9 @@ import {
     StyleSheet,
     Text,
     Pressable,
-    Image
+    Image,
+    Alert,
+    BackHandler
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
@@ -46,7 +48,10 @@ const LoginScreen = ({ navigation }) => {
 
             if (response.ok && data.success) {
                 dispatch(login(data.user));
-                navigation.navigate('LanguageSelectionScreen');
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'LanguageSelectionScreen' }],
+                }); 
             } else {
                 if (data.errors) {
                     if (data.errors.username) setUsernameError(data.errors.username);

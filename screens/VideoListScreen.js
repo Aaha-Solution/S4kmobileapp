@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { BackHandler, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { current } from '@reduxjs/toolkit';
 
 // Video data
 const videoData = {
@@ -68,13 +71,31 @@ const languageLabels = {
   'Panjabi': 'Panjabi',
   'Hindi': 'Hindi',
 };
- 
 const VideoListScreen = ({ navigation }) => {
   const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
   const selectedLanguage = useSelector(state => state.user.selectedLanguage);
   const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
   const [videos, setVideos] = useState([]);
 
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+      
+        Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
+          { text: 'Cancel', style: 'cancel', onPress: () => null },
+          { text: 'YES', onPress: () => BackHandler.exitApp() },
+        ]);
+        return true; // prevent default back action
+      };
+  
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction
+      );
+  
+      return () => backHandler.remove(); // cleanup on blur/unfocus
+    }, [])
+  );
   // Update videos when language or age group changes
   useEffect(() => {
     console.log('Current language:', language);

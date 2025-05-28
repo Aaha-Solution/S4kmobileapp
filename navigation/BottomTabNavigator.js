@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TouchableWithoutFeedback, BackHandler } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import VideoListScreen from '../screens/VideoListScreen';
@@ -34,7 +34,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 			setOpen(false);
 
 			setTimeout(() => {
-				navigation.navigate('Home');
+				navigation.navigate(previousScreen); // pass from params or logic
+
 			}, 100);
 		} catch (error) {
 			console.error('Error in handleAgeSelect:', error);
@@ -56,6 +57,20 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 			navigation.navigate(route.name);
 		}
 	};
+	
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			if (open) {
+				setOpen(false);
+				return true;
+			}
+			navigation.navigate('Home');
+			return true;
+		});
+
+		return () => backHandler.remove();
+	}, [open, navigation]);
+
 
 	return (
 		<TouchableWithoutFeedback onPress={handleOutsidePress}>

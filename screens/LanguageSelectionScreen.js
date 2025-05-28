@@ -52,7 +52,11 @@ const LanguageSelectionScreen = ({ navigation }) => {
 
   const handleNextPress = () => {
     if (selectedLanguage) {
-      navigation.navigate('AgeSelectionScreen');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'AgeSelectionScreen' }],
+  }); 
+
     } else {
       Alert.alert('Selection Required', 'Please select a language before proceeding.');
     }

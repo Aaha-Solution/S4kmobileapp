@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Alert, Platform, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -118,7 +118,15 @@ const SettingsScreen = ({ route, navigation }) => {
 			{ cancelable: false }
 		);
 	};
-	
+
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('Home');
+			return true;
+		});
+
+		
+	});
 
 	return (
 		<View style={{ flex: 1 }}>
