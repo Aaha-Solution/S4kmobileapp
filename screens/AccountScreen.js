@@ -54,7 +54,10 @@ const AccountScreen = ({ route, navigation }) => {
           {menuItems.map((item, index) => (
             <Pressable 
               key={index} 
-              style={styles.menuItem}
+              style={({ pressed }) => [
+								styles.menuItem,
+								pressed && styles.menuItemPressed
+							]}
               onPress={() => {
                 if (item.label === 'Log out') {
                   handleLogout();
@@ -128,6 +131,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
   },
+  menuItemPressed: {
+		transform: [{ scale: 0.98 }],
+		shadowOpacity: 0.22,
+	},
   iconLabel: {
     flexDirection: 'row',
     alignItems: 'center',
