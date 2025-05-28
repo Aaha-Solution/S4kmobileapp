@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
-    marginBottom: 200,
+    marginBottom: 150,
   },
 });
 
