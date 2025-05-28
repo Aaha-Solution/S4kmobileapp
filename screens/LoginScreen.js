@@ -24,6 +24,7 @@ const LoginScreen = ({ navigation }) => {
     const handleLogin = async () => {
         setUsernameError('');
         setPasswordError('');
+        
 
         if (!username || !password) {
             if (!username) setUsernameError('Email is required');
@@ -32,7 +33,8 @@ const LoginScreen = ({ navigation }) => {
         }
 
         try {
-            const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/login.php', {
+           // await AsyncStorage.clear();
+            const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/login.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
