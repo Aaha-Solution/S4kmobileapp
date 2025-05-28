@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
-    marginBottom: 150,
+    marginBottom: 150, 
   },
 });
 
