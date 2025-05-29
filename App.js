@@ -65,7 +65,7 @@ const App = () => (
 						headerTitleAlign: 'center',
 						headerTransparent: true,
 						headerStyle: {
-							backgroundColor: '#E0B0FF',
+							backgroundColor: '#b388eb',
 						},
 						headerLeft: () => (
 							<Ionicons
@@ -84,8 +84,11 @@ const App = () => (
 					headerTitle: 'Account',
 					headerTitleAlign: 'center',
 					headerTransparent: true,
+					headerTintColor: '#fff',
+					headerTitleStyle: { fontWeight: 'bold' },
 					headerStyle: {
-						backgroundColor: '#E0B0FF',
+						backgroundColor: '#b388eb',
+						
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -106,7 +109,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#E0B0FF',
+						backgroundColor: '#b388eb',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -125,7 +128,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#E0B0FF',
+						backgroundColor: '#b388eb',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -144,7 +147,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#E0B0FF',
+						backgroundColor: '#b388eb',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -163,7 +166,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#E0B0FF',
+						backgroundColor: '#b388eb',
 					},
 					headerLeft: () => (
 						<Ionicons

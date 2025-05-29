@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert,BackHandler } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
@@ -56,6 +56,15 @@ const ViewProfileScreen = ({ navigation }) => {
 			email: profile.email,
 		});
 	};
+
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('AccountScreen');
+			return true;
+		});
+
+		return () => backHandler.remove();
+	}, [navigation]);
 
 	return (
 		<View style={{ flex: 1 }}>

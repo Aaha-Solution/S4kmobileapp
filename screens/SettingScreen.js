@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Ale
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CustomAlert from '../Components/CustomAlertMessage';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import avatar1 from '../assets/image/avatar1.png';
 import avatar2 from '../assets/image/avatar2.png';
@@ -31,6 +32,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(avatar4);
+	const [showAlert, setShowAlert] = useState(false);
 
 	useEffect(() => {
 		loadAvatar();
@@ -73,50 +75,42 @@ const SettingsScreen = ({ route, navigation }) => {
 	}, [navigation]);
 
 	const handleLogout = () => {
-		Alert.alert(
-			'Logout',
-			'Are you sure you want to logout?',
-			[
-				{
-					text: 'Cancel',
-					style: 'cancel',
+		setShowAlert(true);
+	};
+
+	const handleConfirmLogout = async () => {
+		try {
+			const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-				{
-					text: 'Logout',
-					onPress: async () => {
-						try {
-							const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-								body: JSON.stringify({ user_id: user.id }),
-							});
-	
-							if (!response.ok) {
-								throw new Error('Logout failed');
-							}
-	
-							const result = await response.json();
-							console.log('Logout success:', result);
-	
-							dispatch(logout());
-							navigation.dispatch(
-								CommonActions.reset({
-									index: 0,
-									routes: [{ name: 'Login' }],
-								})
-							);
-	
-						} catch (error) {
-							console.error('Logout error:', error);
-							Alert.alert("Logout Failed")
-						}
-					},
-				},
-			],
-			{ cancelable: false }
-		);
+				body: JSON.stringify({ user_id: user.id }),
+			});
+
+			if (!response.ok) {
+				throw new Error('Logout failed');
+			}
+
+			const result = await response.json();
+			console.log('Logout success:', result);
+
+			dispatch(logout());
+			navigation.dispatch(
+				CommonActions.reset({
+					index: 0,
+					routes: [{ name: 'Login' }],
+				})
+			);
+
+		} catch (error) {
+			console.error('Logout error:', error);
+			setShowAlert(false);
+		}
+	};
+
+	const handleCancelLogout = () => {
+		setShowAlert(false);
 	};
 
 	useEffect(() => {
@@ -127,6 +121,15 @@ const SettingsScreen = ({ route, navigation }) => {
 
 		
 	});
+
+	const handleConfirmExit = () => {
+		setShowAlert(false);
+		BackHandler.exitApp();
+	};
+
+	const handleCancelExit = () => {
+		setShowAlert(false);
+	};
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -175,6 +178,15 @@ const SettingsScreen = ({ route, navigation }) => {
 						</Pressable>
 					))}
 				</ScrollView>
+				
+				<CustomAlert
+					visible={showAlert}
+					title="Logout"
+					message="Are you sure you want to Logout?"
+					onConfirm={handleConfirmLogout}
+					onCancel={handleCancelLogout}
+				/>
+				
 			</SafeAreaView>
 		</View>
 	);

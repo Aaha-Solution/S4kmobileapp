@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { current } from '@reduxjs/toolkit';
-
+import CustomAlert from '../Components/CustomAlertMessage';
 // Video data
 const videoData = {
 	'Hindi': {
@@ -79,31 +79,50 @@ const VideoListScreen = ({ navigation, route }) => {
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [videos, setVideos] = useState([]);
+	const [showAlert, setShowAlert] = useState(false);
 	const isHomeScreen = route.name === 'Home';
-
+	console.log("isHomeScreen", isHomeScreen)
 	const { width, height } = Dimensions.get('window');
+
+	useEffect(() => {
+		if (!isHomeScreen) return;
+	
+		const backAction = () => {
+		  setShowAlert(true);
+		  return true;
+		};
+	
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+	
+		return () => backHandler.remove();
+	  }, [isHomeScreen]);
 
 	useFocusEffect(
 		useCallback(() => {
 			const backAction = () => {
-				if (isHomeScreen) {
-					Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
-						{ text: 'Cancel', style: 'cancel', onPress: () => null },
-						{ text: 'YES', onPress: () => BackHandler.exitApp() },
-					]);
-					return true;
-				}
-				return false; // allow default back action for non-Home screens
-			};
+				// console.log("hellooooooooo")
 
+				// 	console.log("hello")
+				setShowAlert(true);
+				return true;
+			};
 			const backHandler = BackHandler.addEventListener(
 				'hardwareBackPress',
 				backAction
-			);
-
+			)
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
+
+	const handleConfirmExit = () => {
+		setShowAlert(false);
+		BackHandler.exitApp();
+	};
+
+	const handleCancelExit = () => {
+		setShowAlert(false);
+	};
+
 	// Update videos when language or age group changes
 	useEffect(() => {
 		console.log('Current language:', language);
@@ -144,6 +163,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleLanguageSelect = useCallback((langKey) => {
 		setLanguage(langKey);
 	}, []);
+
 
 	return (
 		<LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
@@ -194,6 +214,14 @@ const VideoListScreen = ({ navigation, route }) => {
 					</View>
 				)}
 				extraData={[selectedAgeGroup, language]}
+			/>
+
+			<CustomAlert
+				visible={showAlert}
+				title="Exit App"
+				message="Are you sure you want to exit the app?"
+				onConfirm={handleConfirmExit}
+				onCancel={handleCancelExit}
 			/>
 		</LinearGradient>
 	);

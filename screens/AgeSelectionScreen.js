@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
+import CustomAlert from '../Components/CustomAlertMessage';
 
 const ageGroups = [
 	{ id: '1', name: 'Pre-Prep (4-6 years)' },
@@ -12,6 +13,7 @@ const ageGroups = [
 const AgeSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const [showAlert, setShowAlert] = useState(false);
 
 	const handleAgeSelect = (age) => {
 		dispatch(setAgeGroup(age));
@@ -23,10 +25,17 @@ const AgeSelectionScreen = ({ navigation }) => {
 				index: 0,
 				routes: [{ name: 'MainTabs' }],
 			}); 
-			
 		} else {
-			Alert.alert('Selection Required', 'Please select an age group before proceeding.');
+			setShowAlert(true);
 		}
+	};
+
+	const handleConfirmExit = () => {
+		setShowAlert(false);
+	};
+
+	const handleCancelExit = () => {
+		setShowAlert(false);
 	};
 
 	return (
@@ -46,6 +55,14 @@ const AgeSelectionScreen = ({ navigation }) => {
 				))}
 				<PressableButton title="Next" onPress={handleNext} style={styles.nextButton} />
 			</View>
+
+			<CustomAlert
+				visible={showAlert}
+				title="Selection Required"
+				message="Please select an age group before proceeding."
+				onConfirm={handleConfirmExit}
+				onCancel={handleCancelExit}
+			/>
 		</LinearGradient>
 	);
 };

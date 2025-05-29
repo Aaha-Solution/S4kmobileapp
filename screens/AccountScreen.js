@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View,  StyleSheet, Text, Pressable, Image, ScrollView } from 'react-native';
+import { View,  StyleSheet, Text, Pressable, Image, ScrollView, BackHandler } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
@@ -9,7 +9,7 @@ const AccountScreen = ({ route, navigation }) => {
   const { username } = route.params || { username: 'Guest User' };
   const [name, setName] = useState(username);
   const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
-
+  
   useEffect(() => {
     loadSelectedAvatar();
   }, []);
@@ -29,6 +29,18 @@ const AccountScreen = ({ route, navigation }) => {
     { icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { username: name }},
     { icon: 'lock-closed-outline', label: 'Change Password', screen: 'ChangePasswordScreen' },
   ];
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.navigate('MainTabs', {
+        screen: 'Setting'
+      });
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient

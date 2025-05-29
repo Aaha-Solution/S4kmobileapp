@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, ActivityIndicator, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, ActivityIndicator, TouchableOpacity, StyleSheet, StatusBar,  Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+
+const { width } = Dimensions.get('window');
 const VideoPlayerScreen = ({ route, navigation }) => {
   const { videoUri } = route.params;
   const [loading, setLoading] = useState(true);
@@ -10,6 +12,18 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 
   const handleLoad = () => setLoading(false);
   const handleBuffer = ({ isBuffering }) => setLoading(isBuffering);
+
+  const onLoad = (data) => {
+		setDuration(data.duration); // duration in seconds
+	  };
+	
+	  // Convert seconds to MM:SS
+	  const formatTime = (timeSec) => {
+		const minutes = Math.floor(timeSec / 60);
+		const seconds = Math.floor(timeSec % 60);
+		return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+	  };
+
 
   return (
     <View style={styles.container}>

@@ -158,6 +158,7 @@ const getIconName = (routeName, focused) => {
 };
 
 const BottomTabNavigator = () => {
+	
 	return (
 		<Tab.Navigator
 			initialRouteName="Home"

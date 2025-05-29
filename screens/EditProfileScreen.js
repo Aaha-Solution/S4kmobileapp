@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Alert, Modal, TouchableOpacity } from 'react-native';
+import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Alert, Modal, TouchableOpacity, BackHandler } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
@@ -20,6 +20,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
     const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
     const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
     const [modalVisible, setModalVisible] = useState(false);
+    const [phoneError, setPhoneError] = useState('');
 
     const avatars = [
         require('../assets/image/profile_avatar.png'),
@@ -85,6 +86,36 @@ const EditProfileScreen = ({ route, navigation, }) => {
         return formattedDate;
     };
 
+    const HandlePhonenumber = (phoneNumber) => {
+        // Remove any non-digit characters
+        const cleanedNumber = phoneNumber.replace(/\D/g, '');
+        
+        // Check if empty
+        if (!cleanedNumber) {
+            setPhoneError('Phone number is required');
+            setPhone(cleanedNumber);
+            return;
+        }
+
+        // Check if length is 10 digits
+        if (cleanedNumber.length !== 10) {
+            setPhoneError('Phone number must be 10 digits');
+            setPhone(cleanedNumber);
+            return;
+        }
+
+        // Check if it's all numbers
+        if (!/^\d+$/.test(cleanedNumber)) {
+            setPhoneError('Phone number must contain only digits');
+            setPhone(cleanedNumber);
+            return;
+        }
+
+
+        setPhoneError('');
+        setPhone(cleanedNumber);
+    }
+
     const handleDateChange = (text) => {
         const formattedDate = validateDate(text);
         setDateOfBirth(formattedDate);
@@ -128,6 +159,13 @@ const EditProfileScreen = ({ route, navigation, }) => {
             Alert.alert('Please fill in all fields');
         }
     };
+
+    useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('ViewProfile');
+			return true;
+		});	
+	});
 
 
     return (
@@ -237,12 +275,14 @@ const EditProfileScreen = ({ route, navigation, }) => {
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Phone Number</Text>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, phoneError ? styles.errorInput : null]}
                         value={phone}
-                        onChangeText={setPhone}
+                        onChangeText={HandlePhonenumber}
                         placeholder="Enter your phone number"
                         keyboardType="phone-pad"
+                        maxLength={10}
                     />
+                    {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
                 </View>
 
                 <View style={styles.inputGroup}>
