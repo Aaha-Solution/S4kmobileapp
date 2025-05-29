@@ -34,8 +34,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 			setOpen(false);
 
 			setTimeout(() => {
-				navigation.navigate(previousScreen); // pass from params or logic
-
+				navigation.navigate('Home');
 			}, 100);
 		} catch (error) {
 			console.error('Error in handleAgeSelect:', error);

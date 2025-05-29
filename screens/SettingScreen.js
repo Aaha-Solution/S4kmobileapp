@@ -44,7 +44,7 @@ const SettingsScreen = ({ route, navigation }) => {
 		}
 	}, [selectedAvatar]);
 
-	const loadAvatar = async () => {
+	const loadAvatar = async () => {   
 		try {
 			// await AsyncStorage.removeItem('selectedAvatar');
 			// console.log('User data removed');
@@ -85,7 +85,7 @@ const SettingsScreen = ({ route, navigation }) => {
 					text: 'Logout',
 					onPress: async () => {
 						try {
-							const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/logout.php', {
+							const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
 								method: 'POST',
 								headers: {
 									'Content-Type': 'application/json',
