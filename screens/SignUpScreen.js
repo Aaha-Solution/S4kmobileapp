@@ -11,7 +11,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const SignupScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -65,17 +65,22 @@ const SignupScreen = ({ navigation }) => {
         }
 
         try {
-            const response = await fetch('http://192.168.0.241/smile4kids-Geethu/api/register.php', {
+            console.log("Payload:", { username, email_id: email, password });
+
+            const response = await fetch('http://192.168.0.208:3000/signup', {
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+               body: JSON.stringify({ username, email_id: email, password })
+
             });
 
             const data = await response.json();
-
-            if (response.ok && data.success) {
+console.log("data",data)
+            if (response.ok) {
+                 
                 navigation.navigate('LoginScreen');
             } else {
                 if (data.errors) {

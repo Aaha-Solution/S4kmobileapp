@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import Video from 'react-native-video';
 
 const initialState = {
 	isLoggedIn: false,
@@ -13,6 +14,7 @@ const initialState = {
 	selectedLanguage: null,
 	selectedAgeGroup: null,
 	email: null,
+	videos: [],
 };
 
 const userSlice = createSlice({
@@ -43,9 +45,16 @@ const userSlice = createSlice({
 			state.selectedLanguage = null;
 			state.selectedAgeGroup = null;
 			state.email = null;
+			state.videos = [];
 		},
 		updateProfile: (state, action) => {
 			state.user = { ...state.user, ...action.payload };
+		},
+		setVideos: (state, action) => {
+			state.videos = action.payload;
+		},
+		addVideo: (state, action) => {
+			state.videos.push(action.payload);
 		},
 	},
 });
@@ -57,7 +66,9 @@ export const {
 	setEmail, 
 	logout, 
 	updateProfile,
-	setProfile 
+	setProfile ,
+	setVideos,     // <--- export
+	addVideo       // <--- export
 } = userSlice.actions;
 
 export default userSlice.reducer;

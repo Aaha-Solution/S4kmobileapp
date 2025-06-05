@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -14,7 +14,7 @@ import { login } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -23,49 +23,102 @@ const LoginScreen = ({ navigation }) => {
     const [passwordError, setPasswordError] = useState('');
     const dispatch = useDispatch();
 
+   useEffect(() => {
+  const loadRememberMe = async () => {
+    const email = await AsyncStorage.getItem('savedEmail');
+    const password = await AsyncStorage.getItem('savedPassword');
+    if (email && password) {
+      setUsername(email);
+      setPassword(password);
+      setRememberMe(true);
+    }
+  };
+  loadRememberMe();
+}, []);
+
+
+const rememberHandler = async () => {
+    const newValue = !rememberMe; // Toggle the current value
+    setRememberMe(newValue);
+  if (newValue) {
+    try {
+        setRememberMe(!rememberMe);
+      await AsyncStorage.setItem('savedEmail', username);
+      await AsyncStorage.setItem('savedPassword', password);
+    } catch (error) {
+      console.error('Error saving credentials:', error);
+    }
+  } else {
+    try {
+      await AsyncStorage.removeItem('savedEmail');
+      await AsyncStorage.removeItem('savedPassword');
+    } catch (error) {
+      console.error('Error removing credentials:', error);
+    }
+  }
+};
+
     const handleLogin = async () => {
         setUsernameError('');
         setPasswordError('');
-        
 
         if (!username || !password) {
             if (!username) setUsernameError('Email is required');
-            if (!password) setPasswordError('Password is required');
+            if (!password) setPasswordError('Password is required'); 
             return;
         }
 
         try {
            // await AsyncStorage.clear();
-            const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/login.php', {
+           console.log('Sending:', { email_id: username, password });
+            const response = await fetch('http://192.168.0.208:3000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email_id:username, password,rememberMe }),
             });
 
             const data = await response.json();
+            console.log('Login response:', data);
+             if (!response.ok) {
+        Alert.alert('Login Failed', data.message || 'Invalid credentials');
+        return;
+      }
 
-            if (response.ok && data.success) {
+      // Store token securely
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('rememberMe',rememberMe.toString());
+      await rememberHandler();
+
+          
                 dispatch(login(data.user));
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'LanguageSelectionScreen' }],
                 }); 
-            } else {
-                if (data.errors) {
-                    if (data.errors.username) setUsernameError(data.errors.username);
-                    if (data.errors.password) setPasswordError(data.errors.password);
-                } else {
-                    setUsernameError('Invalid email');
-                    setPasswordError('Invalid password');
-                }
-            }
+           
         } catch (error) {
+             console.error('Login error:', error);
             setPasswordError('Something went wrong. Please try again.');
         }
     };
 
+    useEffect(() => {
+  const checkToken = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LanguageSelectionScreen' }],
+      });
+    }
+  };
+
+  checkToken();
+}, []);
+
+    
     return (
         <LinearGradient
             colors={['#9346D2', '#5BC3F5']}
@@ -108,7 +161,7 @@ const LoginScreen = ({ navigation }) => {
                 <View style={styles.bottomRow}>
                     <Pressable
                         style={styles.rememberMe}
-                        onPress={() => setRememberMe(!rememberMe)}
+                        onPress={ ()=>rememberHandler()}
                     >
                         <View
                             style={[styles.checkbox, rememberMe && styles.checkboxChecked]}

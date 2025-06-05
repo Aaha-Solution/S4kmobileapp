@@ -6,13 +6,13 @@ import PressableButton from '../Components/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profile_avatar from '../assets/image/profile_avatar.png';
+import CustomAlert from '../Components/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
 import { setProfile } from '../Store/userSlice';
 
 const EditProfileScreen = ({ route, navigation, }) => {
     const dispatch = useDispatch();
-    const [firstname, setFirstName] = useState(route.params?.username);
-    const [surename, setSureName] = useState(route.params?.surename);
+    const [username, setUsername] = useState(route.params?.username);
     const [address, setAddress] = useState(route.params?.address);
     const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth);
     const [dateError, setDateError] = useState('');
@@ -21,7 +21,10 @@ const EditProfileScreen = ({ route, navigation, }) => {
     const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
     const [modalVisible, setModalVisible] = useState(false);
     const [phoneError, setPhoneError] = useState('');
-
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
+    
     const avatars = [
         require('../assets/image/profile_avatar.png'),
         require('../assets/image/avatar1.png'),
@@ -121,7 +124,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
         setDateOfBirth(formattedDate);
     };
 
-    const isValid = firstname && surename && dateOfBirth && phone && address;
+    const isValid = username && dateOfBirth && phone && address;
 
     const handleSave = async () => {
         if(isValid) {
@@ -132,8 +135,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
 
                 // Save profile data to Redux
                 const profileData = {
-                    username: firstname,
-                    surename: surename,
+                    username: username,
                     address: address,
                     dateOfBirth: dateOfBirth,
                     phone: phone,
@@ -145,18 +147,20 @@ const EditProfileScreen = ({ route, navigation, }) => {
                 // Save profile data to AsyncStorage for persistence
                 await AsyncStorage.setItem('userProfile', JSON.stringify(profileData));
 
-                Alert.alert('Profile saved successfully');
+                setAlertTitle('Success');
+                setAlertMessage('Your profile has been saved successfully');
+                setShowAlert(true);
                 navigation.navigate('ViewProfile');
             } catch (error) {
                 console.log('Error saving profile:', error);
-                Alert.alert(
-                    'Error',
-                    'Failed to save profile. Please try again.',
-                    [{ text: 'OK' }]
-                );
+                setAlertTitle('Error');
+                setAlertMessage('Failed to save profile. Please try again.');
+                setShowAlert(true);
             }
         } else {
-            Alert.alert('Please fill in all fields');
+            setAlertTitle('Warning');
+            setAlertMessage('Please fill in all required fields');
+            setShowAlert(true);
         }
     };
 
@@ -243,19 +247,12 @@ const EditProfileScreen = ({ route, navigation, }) => {
             <View style={styles.formContainer}>
                
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>First Name</Text>
+                    <Text style={styles.label}>Username</Text>
                     <TextInput
                         style={styles.firstnameinput}
-                        value={firstname}
-                        onChangeText={setFirstName}
-                        placeholder="Enter your first name"
-                    />
-                    <Text style={styles.label}>Sure Name</Text>
-                    <TextInput
-                        style={styles.surenameinput}
-                        value={surename}
-                        onChangeText={setSureName}
-                        placeholder="Enter your sure name"
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholder="Enter your username"
                     />
                 </View>
 
@@ -301,6 +298,12 @@ const EditProfileScreen = ({ route, navigation, }) => {
                 
             </View>
             </ScrollView>
+            <CustomAlert
+                visible={showAlert}
+                title={alertTitle}
+                message={alertMessage}
+                onConfirm={() => setShowAlert(false)}
+            />
 
         </SafeAreaView>
         </View>
@@ -396,6 +399,7 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         marginBottom: 20,
+        width: '100%',
     },
     label: {
         fontSize: 16,

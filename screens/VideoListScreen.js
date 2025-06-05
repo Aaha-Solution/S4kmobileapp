@@ -1,115 +1,48 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { BackHandler, Alert } from 'react-native';
-import { useSelector } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
+import {
+	View,
+	Text,
+	FlatList,
+	TouchableOpacity,
+	StyleSheet,
+	Dimensions,
+	BackHandler
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { current } from '@reduxjs/toolkit';
+import { setAgeGroup, setVideos, setLanguage } from '../Store/userSlice';
 import CustomAlert from '../Components/CustomAlertMessage';
-// Video data
-const videoData = {
-	'Hindi': {
-		'Pre-Prep (4-6 years)': [
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-			require('../assets/videos/hindi/prejunior/hindiprejun.mp4'),
-		],
-		'Junior (7 & above years)': [
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-			require('../assets/videos/hindi/junior/hindijun.mp4'),
-		],
-	},
-	'Panjabi': {
-		'Pre-Prep (4-6 years)': [
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-			require('../assets/videos/punjabi/prejunior/punbajprejun.mp4'),
-		],
-		'Junior (7 & above years)': [
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-			require('../assets/videos/punjabi/junior/punjabjun.mp4'),
-		],
-	},
-	'Gujarati': {
-		'Pre-Prep (4-6 years)': [
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-			require('../assets/videos/gujarat/prejunior/gujaratiprejun.mp4'),
-		],
-		'Junior (7 & above years)': [
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-			require('../assets/videos/gujarat/junior/gujaratijun.mp4'),
-		],
-	},
-};
-
-// Language short labels
-const languageLabels = {
-	'Gujarati': 'Gujarati',
-	'Panjabi': 'Panjabi',
-	'Hindi': 'Hindi',
-};
-
 const { width } = Dimensions.get('window');
 
+const languageLabels = {
+	Gujarati: 'Gujarati',
+	Panjabi: 'Panjabi',
+	Hindi: 'Hindi',
+};
+
 const VideoListScreen = ({ navigation, route }) => {
+	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+	const videos = useSelector(state => state.user.videos);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
-	const [videos, setVideos] = useState([]);
 	const [showAlert, setShowAlert] = useState(false);
+
 	const isHomeScreen = route.name === 'Home';
-	console.log("isHomeScreen", isHomeScreen)
-	const { width, height } = Dimensions.get('window');
 
-	useEffect(() => {
-		if (!isHomeScreen) return;
-	
-		const backAction = () => {
-		  setShowAlert(true);
-		  return true;
-		};
-	
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-	
-		return () => backHandler.remove();
-	  }, [isHomeScreen]);
-
+	// Handle hardware back button
 	useFocusEffect(
 		useCallback(() => {
-			const backAction = () => {
-				// console.log("hellooooooooo")
+			if (!isHomeScreen) return;
 
-				// 	console.log("hello")
+			const backAction = () => {
 				setShowAlert(true);
 				return true;
 			};
-			const backHandler = BackHandler.addEventListener(
-				'hardwareBackPress',
-				backAction
-			)
+
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
@@ -123,51 +56,62 @@ const VideoListScreen = ({ navigation, route }) => {
 		setShowAlert(false);
 	};
 
-	// Update videos when language or age group changes
+	// Fetch videos from backend
 	useEffect(() => {
-		console.log('Current language:', language);
-		console.log('Current age group:', selectedAgeGroup);
-		if (selectedAgeGroup && language) {
-			const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-			console.log('Available videos for', language, selectedAgeGroup, ':', newVideos.length);
-			setVideos(newVideos);
-		}
-	}, [selectedAgeGroup, language]);
+		const fetchVideo = async () => {
+			if (!selectedLanguage || !selectedAgeGroup) return;
+			try {
+				const apiUrl = `http://192.168.0.208:3000/videos/by-category?language=${selectedLanguage}&level=${selectedAgeGroup}`;
+				const response = await fetch(apiUrl);
+				
+				if (response.ok) {
+					const data = await response.json();
+					console.log('Fetched videos:', data);
+					dispatch(setVideos(data));
+		   		} else {
+					console.warn('Video fetch failed.');
+					dispatch(setVideos([]));
+				}
+			} catch (error) {
+				console.error('Error fetching video:', error);
+				dispatch(setVideos([]));
+			}
+		};
 
-	// Update language when selectedLanguage changes
+		fetchVideo();
+	}, [selectedLanguage, selectedAgeGroup]);
+
 	useEffect(() => {
 		if (selectedLanguage) {
-			console.log('Language changed to:', selectedLanguage);
 			setLanguage(selectedLanguage);
 		}
 	}, [selectedLanguage]);
 
-	// Add focus listener to refresh videos when screen comes into focus
 	useEffect(() => {
-		const unsubscribe = navigation.addListener('focus', () => {
-			console.log('Screen focused - Current state:', { language, selectedAgeGroup });
-			if (selectedAgeGroup && language) {
-				const newVideos = videoData[language]?.[selectedAgeGroup] || [];
-				console.log('Refreshing videos:', newVideos.length, 'for', language, selectedAgeGroup);
-				setVideos(newVideos);
-			}
-		});
-
-		return unsubscribe;
-	}, [navigation, selectedAgeGroup, language]);
-
-	const handleVideoPress = useCallback((videoUri) => {
-		navigation.navigate('VideoPlayer', { videoUri });
-	}, [navigation]);
+		if (selectedAgeGroup) {
+			setAgeGroup(selectedAgeGroup);
+		}
+	}, [selectedAgeGroup]);
 
 	const handleLanguageSelect = useCallback((langKey) => {
-		setLanguage(langKey);
-	}, []);
+	setLanguage(langKey);
+	dispatch(setLanguage(langKey));
+}, [dispatch]);
 
+	const handleVideoPress = useCallback((video) => {
+	console.log('Video item:', video);
+	 if (!video.url) {
+    console.warn('Video URL is empty or invalid:', video.url);
+    return;
+  }
+	navigation.navigate('VideoPlayer', { videoUri: video.url });
+}, [navigation]);
+
+
+	
 
 	return (
 		<LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
-			{/* Language Buttons */}
 			<View style={styles.languageRow}>
 				{Object.keys(languageLabels).map((langKey) => (
 					<TouchableOpacity
@@ -183,12 +127,10 @@ const VideoListScreen = ({ navigation, route }) => {
 				))}
 			</View>
 
-			{/* Selected Language Header */}
 			<View style={styles.languageHeader}>
 				<Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
 			</View>
 
-			{/* Video Grid */}
 			<FlatList
 				data={videos}
 				keyExtractor={(item, index) => `video-${index}`}
@@ -198,7 +140,6 @@ const VideoListScreen = ({ navigation, route }) => {
 					<TouchableOpacity
 						style={styles.videoItem}
 						onPress={() => handleVideoPress(item)}
-						resizeModel="contain"
 					>
 						<Icon name="play-circle-fill" size={40} color="#9346D2" />
 						<Text style={styles.videoText}>Video {index + 1}</Text>
@@ -213,7 +154,6 @@ const VideoListScreen = ({ navigation, route }) => {
 						</Text>
 					</View>
 				)}
-				extraData={[selectedAgeGroup, language]}
 			/>
 
 			<CustomAlert
@@ -260,24 +200,12 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		backgroundColor: '#9346D2',
 		marginTop: 20,
-		marginHorizontal: 16,
 		borderRadius: 25,
 		alignItems: 'center',
-		justifyContent: 'center',
-
-	},
-	languageHeaderText: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		color: 'white',
-		textAlign: 'center',
 	},
 	ageGroupText: {
 		fontSize: 16,
 		color: 'white',
-		marginTop: 0,
-		alignSelf: 'center',
-		textAlign: 'center',
 	},
 	gridContainer: {
 		padding: 10,
@@ -291,8 +219,6 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '100%',
-		height: (width * 9) / 16,
 	},
 	videoText: {
 		marginTop: 10,
@@ -311,4 +237,5 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 });
+
 export default VideoListScreen;

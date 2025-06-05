@@ -31,7 +31,6 @@ export default CustomAlert;
 const styles = StyleSheet.create({
 	overlay: {
 		flex: 1,
-		backgroundColor: '#00000099',
 		justifyContent: 'center',
 		alignItems: 'center',
 	},

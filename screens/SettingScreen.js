@@ -74,41 +74,72 @@ const SettingsScreen = ({ route, navigation }) => {
 		return unsubscribe;
 	}, [navigation]);
 
-	const handleLogout = () => {
-		setShowAlert(true);
-	};
 
-	const handleConfirmLogout = async () => {
-		try {
-			const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ user_id: user.id }),
-			});
+	// 	try {
+	// 		const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json',
+	// 			},
+	// 			body: JSON.stringify({ user_id: user.id }),
+	// 		});
 
-			if (!response.ok) {
-				throw new Error('Logout failed');
-			}
+	// 		if (!response.ok) {
+	// 			throw new Error('Logout failed');
+	// 		}
 
-			const result = await response.json();
-			console.log('Logout success:', result);
+	// 		const result = await response.json();
+	// 		console.log('Logout success:', result);
 
-			dispatch(logout());
-			navigation.dispatch(
-				CommonActions.reset({
-					index: 0,
-					routes: [{ name: 'Login' }],
-				})
-			);
+	// 		dispatch(logout());
+	// 		navigation.dispatch(
+	// 			CommonActions.reset({
+	// 				index: 0,
+	// 				routes: [{ name: 'Login' }],
+	// 			})
+	// 		);
 
-		} catch (error) {
-			console.error('Logout error:', error);
-			setShowAlert(false);
-		}
-	};
+	// 	} catch (error) {
+	// 		console.error('Logout error:', error);
+	// 		setShowAlert(false);
+	// 	}
+	// };
+	
+const handleConfirmLogout = async () => {
+	const token = await AsyncStorage.getItem('token');
+	const savedEmail = await AsyncStorage.getItem('savedEmail');
+    const savedPassword = await AsyncStorage.getItem('savedPassword');
+    const rememberMe = await AsyncStorage.getItem('rememberMe');
+	
+  try {
+	
+    console.log("token:", token);
+    console.log("savedEmail:", savedEmail);
+    console.log("savedPassword:", savedPassword);
+    console.log("rememberMe:", rememberMe);
 
+
+    await AsyncStorage.removeItem('token');	
+    await AsyncStorage.removeItem('savedEmail'); // if you saved email	
+    await AsyncStorage.removeItem('savedPassword'); // if you saved password
+    await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
+
+    dispatch(logout()); // clear Redux user state
+	navigation.dispatch(
+			CommonActions.reset({
+				index: 0,
+				routes: [{ name: 'Login' }],
+			})
+		);
+	}  catch (error) {
+    console.error('Logout failed:', error);
+	setShowAlert(false);
+  }
+};
+
+const handleLogout =()=>{
+	setShowAlert(true);
+}
 	const handleCancelLogout = () => {
 		setShowAlert(false);
 	};
@@ -122,10 +153,6 @@ const SettingsScreen = ({ route, navigation }) => {
 		
 	});
 
-	const handleConfirmExit = () => {
-		setShowAlert(false);
-		BackHandler.exitApp();
-	};
 
 	const handleCancelExit = () => {
 		setShowAlert(false);

@@ -33,9 +33,9 @@ const VideoPlayerScreen = ({ route, navigation }) => {
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={28} color="#fff" />
       </TouchableOpacity>
-
+console.log("videos")
       <Video
-        source={videoUri}
+        source={{ uri: videoUri }}
         style={styles.video}
         resizeMode="contain"
         onBuffer={handleBuffer}

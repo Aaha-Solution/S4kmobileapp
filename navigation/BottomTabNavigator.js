@@ -63,12 +63,15 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 				setOpen(false);
 				return true;
 			}
-			navigation.navigate('Home');
-			return true;
+			if (state.routes[state.index].name === 'Age') {
+				navigation.navigate('Home');
+				return true;
+			}
+			return false;
 		});
 
 		return () => backHandler.remove();
-	}, [open, navigation]);
+	}, [open, navigation, state]);
 
 
 	return (

@@ -4,7 +4,6 @@ import {
 	Text,
 	TouchableOpacity,
 	StyleSheet,
-	Alert,
 	Animated,
 	FlatList,
 } from 'react-native';
@@ -20,7 +19,7 @@ const languagesData = [
 	{ id: '3', label: 'Gujarati', value: 'Gujarati' },
 ];
 
-const LanguageSelectionScreen = ({ navigation }) => {
+const LanguageSelectionScreen = ({ navigation }) => {  
 	const dispatch = useDispatch();
 	const selectedLanguage = useSelector((state) => state.user.selectedLanguage);
 	const [animations, setAnimations] = useState(
@@ -57,17 +56,12 @@ const LanguageSelectionScreen = ({ navigation }) => {
 				index: 0,
 				routes: [{ name: 'AgeSelectionScreen' }],
 			});
-
 		} else {
 			setShowAlert(true);
 		}
 	};
 
-	const handleConfirmExit = () => {
-		setShowAlert(false);
-	};
-
-	const handleCancelExit = () => {
+	const handleConfirmAlert = () => {
 		setShowAlert(false);
 	};
 
@@ -105,9 +99,9 @@ const LanguageSelectionScreen = ({ navigation }) => {
 			</View>
 			<CustomAlert
 				visible={showAlert}
-				title="Selection Required"
-				message="Please select a language before proceeding"
-				onConfirm={handleConfirmExit}
+				title="Selection Required" 
+				message="Please select a language to continue"
+				onConfirm={handleConfirmAlert}
 			/>
 		</LinearGradient>
 	);
@@ -167,6 +161,9 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 40,
 		borderRadius: 10,
 		marginBottom: 150,
+	},
+	alert: {
+		marginTop: 100,
 	},
 });
 

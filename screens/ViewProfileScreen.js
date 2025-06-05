@@ -49,7 +49,6 @@ const ViewProfileScreen = ({ navigation }) => {
 	const handleEditPress = () => {
 		navigation.navigate('EditProfileScreen', {
 			username: profile.username,
-			surename: profile.surename,
 			address: profile.address,
 			dateOfBirth: profile.dateOfBirth,
 			phone: profile.phone,
@@ -133,13 +132,8 @@ const ViewProfileScreen = ({ navigation }) => {
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>First Name</Text>
+							<Text style={styles.label}>Username</Text>
 							<Text style={styles.readonlyText}>{profile.username}</Text>
-						</View>
-
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Sure Name</Text>
-							<Text style={styles.readonlyText}>{profile.surename}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>

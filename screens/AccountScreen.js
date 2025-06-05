@@ -57,7 +57,10 @@ const AccountScreen = ({ route, navigation }) => {
               style={styles.avatar}
               resizeMode="cover"
             />
-            <Text style={styles.name}>My Account</Text>
+            <Text style={styles.name}>
+				<Text style={{color: '#6E00B3'}}>My </Text>
+				<Text style={{color: 'black'}}>Account</Text>
+			</Text>
           </View>
         </View>
 
