@@ -61,7 +61,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 				title="Selection Required"
 				message="Please select an age group before proceeding."
 				onConfirm={handleConfirmExit}
-				
+				onCancel={handleCancelExit}
 			/>
 		</LinearGradient>
 	);
