@@ -12,10 +12,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { setAgeGroup, setVideos, setLanguage } from '../Store/userSlice';
 import CustomAlert from '../Components/CustomAlertMessage';
-const { width } = Dimensions.get('window');
+import axios from 'axios';
 
+// Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
 	Panjabi: 'Panjabi',
@@ -29,20 +29,36 @@ const VideoListScreen = ({ navigation, route }) => {
 	const videos = useSelector(state => state.user.videos);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
-
+	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
+	
+	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
 
-	// Handle hardware back button
+	console.log("isHomeScreen", isHomeScreen);
+
+	// Handle back button for exit confirmation
+	useEffect(() => {
+		if (!isHomeScreen) return;
+	
+		const backAction = () => {
+		  setShowAlert(true);
+		  return true;
+		};
+	
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		return () => backHandler.remove();
+	}, [isHomeScreen]);
+
 	useFocusEffect(
 		useCallback(() => {
-			if (!isHomeScreen) return;
-
 			const backAction = () => {
 				setShowAlert(true);
 				return true;
 			};
-
-			const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+			const backHandler = BackHandler.addEventListener(
+				'hardwareBackPress',
+				backAction
+			);
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
@@ -56,31 +72,66 @@ const VideoListScreen = ({ navigation, route }) => {
 		setShowAlert(false);
 	};
 
-	// Fetch videos from backend
-	useEffect(() => {
-		const fetchVideo = async () => {
-			if (!selectedLanguage || !selectedAgeGroup) return;
-			try {
-				const apiUrl = `http://192.168.0.208:3000/videos/by-category?language=${selectedLanguage}&level=${selectedAgeGroup}`;
-				const response = await fetch(apiUrl);
-				
-				if (response.ok) {
-					const data = await response.json();
-					console.log('Fetched videos:', data);
-					dispatch(setVideos(data));
-		   		} else {
-					console.warn('Video fetch failed.');
-					dispatch(setVideos([]));
-				}
-			} catch (error) {
-				console.error('Error fetching video:', error);
-				dispatch(setVideos([]));
+	// Function to get formatted level from age group
+	const getFormattedLevel = (ageGroup) => {
+		if (!ageGroup) return 'PreJunior';
+		
+		// Check if the age group contains "Junior" and mentions "7" or "above"
+		const lowerAgeGroup = ageGroup.toLowerCase();
+		if (lowerAgeGroup.includes('junior') && (lowerAgeGroup.includes('7') || lowerAgeGroup.includes('above'))) {
+			return 'Junior';
+		} else if (lowerAgeGroup.includes('pre-prep') || lowerAgeGroup.includes('4-6')) {
+			return 'PreJunior';
+		}
+		
+		return 'PreJunior'; // Default fallback
+	};
+
+	// Fetch videos from API
+	const fetchVideos = useCallback(async () => {
+		if (!selectedAgeGroup || !language) {
+			setVideos([]);
+			return;
+		}
+
+		setLoading(true);
+		setVideos([]);
+
+		const formattedLevel = getFormattedLevel(selectedAgeGroup);
+		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
+
+		console.log('🔍 selectedAgeGroup:', selectedAgeGroup);
+		console.log('🔍 language:', language);
+		console.log('🔍 formattedLevel:', formattedLevel);
+		console.log('🔍 API URL:', url);
+
+		try {
+			const response = await axios.get(url);
+			console.log('🔍 API Response:', response.data);
+			
+			if (response.status === 200 && Array.isArray(response.data)) {
+				console.log('📦 Received videos:', response.data.length);
+				setVideos(response.data);
+			} else {
+				console.warn('Unexpected API response format');
+				setVideos([]);
 			}
-		};
+		} catch (error) {
+			console.error('API fetch error:', error);
+			setVideos([]);
+		} finally {
+			setLoading(false);
+		}
+	}, [language, selectedAgeGroup]);
 
-		fetchVideo();
-	}, [selectedLanguage, selectedAgeGroup]);
+	// Fetch videos when language or age group changes
+	useEffect(() => {
+		console.log('Current language:', language);
+		console.log('Current age group:', selectedAgeGroup);
+		fetchVideos();
+	}, [selectedAgeGroup, language, fetchVideos]);
 
+	// Update language when selectedLanguage changes
 	useEffect(() => {
 		if (selectedLanguage) {
 			setLanguage(selectedLanguage);
@@ -88,27 +139,22 @@ const VideoListScreen = ({ navigation, route }) => {
 	}, [selectedLanguage]);
 
 	useEffect(() => {
-		if (selectedAgeGroup) {
-			setAgeGroup(selectedAgeGroup);
-		}
-	}, [selectedAgeGroup]);
+		const unsubscribe = navigation.addListener('focus', () => {
+			console.log('Screen focused - refreshing videos');
+			fetchVideos();
+		});
+
+		return unsubscribe;
+	}, [navigation, fetchVideos]);
+
+	const handleVideoPress = useCallback((videoItem) => {
+		// Pass the entire video item to VideoPlayer
+		navigation.navigate('VideoPlayer', { videoUri: videoItem });
+	}, [navigation]);
 
 	const handleLanguageSelect = useCallback((langKey) => {
-	setLanguage(langKey);
-	dispatch(setLanguage(langKey));
-}, [dispatch]);
-
-	const handleVideoPress = useCallback((video) => {
-	console.log('Video item:', video);
-	 if (!video.url) {
-    console.warn('Video URL is empty or invalid:', video.url);
-    return;
-  }
-	navigation.navigate('VideoPlayer', { videoUri: video.url });
-}, [navigation]);
-
-
-	
+		setLanguage(langKey);
+	}, []);
 
 	return (
 		<LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
@@ -131,29 +177,45 @@ const VideoListScreen = ({ navigation, route }) => {
 				<Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
 			</View>
 
+			{/* Loading indicator */}
+			{loading && (
+				<View style={styles.loadingContainer}>
+					<Text style={styles.loadingText}>Loading videos...</Text>
+				</View>
+			)}
+
+			{/* Video Grid */}
 			<FlatList
 				data={videos}
-				keyExtractor={(item, index) => `video-${index}`}
+				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
 				numColumns={2}
 				contentContainerStyle={styles.gridContainer}
 				renderItem={({ item, index }) => (
-					<TouchableOpacity
-						style={styles.videoItem}
-						onPress={() => handleVideoPress(item)}
-					>
-						<Icon name="play-circle-fill" size={40} color="#9346D2" />
-						<Text style={styles.videoText}>Video {index + 1}</Text>
-					</TouchableOpacity>
+					item ? (
+						<TouchableOpacity
+							style={styles.videoItem}
+							onPress={() => handleVideoPress(item)}
+						>
+							<Icon name="play-circle-fill" size={40} color="#9346D2" />
+							<Text style={styles.videoText}>
+								{item.title || `Video ${index + 1}`}
+							</Text>
+						</TouchableOpacity>
+					) : null
 				)}
 				ListEmptyComponent={() => (
 					<View style={styles.emptyContainer}>
 						<Text style={styles.emptyText}>
-							{selectedAgeGroup
+							{loading 
+								? 'Loading videos...' 
+								: selectedAgeGroup
 								? 'No videos available for this selection'
-								: 'Please select an age group'}
+								: 'Please select an age group'
+							}
 						</Text>
 					</View>
 				)}
+				extraData={[selectedAgeGroup, language, loading]}
 			/>
 
 			<CustomAlert
@@ -202,10 +264,27 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		borderRadius: 25,
 		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	ageGroupText: {
 		fontSize: 16,
 		color: 'white',
+	},
+	loadingContainer: {
+		padding: 20,
+		alignItems: 'center',
+	},
+	loadingText: {
+		fontSize: 16,
+		color: '#666',
+	},
+	loadingContainer: {
+		padding: 20,
+		alignItems: 'center',
+	},
+	loadingText: {
+		fontSize: 16,
+		color: '#666',
 	},
 	gridContainer: {
 		padding: 10,
@@ -224,6 +303,8 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 		fontWeight: '600',
 		fontSize: 16,
+		textAlign: 'center',
+		paddingHorizontal: 5,
 	},
 	emptyContainer: {
 		flex: 1,
