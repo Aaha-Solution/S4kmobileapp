@@ -7,7 +7,7 @@ import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import OTPVerificationScreen from './screens/OTPVerificationScreen';
-import ResetPasswordScreen from './screens/ResetPasswordScreen';
+import ResetPasswordScreen from './screens/ResetPasswordScreen.js';
 import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
 import AgeSelectionScreen from './screens/AgeSelectionScreen';
 import AccountScreen from './screens/AccountScreen';

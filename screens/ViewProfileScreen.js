@@ -7,12 +7,14 @@ import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
-
+import { useDispatch } from 'react-redux';
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
 	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [modalVisible, setModalVisible] = useState(false);
+
+	const dispatch = useDispatch();
 
 	const avatars = [
 		require('../assets/image/profile_avatar.png'),
@@ -48,7 +50,7 @@ const ViewProfileScreen = ({ navigation }) => {
 
 	const handleEditPress = () => {
 		navigation.navigate('EditProfileScreen', {
-			username: profile.username,
+			email: profile.email,
 			address: profile.address,
 			dateOfBirth: profile.dateOfBirth,
 			phone: profile.phone,
@@ -122,18 +124,18 @@ const ViewProfileScreen = ({ navigation }) => {
 												resizeMode="cover"
 											/>
 										</TouchableOpacity>
-									))}
+									))} 
 								</View>
 							</View>
 						</TouchableOpacity>
-					</Modal>
+					</Modal>   
 
-					<Text style={styles.name}>{profile.username}</Text>
+					<Text style={styles.name}>{profile.email}</Text>
 
 					<View style={styles.formContainer}>
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Username</Text>
-							<Text style={styles.readonlyText}>{profile.username}</Text>
+						<View style={styles.inputGroup}> 
+							<Text style={styles.label}>email</Text>
+							<Text style={styles.readonlyText}>{profile.email}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>

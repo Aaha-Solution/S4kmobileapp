@@ -1,163 +1,216 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Animated, Pressable, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
+import CustomAlert from '../Components/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
-import { setEmail as setReduxEmail } from '../Store/userSlice'; 
+import { setEmail as setReduxEmail } from '../Store/userSlice';
 const ForgotPasswordScreen = ({ navigation }) => {
-  const [email, setEmailState] = useState(''); 
-  const [error, setError] = useState('');
-  const dispatch = useDispatch();
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+	const [email, setEmailState] = useState('');
+	const [error, setError] = useState('');
+	const [showAlert, setShowAlert] = useState(false);
+	const [currentPassword, setCurrentPassword] = useState('');
+	const [newPassword, setNewPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.05,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
+	const dispatch = useDispatch();
+	const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  const isValidEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+	useEffect(() => {
+		Animated.loop(
+			Animated.sequence([
+				Animated.timing(pulseAnim, {
+					toValue: 1.05,
+					duration: 1000,
+					useNativeDriver: true,
+				}),
+				Animated.timing(pulseAnim, {
+					toValue: 1,
+					duration: 1000,
+					useNativeDriver: true,
+				}),
+			])
+		).start();
+	}, []);
 
-  const handleSendOTP = () => {
-    if (!email.trim()) {
-      setError('Please enter your email.');
-    } else if (!isValidEmail(email)) {
-      setError('Please enter a valid email address.');
-    } else {
-      setError('');
-      dispatch(setReduxEmail(email)); // Save email in Redux
-      navigation.navigate('OTPVerification'); 
-    }
-  };
+	const handleConfirmLogout = () => {
+		setShowAlert(false)
+	}
 
-  return (
-    <LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
-      <View style={styles.header}>
-                <Pressable onPress={() => navigation.goBack()}>
-                  <Ionicons name="arrow-back" size={28} color="#4B0082" />
-                </Pressable>
-              </View>
-      {/* Main Content */}
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <View style={styles.titleRow}>
-            <Animated.Text
-              style={[styles.emoji, { transform: [{ scale: pulseAnim }] }]}
-            >
-              🤔
-            </Animated.Text>
-            <Text style={styles.titleText}>Forgot Password?</Text>
-          </View>
+	const isValidEmail = (email) => {
+		const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return regex.test(email);
+	};
 
-          <Text style={styles.label}>Enter your email:</Text>
-          <View style={styles.inputContainer}>
-            <CustomTextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={text => {
-                setEmailState(text);  // Update email state
-                setError('');  // Clear error on input change
-              }}
-              keyboardType="email-address"
-              accessibilityLabel="Email Input"
-            />
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          </View>
 
-          <PressableButton
-            title="Get OTP"
-            onPress={handleSendOTP}
-            style={{ marginTop: 15 }}
-            accessibilityLabel="Get OTP Button"
-          />
-        </View>
-      </View>
+	const handleSendOTP = async () => {
+		if (!email.trim()) {
+			setError('Please enter your email.');
+			return;
+		}
 
-    </LinearGradient>
-  );
+		if (!isValidEmail(email)) {
+			setShowAlert(true);
+			return;
+		}
+
+		try {
+			const response = await fetch("http://192.168.0.208:3000/forgot/send-otp", {
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email_id: email }),
+			});
+
+			console.log("response:", response);
+			const contentType = response.headers.get("Content-Type") || "";
+			console.log("contentType:", contentType);
+
+			if (contentType.includes("application/json")) {
+				const data = await response.json();
+				console.log("Server response:", data);
+				if (response.ok) {
+					Alert.alert("Success", data.message || "OTP sent to your email.");
+					// Save to Redux and navigate to next screen
+					setError('');
+					dispatch(setReduxEmail(email));
+					navigation.navigate('OTPVerification');
+				} else {
+					Alert.alert("Error", data.message || "Something went wrong.");
+					console.error("Server error:", data);
+				}
+			} else {
+				const text = await response.text();
+				console.error("Unexpected response (HTML?):", text);
+				Alert.alert("Server Error", "Unexpected response from server.");
+			}
+		} catch (error) {
+			console.error("Forgot Password Error:", error);
+			Alert.alert("Network Error", "Please try again later.");
+		}
+	};
+
+
+	return (
+		<LinearGradient colors={['#75a0ca', '#f3b5d1']} style={styles.container}>
+			<View style={styles.header}>
+				<Pressable onPress={() => navigation.goBack()}>
+					<Ionicons name="arrow-back" size={28} color="#4B0082" />
+				</Pressable>
+			</View>
+			{/* Main Content */}
+			<View style={styles.content}>
+				<View style={styles.card}>
+					<View style={styles.titleRow}>
+						<Animated.Text
+							style={[styles.emoji, { transform: [{ scale: pulseAnim }] }]}
+						>
+							🤔
+						</Animated.Text>
+						<Text style={styles.titleText}>Forgot Password?</Text>
+					</View>
+
+					<Text style={styles.label}>Enter your email:</Text>
+					<View style={styles.inputContainer}>
+						<CustomTextInput
+							placeholder="Email"
+							value={email}
+							onChangeText={(text) => setEmailState(text)}
+							keyboardType="email-address"
+							accessibilityLabel="Email Input"
+						/>
+						{error ? <Text style={styles.errorText}>{error}</Text> : null}
+					</View>
+
+					<PressableButton
+						title="Get OTP"
+						onPress={handleSendOTP}
+						style={{ marginTop: 15 }}
+						accessibilityLabel="Get OTP Button"
+					/>
+				</View>
+
+				<CustomAlert
+					visible={showAlert}
+					title="Error"
+					message="Please enter your email"
+					onConfirm={handleConfirmLogout}
+				/>
+
+			</View>
+
+		</LinearGradient>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 10,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    marginTop: -150,
-  },
+	container: {
+		flex: 1,
+		paddingHorizontal: 20,
+	},
+	header: {
+		paddingTop: 50,
+		paddingBottom: 10,
+	},
+	backButton: {
+		alignSelf: 'flex-start',
+	},
+	content: {
+		flex: 1,
+		justifyContent: 'center',
+		marginTop: -150,
+	},
 
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  emoji: {
-    fontSize: 36,
-    marginRight: 10,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4B0082',
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#4B0082',
-  },
-  errorText: {
-    color: 'red',
-    marginTop: 4,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  inputContainer: {
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 10,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 10,
-    alignSelf: 'flex-start',
-  },
+	titleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginBottom: 20,
+	},
+	emoji: {
+		fontSize: 36,
+		marginRight: 10,
+	},
+	titleText: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		color: '#4B0082',
+	},
+	label: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginBottom: 10,
+		color: '#4B0082',
+	},
+	errorText: {
+		color: 'red',
+		marginTop: 4,
+		fontSize: 14,
+		fontWeight: 'bold',
+	},
+	inputContainer: {
+		marginBottom: 8,
+	},
+	card: {
+		backgroundColor: 'white',
+		borderRadius: 16,
+		padding: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 6 },
+		shadowOpacity: 1,
+		shadowRadius: 8,
+		elevation: 10,
+		width: '100%',
+		alignSelf: 'center',
+	},
+	header: {
+		paddingTop: 50,
+		paddingBottom: 10,
+		alignSelf: 'flex-start',
+	},
 });
 
 export default ForgotPasswordScreen;

@@ -2,41 +2,26 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable } from 'react-native';
 import PressableButton from '../Components/PressableButton';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChangePasswordScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const email = useSelector((state) => state.user.email) || '';
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isCurrentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [isNewPasswordVisible, setNewPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [isCurrentPasswordValid, setIsCurrentPasswordValid] = useState(false);
-
-  const validateCurrentPassword = (password) => {
-    // Add your current password validation logic here
-    // For example, check against stored password
-    if (password.length >= 6) {
-      setIsCurrentPasswordValid(true);
-    } else {
-      setIsCurrentPasswordValid(false);
-    }
-  };
 
   const handleCurrentPasswordChange = (text) => {
     setCurrentPassword(text);
-    validateCurrentPassword(text);
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!email || !currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-
-    if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -55,22 +40,39 @@ const ChangePasswordScreen = ({ navigation }) => {
       return;
     }
 
-    // Add password change logic here
-    Alert.alert(
-      'Success',
-      'Password changed successfully',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack()
-        }
-      ]
-    );
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch("http://192.168.0.208:3000/forgot/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email_id: email,
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.message === "Password changed successfully") {
+        Alert.alert('Success', data.message);
+        navigation.navigate("AccountScreen");
+      } else {
+        Alert.alert('Error', data.message || 'Something went wrong.');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      Alert.alert('Error', 'Failed to change password. Please try again later.');
+    }
   };
 
-    const handleCancel = () => {
-      navigation.goBack();
-    };
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
@@ -84,15 +86,12 @@ const ChangePasswordScreen = ({ navigation }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>E-Mail</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: '#eee' }]}
               value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your E-Mail"
-              secureTextEntry={false}
+              editable={false}
               placeholderTextColor="#999"
             />
           </View>
-
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Current Password</Text>
             <TextInput
@@ -111,63 +110,47 @@ const ChangePasswordScreen = ({ navigation }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>New Password</Text>
             <TextInput
-              style={[styles.input, !isCurrentPasswordValid && styles.disabledInput]}
+              style={styles.input}
               value={newPassword}
               onChangeText={setNewPassword}
               placeholder="Enter new password"
               secureTextEntry={!isNewPasswordVisible}
               placeholderTextColor="#999"
-              editable={isCurrentPasswordValid}
+              editable={true} // Always editable
             />
-            <Pressable 
-              style={[styles.icon, !isCurrentPasswordValid && styles.disabledIcon]} 
-              onPress={() => isCurrentPasswordValid && setNewPasswordVisible(!isNewPasswordVisible)}
-            >
-              <Icon 
-                name={isNewPasswordVisible ? 'eye-off' : 'eye'} 
-                size={20} 
-                color={isCurrentPasswordValid ? "#888" : "#ccc"} 
-              />
+            <Pressable style={styles.icon} onPress={() => setNewPasswordVisible(!isNewPasswordVisible)}>
+              <Icon name={isNewPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
             </Pressable>
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Confirm New Password</Text>
             <TextInput
-              style={[styles.input, !isCurrentPasswordValid && styles.disabledInput]}
+              style={styles.input}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm new password"
               secureTextEntry={!isConfirmPasswordVisible}
               placeholderTextColor="#999"
-              editable={isCurrentPasswordValid}
+              editable={true} // Always editable
             />
-            <Pressable 
-              style={[styles.icon, !isCurrentPasswordValid && styles.disabledIcon]} 
-              onPress={() => isCurrentPasswordValid && setConfirmPasswordVisible(!isConfirmPasswordVisible)}
-            >
-              <Icon 
-                name={isConfirmPasswordVisible ? 'eye-off' : 'eye'} 
-                size={20} 
-                color={isCurrentPasswordValid ? "#888" : "#ccc"} 
-              />
+            <Pressable style={styles.icon} onPress={() => setConfirmPasswordVisible(!isConfirmPasswordVisible)}>
+              <Icon name={isConfirmPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
             </Pressable>
           </View>
 
           <View style={styles.buttonContainer}>
-          <PressableButton
-            style={[styles.saveButton, !isCurrentPasswordValid && styles.disabledButton]}
-            title="Update"
-            onPress={handleChangePassword}
-          />
-          <PressableButton
-            style={[styles.cancelButton, !isCurrentPasswordValid && styles.disabledButton]}
-            title="Cancel"
-            onPress={handleCancel}
-          />
-
+            <PressableButton
+              style={styles.saveButton}
+              title="Update"
+              onPress={handleChangePassword}
+            />
+            <PressableButton
+              style={styles.cancelButton}
+              title="Cancel"
+              onPress={handleCancel}
+            />
           </View>
-         
         </View>
       </ScrollView>
     </View>
@@ -180,7 +163,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     padding: 20,
-    marginTop: 10,
+    marginTop: 110,
   },
   inputGroup: {
     marginBottom: 20,
@@ -209,19 +192,11 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
-  disabledInput: {
-    backgroundColor: '#f5f5f5',
-    borderColor: '#ddd',
-    color: '#999',
-  },
   icon: {
     position: 'absolute',
     right: 15,
     top: 45,
     zIndex: 1,
-  },
-  disabledIcon: {
-    opacity: 0.5,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -240,15 +215,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-  disabledButton: {
+  cancelButton: {
     backgroundColor: '#ccc',
     padding: 10,
     paddingVertical: 15,
     borderRadius: 12,
     alignItems: 'center',
-    flex: 1, // Make it take up equal space
+    flex: 1,
     marginLeft: 5,
-  }
+  },
 });
 
 export default ChangePasswordScreen;

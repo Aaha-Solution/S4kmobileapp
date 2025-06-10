@@ -12,7 +12,7 @@ import { setProfile } from '../Store/userSlice';
 
 const EditProfileScreen = ({ route, navigation, }) => {
     const dispatch = useDispatch();
-    const [username, setUsername] = useState(route.params?.username);
+    const [email, setemail] = useState(route.params?.email);
     const [address, setAddress] = useState(route.params?.address);
     const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth);
     const [dateError, setDateError] = useState('');
@@ -124,7 +124,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
         setDateOfBirth(formattedDate);
     };
 
-    const isValid = username && dateOfBirth && phone && address;
+    const isValid = email && dateOfBirth && phone && address;
 
     const handleSave = async () => {
         if(isValid) {
@@ -135,7 +135,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
 
                 // Save profile data to Redux
                 const profileData = {
-                    username: username,
+                    email: email,
                     address: address,
                     dateOfBirth: dateOfBirth,
                     phone: phone,
@@ -165,11 +165,58 @@ const EditProfileScreen = ({ route, navigation, }) => {
     };
 
     useEffect(() => {
+	const updateProfile = async () => {
+		const token = await AsyncStorage.getItem('token');
+
+		try {
+			const response = await fetch('http://192.168.0.208:3000/signup/update-profile', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`, // ✅ Fixed typo here
+				},
+				body: JSON.stringify({
+					email_id: profile.email,
+					adob: profile.dateOfBirth,
+					address: profile.address,
+					ph_no: profile.phone,
+				}),
+			});
+
+			const data = await response.json();
+			if (data.message === 'Profile updated successfully') {
+				console.log('Profile updated successfully');
+
+				dispatch({
+					type: 'user/updateProfile',
+					payload: {
+						email: profile.email,
+						address: profile.address,
+						dateOfBirth: profile.dateOfBirth,
+						phone: profile.phone,
+						email: profile.email,
+						selectedAvatar: tempSelectedAvatar,
+					},
+				});
+			} else {
+				console.warn('Profile update failed:', data.message);
+			}
+		} catch (error) {
+			console.error('Error updating profile:', error);
+		}
+	};
+    updateProfile();    
+})
+
+
+    useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('ViewProfile');
 			return true;
 		});	
 	});
+
+
 
 
     return (
@@ -247,12 +294,12 @@ const EditProfileScreen = ({ route, navigation, }) => {
             <View style={styles.formContainer}>
                
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Username</Text>
+                    <Text style={styles.label}>email</Text>
                     <TextInput
                         style={styles.firstnameinput}
-                        value={username}
-                        onChangeText={setUsername}
-                        placeholder="Enter your username"
+                        value={email}
+                        onChangeText={setemail}
+                        placeholder="Enter your email"
                     />
                 </View>
 

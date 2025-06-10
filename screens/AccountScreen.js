@@ -6,8 +6,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountScreen = ({ route, navigation }) => {
-  const { username } = route.params || { username: 'Guest User' };
-  const [name, setName] = useState(username);
+  const { email } = route.params || { email: 'Guest User' };
+  const [name, setName] = useState(email);
   const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
   
   useEffect(() => {
@@ -26,7 +26,7 @@ const AccountScreen = ({ route, navigation }) => {
   };
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { username: name }},
+    { icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { email: name }},
     { icon: 'lock-closed-outline', label: 'Change Password', screen: 'ChangePasswordScreen' },
   ];
 

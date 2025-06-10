@@ -12,13 +12,12 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
 const SignupScreen = ({ navigation }) => {
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [usernameError, setUsernameError] = useState('');
-    const [emailError, setEmailError] = useState('');
+    const [emailError, setemailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
@@ -27,16 +26,16 @@ const SignupScreen = ({ navigation }) => {
         return emailRegex.test(email);
     };
 
-   
+    const dispatch = useDispatch();
     const handleSignUp = async () => {
-        setUsernameError('');
+        setemailError('');
         setEmailError('');
         setPasswordError('');
         setConfirmPasswordError('');
 
         // Basic validation
-        if (!username.trim()) {
-            setUsernameError('Username is required');
+        if (!email.trim()) {
+            setemailError('email is required');
             return;
         }
         if (!email.trim()) {
@@ -65,26 +64,38 @@ const SignupScreen = ({ navigation }) => {
         }
 
         try {
-            console.log("Payload:", { username, email_id: email, password });
-
+            console.log("Payload:", { email, email_id: email, password, confirmPassword });
+           
             const response = await fetch('http://192.168.0.208:3000/signup', {
 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-               body: JSON.stringify({ username, email_id: email, password })
+                 body: JSON.stringify({ email, email_id: email, password, confirm_password: confirmPassword })
 
             });
+            console.log("response:", response);
 
-            const data = await response.json();
-console.log("data",data)
-            if (response.ok) {
-                 
-                navigation.navigate('LoginScreen');
+            const text = await response.text();
+            console.log("Raw Response:", text);
+
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error("Failed to parse JSON:", e.message);
+                setPasswordError('Invalid response from server');
+                return;
+            }
+            console.log("Parsed Data:", data);
+
+            if ( data.message === 'User created successfully') {
+                
+                navigation.navigate('Login');
             } else {
                 if (data.errors) {
-                    if (data.errors.username) setUsernameError(data.errors.username);
+                    if (data.errors.email) setemailError(data.errors.email);
                     if (data.errors.email) setEmailError(data.errors.email);
                     if (data.errors.password) setPasswordError(data.errors.password);
                 }
@@ -106,14 +117,14 @@ console.log("data",data)
                 />
 
                 <CustomTextInput
-                    value={username}
+                    value={email}
                     onChangeText={(text) => {
-                        setUsername(text);
-                        if (usernameError) setUsernameError('');
+                        setemail(text);
+                        if (emailError) setemailError('');
                     }}
-                    placeholder="Username"
+                    placeholder="email"
                 />
-                {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
                 <CustomTextInput
                     value={email}

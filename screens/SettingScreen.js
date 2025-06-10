@@ -112,17 +112,20 @@ const handleConfirmLogout = async () => {
     const rememberMe = await AsyncStorage.getItem('rememberMe');
 	
   try {
-	
-    console.log("token:", token);
+
+    await AsyncStorage.removeItem('token');	 
+    await AsyncStorage.removeItem('savedEmail'); // if you saved email	
+    await AsyncStorage.removeItem('savedPassword'); // if you saved password
+    await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
+
+	 console.log("token:", token);
     console.log("savedEmail:", savedEmail);
     console.log("savedPassword:", savedPassword);
     console.log("rememberMe:", rememberMe);
 
+	 const tokenAfterRemoval = await AsyncStorage.getItem('token');
+        console.log("token AFTER removal:", tokenAfterRemoval); // This should now be null
 
-    await AsyncStorage.removeItem('token');	
-    await AsyncStorage.removeItem('savedEmail'); // if you saved email	
-    await AsyncStorage.removeItem('savedPassword'); // if you saved password
-    await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
 
     dispatch(logout()); // clear Redux user state
 	navigation.dispatch(
@@ -176,8 +179,8 @@ const handleLogout =()=>{
 							onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 						/>
 						<View>
-							<Text style={styles.name}>{user.username} {user.surename}</Text>
-							<Text style={styles.email}>{user.username === 'Guest User' ? 'guest@example.com' : `${user.username}@example.com`}</Text>
+							<Text style={styles.name}>{user.email} {user.surename}</Text>
+							<Text style={styles.email}>{user.email}</Text>
 						</View>
 					</View>
 				</View>

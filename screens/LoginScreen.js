@@ -6,7 +6,7 @@ import {
     Pressable,
     Image,
     Alert,
-    BackHandler
+    ActivityIndicator // Import ActivityIndicator for loading state
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
@@ -15,115 +15,161 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain'; // Re-import Keychain for secure storage
+
 const LoginScreen = ({ navigation }) => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [usernameError, setUsernameError] = useState('');
+    const [emailError, setemailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [loading, setLoading] = useState(false); // State for loading indicator
     const dispatch = useDispatch();
 
-   useEffect(() => {
-  const loadRememberMe = async () => {
-    const email = await AsyncStorage.getItem('savedEmail');
-    const password = await AsyncStorage.getItem('savedPassword');
-    if (email && password) {
-      setUsername(email);
-      setPassword(password);
-      setRememberMe(true);
-    }
-  };
-  loadRememberMe();
-}, []);
+    // --- Effect to check for remembered user credentials on app startup ---
+    useEffect(() => {
+        const checkRememberedUser = async () => {
+            try {
+                // Attempt to retrieve stored email and password from Keychain
+                // Keychain stores these securely on the device (iOS Keychain, Android Keystore)
+                const credentials = await Keychain.getGenericPassword();
+                if (credentials) {
+                    // If credentials are found, pre-fill the login fields
+                    setEmail(credentials.username);
+                    setPassword(credentials.password);
+                    setRememberMe(true); // Set rememberMe switch to true
+                    console.log('Remembered credentials found and pre-filled.');
+                }
+            } catch (error) {
+                // Log any errors accessing Keychain. This often indicates a linking issue
+                // or that the Keychain service is unavailable for some reason.
+                console.error('Keychain could not be accessed for pre-fill:', error);
+            }
+        };
 
+        checkRememberedUser();
+    }, []); // Empty dependency array means this runs once on component mount
 
-const rememberHandler = async () => {
-    const newValue = !rememberMe; // Toggle the current value
-    setRememberMe(newValue);
-  if (newValue) {
-    try {
-        setRememberMe(!rememberMe);
-      await AsyncStorage.setItem('savedEmail', username);
-      await AsyncStorage.setItem('savedPassword', password);
-    } catch (error) {
-      console.error('Error saving credentials:', error);
-    }
-  } else {
-    try {
-      await AsyncStorage.removeItem('savedEmail');
-      await AsyncStorage.removeItem('savedPassword');
-    } catch (error) {
-      console.error('Error removing credentials:', error);
-    }
-  }
-};
+    // --- Effect to check for an existing authentication token and auto-navigate ---
+    // This handles cases where a user might be already logged in (e.g., app was closed, then reopened)
+    // and bypasses the login screen if a valid session token exists.
+    useEffect(() => {
+        const checkToken = async () => {
+            setLoading(true); // Start loading while checking for token
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    // If a token exists, assume the user is already logged in
+                    // In a production app, you might want to validate this token with your API
+                    // (e.g., /verify-token endpoint) before automatically navigating.
+                    console.log('Existing token found, navigating to LanguageSelectionScreen.');
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'LanguageSelectionScreen' }],
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking token in AsyncStorage:', error);
+            } finally {
+                setLoading(false); // Stop loading after token check is complete
+            }
+        };
 
+        checkToken();
+    }, []); // Empty dependency array means this runs once on component mount
+
+    // --- Function to handle the login process ---
     const handleLogin = async () => {
-        setUsernameError('');
+        // Clear any previous validation error messages
+        setemailError('');
         setPasswordError('');
 
-        if (!username || !password) {
-            if (!username) setUsernameError('Email is required');
-            if (!password) setPasswordError('Password is required'); 
-            return;
+        // Basic client-side validation for empty fields
+        if (!email) {
+            setemailError('Email is required');
+        }
+        if (!password) {
+            setPasswordError('Password is required');
+        }
+        if (!email || !password) {
+            return; // Stop the login process if validation fails
         }
 
+        setLoading(true); // Start loading indicator before API call
         try {
-           // await AsyncStorage.clear();
-           console.log('Sending:', { email_id: username, password });
+            console.log('Sending login request to API:', { email_id: email, password });
+            // Make the API call to your backend login endpoint
             const response = await fetch('http://192.168.0.208:3000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email_id:username, password,rememberMe }),
+                body: JSON.stringify({ email_id: email, password }),
             });
 
-            const data = await response.json();
-            console.log('Login response:', data);
-             if (!response.ok) {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials');
-        return;
-      }
+            const data = await response.json(); // Parse the JSON response
+            console.log('Login API response received:', data);
 
-      // Store token securely
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('rememberMe',rememberMe.toString());
-      await rememberHandler();
+            // Check if the API response indicates success
+            if (!response.ok) {
+                // If login fails (e.g., 401 Unauthorized), show an alert with the error message
+                Alert.alert('Login Failed', data.message || 'Invalid credentials');
+                return; // Stop execution if login was not successful
+            }
 
-          
-                dispatch(login(data.user));
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'LanguageSelectionScreen' }],
-                }); 
-           
+            // --- Login successful ---
+            // Store the session token from the API response in AsyncStorage.
+            // This token is typically used for authentication of subsequent API calls.
+            await AsyncStorage.setItem('token', data.token);
+            console.log('Authentication token stored in AsyncStorage.');
+
+            // --- Handle "Remember Me" logic using Keychain ---
+            if (rememberMe) {
+                try {
+                    // If "Remember Me" is checked, securely store the user's email and password
+                    // for pre-filling on future app launches.
+                    await Keychain.setGenericPassword(email, password);
+                    console.log('Email and password stored securely in Keychain for "Remember Me".');
+                } catch (keychainSetError) {
+                    // Log any errors during the Keychain set operation.
+                    // This might occur if Keychain is temporarily unavailable or there's a device issue.
+                    console.error('Failed to store credentials in Keychain:', keychainSetError);
+                    Alert.alert('Warning', 'Could not save "Remember Me" preferences securely.');
+                }
+            } else {
+                try {
+                    // If "Remember Me" is NOT checked, remove any previously stored credentials
+                    // from Keychain to ensure they are not pre-filled next time.
+                    await Keychain.resetGenericPassword();
+                    console.log('Remember Me not selected, clearing stored credentials (if any).');
+                } catch (keychainResetError) {
+                    // Log any errors during the Keychain reset operation.
+                    console.error('Failed to clear credentials from Keychain:', keychainResetError);
+                }
+            }
+
+            // Dispatch user data to Redux store to update application state
+            dispatch(login(data.user));
+
+            // Navigate to the LanguageSelectionScreen and reset the navigation stack
+            // This prevents the user from going back to the login screen using the back button.
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'LanguageSelectionScreen' }],
+            });
+
         } catch (error) {
-             console.error('Login error:', error);
-            setPasswordError('Something went wrong. Please try again.');
+            // Catch any network errors or errors during parsing the API response
+            console.error('Login request or response processing error:', error);
+            Alert.alert('Error', 'Something went wrong. Please check your network and try again.');
+        } finally {
+            setLoading(false); // Always stop loading indicator when the process completes or errors out
         }
     };
 
-    useEffect(() => {
-  const checkToken = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'LanguageSelectionScreen' }],
-      });
-    }
-  };
-
-  checkToken();
-}, []);
-
-    
+    // --- Render the login UI ---
     return (
-        <LinearGradient
-            colors={['#9346D2', '#5BC3F5']}
-            style={styles.background}
-        >
+        <LinearGradient colors={['#9346D2', '#5BC3F5']} style={styles.background}>
             <View style={styles.container}>
                 <Image
                     source={require('../assets/image/splash.png')}
@@ -131,44 +177,54 @@ const rememberHandler = async () => {
                 />
 
                 <CustomTextInput
-                    value={username}
+                    value={email}
                     onChangeText={(text) => {
-                        setUsername(text);
-                        if (usernameError) setUsernameError('');
+                        setEmail(text);
+                        if (emailError) setemailError(''); // Clear email error on text change
                     }}
                     placeholder="E-mail id"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                 />
-                {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+                {emailError ? (
+                    <Text style={styles.errorText}>{emailError}</Text>
+                ) : null}
 
                 <CustomTextInput
                     value={password}
                     onChangeText={(text) => {
                         setPassword(text);
-                        if (passwordError) setPasswordError('');
+                        if (passwordError) setPasswordError(''); // Clear password error on text change
                     }}
                     placeholder="Password"
                     secureTextEntry={true}
                 />
-                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+                {passwordError ? (
+                    <Text style={styles.errorText}>{passwordError}</Text>
+                ) : null}
 
-                <PressableButton
-                    title="Login"
-                    onPress={handleLogin}
-                    style={styles.goButton}
-                />
+                {/* Show loading indicator or Login button based on 'loading' state */}
+                {loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
+                ) : (
+                    <PressableButton
+                        title="Login"
+                        onPress={handleLogin}
+                        style={styles.goButton}
+                    />
+                )}
 
-                {/* Remember Me and Forgot Password Side by Side */}
+                {/* Remember Me and Forgot Password options row */}
                 <View style={styles.bottomRow}>
                     <Pressable
                         style={styles.rememberMe}
-                        onPress={ ()=>rememberHandler()}
+                        onPress={() => setRememberMe(!rememberMe)} // Toggle rememberMe state on press
                     >
                         <View
                             style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
                         >
-                            {rememberMe && (
-                                <Icon name="check" size={12} color="white" />
-                            )}
+                            {/* Display check icon if rememberMe is true */}
+                            {rememberMe && <Icon name="check" size={12} color="white" />}
                         </View>
                         <Text style={styles.optionText}>Remember Me</Text>
                     </Pressable>
@@ -178,13 +234,14 @@ const rememberHandler = async () => {
                     </Pressable>
                 </View>
 
-                {/* Sign Up Button */}
+                {/* Sign Up button for new users */}
                 <Pressable
                     style={styles.signupButton}
                     onPress={() => navigation.navigate('SignupScreen')}
                 >
                     <Text style={styles.signupText}>
-                        Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
+                        Don't have an account?{' '}
+                        <Text style={styles.signupLink}>Sign Up</Text>
                     </Text>
                 </Pressable>
             </View>
@@ -245,16 +302,14 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
     },
     checkboxChecked: {
-        backgroundColor: '#800080',
+        backgroundColor: '#800080', // Purple color when checked
         borderColor: '#800080',
     },
     optionText: {
         fontSize: 14,
-        color: '#512DA8',
-        textAlign: 'left',
+        color: '#512DA8', // Deep purple color
     },
     forgotPasswordText: {
         color: '#512DA8',
@@ -272,8 +327,12 @@ const styles = StyleSheet.create({
     signupLink: {
         textDecorationLine: 'underline',
         fontWeight: 'bold',
-        color: '#9346D2',
+        color: '#9346D2', // Your gradient start color
     },
+    loadingIndicator: {
+        marginTop: 20,
+        marginBottom: 20,
+    }
 });
 
 export default LoginScreen;
