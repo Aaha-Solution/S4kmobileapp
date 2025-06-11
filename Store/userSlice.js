@@ -25,6 +25,12 @@ const userSlice = createSlice({
       state.user = { ...state.user, ...action.payload };
       state.email = action.payload.email_id;
       // Do NOT store password in Redux
+
+      const normalizedUser = {
+    ...action.payload,
+    email: action.payload.email_id || action.payload.email, // fix here
+  };
+  
     },
     logout: (state) => {
       state.isLoggedIn = false;

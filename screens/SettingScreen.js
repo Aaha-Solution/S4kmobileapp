@@ -29,6 +29,8 @@ const menuItems = [
   
 const SettingsScreen = ({ route, navigation }) => {
 	const { selectedAvatar } = route.params || {};
+	const email = useSelector((state) => state.user.email) || '';
+	const username = useSelector((state) => state.user.user.username) || 'Guest User';
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.user);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(avatar4);
@@ -106,6 +108,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	// };
 	
 const handleConfirmLogout = async () => {
+	console.log("handleConfirmLogout called");
 	const token = await AsyncStorage.getItem('token');
 	const savedEmail = await AsyncStorage.getItem('savedEmail');
     const savedPassword = await AsyncStorage.getItem('savedPassword');
@@ -117,6 +120,10 @@ const handleConfirmLogout = async () => {
     await AsyncStorage.removeItem('savedEmail'); // if you saved email	
     await AsyncStorage.removeItem('savedPassword'); // if you saved password
     await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
+	await AsyncStorage.removeItem('selectedAvatar'); // remove selected avatar
+	await AsyncStorage.removeItem('user'); // remove user data
+	await AsyncStorage.removeItem('userProfile'); 
+	
 
 	 console.log("token:", token);
     console.log("savedEmail:", savedEmail);
@@ -179,8 +186,8 @@ const handleLogout =()=>{
 							onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 						/>
 						<View>
-							<Text style={styles.name}>{user.email} {user.surename}</Text>
-							<Text style={styles.email}>{user.email}</Text>
+							<Text style={styles.name}>{username}</Text>
+							<Text style={styles.email}>{email}</Text>
 						</View>
 					</View>
 				</View>

@@ -26,13 +26,13 @@ const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-	const videos = useSelector(state => state.user.videos);
+	const[videos, setVideos] = useState([]);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 	
-	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
+	const baseURL = 'http://192.168.0.208:3000/videos/by-category';
 
 	console.log("isHomeScreen", isHomeScreen);
 
@@ -90,7 +90,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	// Fetch videos from API
 	const fetchVideos = useCallback(async () => {
 		if (!selectedAgeGroup || !language) {
-			setVideos([]);
+			 ([]);
 			return;
 		}
 

@@ -10,6 +10,8 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
+	console.log("Profile Data:", profile);
+	const email = useSelector((state) => state.user.email) || '';
 	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -50,11 +52,10 @@ const ViewProfileScreen = ({ navigation }) => {
 
 	const handleEditPress = () => {
 		navigation.navigate('EditProfileScreen', {
-			email: profile.email,
+			email: email,
 			address: profile.address,
 			dateOfBirth: profile.dateOfBirth,
-			phone: profile.phone,
-			email: profile.email,
+			username: profile.username,
 		});
 	};
 
@@ -134,13 +135,13 @@ const ViewProfileScreen = ({ navigation }) => {
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}> 
-							<Text style={styles.label}>email</Text>
-							<Text style={styles.readonlyText}>{profile.email}</Text>
+							<Text style={styles.label}>UserName</Text>
+							<Text style={styles.readonlyText}>{profile.username}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>E-Mail</Text>
-							<Text style={styles.readonlyText}>{profile.email || 'example@gmail.com'}</Text>
+							<Text style={styles.readonlyText}>{email || 'example@gmail.com'}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>

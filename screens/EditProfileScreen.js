@@ -2,58 +2,86 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Alert, Modal, TouchableOpacity, BackHandler } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { setProfile } from '../Store/userSlice';
 import PressableButton from '../Components/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import CustomAlert from '../Components/CustomAlertMessage';
-import { useDispatch } from 'react-redux';
-import { setProfile } from '../Store/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
-const EditProfileScreen = ({ route, navigation, }) => {
+const EditProfileScreen = ({ route, navigation }) => {
     const dispatch = useDispatch();
-    const [email, setemail] = useState(route.params?.email);
-    const [address, setAddress] = useState(route.params?.address);
-    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth);
+    const profile = useSelector(state => state.user.user);
+    const username = profile?.username || '';
+    
+    // Base URL - consider moving to config file
+    const BASE_URL = 'http://192.168.0.208:3000';
+    
+    // State variables
+    const [email, setemail] = useState(route.params?.email || '');
+    const [address, setAddress] = useState(route.params?.address || '');
+    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth || '');
     const [dateError, setDateError] = useState('');
-    const [phone, setPhone] = useState(route.params?.phone);
+    const [phone, setPhone] = useState(route.params?.phone || '');
     const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
-    const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
     const [modalVisible, setModalVisible] = useState(false);
     const [phoneError, setPhoneError] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertTitle, setAlertTitle] = useState('');
-    
-    const avatars = [
-        require('../assets/image/profile_avatar.png'),
-        require('../assets/image/avatar1.png'),
-        require('../assets/image/avatar2.png'),
-        require('../assets/image/avatar3.png'),
-        require('../assets/image/avatar4.png'),
-        require('../assets/image/avatar5.png'),
-    ];
+    const [images, setImages] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const loadSelectedAvatar = async () => {
-        try {
-            const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-            if (savedAvatar) {
-                setSelectedAvatar(JSON.parse(savedAvatar));
-                setTempSelectedAvatar(JSON.parse(savedAvatar));
-            }
-        } catch (error) {
-            console.log('Error loading avatar:', error);
-        }
-    };
-
+    // Load avatar images from server
     useEffect(() => {
-		loadSelectedAvatar();
-	}, []);
-    
+        fetch(`${BASE_URL}/api/images/`)
+            .then((response) => response.json())
+            .then((data) => {
+                setImages(data);
+                setLoading(false);
+            })
+            
+            .catch((error) => {
+                console.error('Error fetching images:', error);
+                setLoading(false);
+                setAlertTitle('Error');
+                setAlertMessage('Failed to load avatar images');
+                setShowAlert(true);
+            });
+            console.log('response', images);
+    }, []);
+
+    // Load saved avatar from AsyncStorage
+    useEffect(() => {
+        const loadSelectedAvatar = async () => {
+            try {
+                const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+                if (savedAvatar) {
+                    setSelectedAvatar(JSON.parse(savedAvatar));
+                }
+            } catch (error) {
+                console.log('Error loading avatar:', error);
+            }
+        };
+        loadSelectedAvatar();
+    }, []);
+
+    // Handle back button
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            navigation.navigate('ViewProfile');
+            return true;
+        });
+
+        // Cleanup function to remove the listener
+        return () => backHandler.remove();
+    }, [navigation]);
+
     const validateDate = (date) => {
         // Remove any non-numeric characters
         const cleanedDate = date.replace(/[^\d]/g, '');
-        
+
         // Format the date as user types
         let formattedDate = '';
         if (cleanedDate.length > 0) {
@@ -70,11 +98,11 @@ const EditProfileScreen = ({ route, navigation, }) => {
         if (formattedDate.length === 10) {
             const [day, month, year] = formattedDate.split('/').map(Number);
             const date = new Date(year, month - 1, day);
-            
+
             // Check if the date is valid
-            if (isNaN(date.getTime()) || 
-                date.getDate() !== day || 
-                date.getMonth() !== month - 1 || 
+            if (isNaN(date.getTime()) ||
+                date.getDate() !== day ||
+                date.getMonth() !== month - 1 ||
                 date.getFullYear() !== year) {
                 setDateError('Please enter a valid date');
             } else {
@@ -92,7 +120,7 @@ const EditProfileScreen = ({ route, navigation, }) => {
     const HandlePhonenumber = (phoneNumber) => {
         // Remove any non-digit characters
         const cleanedNumber = phoneNumber.replace(/\D/g, '');
-        
+
         // Check if empty
         if (!cleanedNumber) {
             setPhoneError('Phone number is required');
@@ -114,245 +142,242 @@ const EditProfileScreen = ({ route, navigation, }) => {
             return;
         }
 
-
         setPhoneError('');
         setPhone(cleanedNumber);
-    }
+    };
 
     const handleDateChange = (text) => {
         const formattedDate = validateDate(text);
         setDateOfBirth(formattedDate);
     };
 
-    const isValid = email && dateOfBirth && phone && address;
-
     const handleSave = async () => {
-        if(isValid) {
-            try {
-                // Save avatar
-                setSelectedAvatar(tempSelectedAvatar);
-                await AsyncStorage.setItem('selectedAvatar', JSON.stringify(tempSelectedAvatar));
+        if (!email || !dateOfBirth || !phone || !address) {
+            setAlertTitle('Validation Error');
+            setAlertMessage('Please fill in all required fields.');
+            setShowAlert(true);
+            return;
+        }
 
-                // Save profile data to Redux
-                const profileData = {
-                    email: email,
+        // Check for validation errors
+        if (dateError || phoneError) {
+            setAlertTitle('Validation Error');
+            setAlertMessage('Please fix the errors before saving.');
+            setShowAlert(true);
+            return;
+        }
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const username = profile?.username || '';
+
+            const response = await fetch(`${BASE_URL}/signup/update-profile`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    username,
+                    email_id: email,
+                    dob: dateOfBirth,
+                    ph_no: phone,
                     address: address,
-                    dateOfBirth: dateOfBirth,
-                    phone: phone,
-                    selectedAvatar: tempSelectedAvatar
-                };
-                
-                dispatch(setProfile(profileData));
+                }),
+            });
+            console.log('response', response);
+            
+            const data = await response.json();
+            console.log('Response:', data);
 
-                // Save profile data to AsyncStorage for persistence
-                await AsyncStorage.setItem('userProfile', JSON.stringify(profileData));
+            if (data.message && data.message.toLowerCase().includes('profile updated successfully')) {
+                dispatch(setProfile({
+                    username,
+                    dateOfBirth,
+                    phone,
+                    address,
+                }));
+
+                // Save selected avatar if changed
+                if (selectedAvatar !== profile_avatar) {
+                    await AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
+                }
+
+                 await AsyncStorage.setItem('userProfile', JSON.stringify({
+        username, email, dateOfBirth, phone, address
+      }));
 
                 setAlertTitle('Success');
-                setAlertMessage('Your profile has been saved successfully');
+                setAlertMessage('Profile updated successfully');
                 setShowAlert(true);
-                navigation.navigate('ViewProfile');
-            } catch (error) {
-                console.log('Error saving profile:', error);
+                
+                // Navigate after alert is dismissed
+                setTimeout(() => {
+                    navigation.navigate('ViewProfile');
+                }, 2000);
+            } else {
                 setAlertTitle('Error');
-                setAlertMessage('Failed to save profile. Please try again.');
+                setAlertMessage(data.message || 'Failed to update profile');
                 setShowAlert(true);
             }
-        } else {
-            setAlertTitle('Warning');
-            setAlertMessage('Please fill in all required fields');
+
+        } catch (err) {
+            console.error(err);
+            setAlertTitle('Error');
+            setAlertMessage('Something went wrong.');
             setShowAlert(true);
         }
     };
 
-    useEffect(() => {
-	const updateProfile = async () => {
-		const token = await AsyncStorage.getItem('token');
-
-		try {
-			const response = await fetch('http://192.168.0.208:3000/signup/update-profile', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`, // ✅ Fixed typo here
-				},
-				body: JSON.stringify({
-					email_id: profile.email,
-					adob: profile.dateOfBirth,
-					address: profile.address,
-					ph_no: profile.phone,
-				}),
-			});
-
-			const data = await response.json();
-			if (data.message === 'Profile updated successfully') {
-				console.log('Profile updated successfully');
-
-				dispatch({
-					type: 'user/updateProfile',
-					payload: {
-						email: profile.email,
-						address: profile.address,
-						dateOfBirth: profile.dateOfBirth,
-						phone: profile.phone,
-						email: profile.email,
-						selectedAvatar: tempSelectedAvatar,
-					},
-				});
-			} else {
-				console.warn('Profile update failed:', data.message);
-			}
-		} catch (error) {
-			console.error('Error updating profile:', error);
-		}
-	};
-    updateProfile();    
-})
-
-
-    useEffect(() => {
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-			navigation.navigate('ViewProfile');
-			return true;
-		});	
-	});
-
-
-
-
     return (
         <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[ '#E0B0FF', '#ffffff']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-        <SafeAreaView style={styles.container}>
-            <ScrollView>
-            <View style={styles.header}>
-                <View style={styles.profileContainer}>
-                    <Image
-                        source={tempSelectedAvatar}
-                        style={styles.avatar}
-                        resizeMode="cover"
-                    />
-                    <TouchableOpacity 
-                        style={styles.editButton}
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <Ionicons name="camera" size={20} color="white"/>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity 
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Choose Avatar</Text>
-                            <TouchableOpacity 
-                                onPress={() => setModalVisible(false)}
-                                style={styles.closeButton}
+            <LinearGradient
+                colors={['#E0B0FF', '#ffffff']}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={StyleSheet.absoluteFill}
+            />
+            <SafeAreaView style={styles.container}>
+                <ScrollView>
+                    <View style={styles.header}>
+                        <View style={styles.profileContainer}>
+                            <Image
+                                source={selectedAvatar}
+                                style={styles.avatar}
+                                resizeMode="cover"
+                            />
+                            <TouchableOpacity
+                                style={styles.editButton}
+                                onPress={() => setModalVisible(true)}
                             >
-                                <Ionicons name="close" size={24} color="black" />
+                                <Ionicons name="camera" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <View style={styles.avatarGrid}>
-                            {avatars.map((avatar, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={styles.avatarOption}
-                                    onPress={() => {
-                                        setTempSelectedAvatar(avatar);
-                                        setModalVisible(false);
-                                    }}
-                                >
-                                    <Image
-                                        source={avatar}
-                                        style={[
-                                            styles.avatarThumbnail,
-                                            tempSelectedAvatar === avatar && styles.selectedAvatar
-                                        ]}
-                                        resizeMode="cover"
-                                    />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
                     </View>
-                </TouchableOpacity>
-            </Modal>
 
-            <View style={styles.formContainer}>
-               
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>email</Text>
-                    <TextInput
-                        style={styles.firstnameinput}
-                        value={email}
-                        onChangeText={setemail}
-                        placeholder="Enter your email"
-                    />
-                </View>
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <TouchableOpacity
+                            style={styles.modalOverlay}
+                            activeOpacity={1}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Choose Avatar</Text>
+                                    <TouchableOpacity
+                                        onPress={() => setModalVisible(false)}
+                                        style={styles.closeButton}
+                                    >
+                                        <Ionicons name="close" size={24} color="black" />
+                                    </TouchableOpacity>
+                                </View>
 
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Date of Birth</Text>
-                    <TextInput
-                        style={[styles.dateinput, dateError ? styles.errorInput : null]}
-                        value={dateOfBirth}
-                        onChangeText={handleDateChange}
-                        placeholder="DD/MM/YYYY"
-                        keyboardType="numeric"
-                        maxLength={10}
-                    />
-                    {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
-                </View>
+                                {loading ? (
+                                    <Text style={styles.loadingText}>Loading avatars...</Text>
+                                ) : (
+                                    <ScrollView>
+                                        <View style={styles.avatarGrid}>
+                                            {images.map((image, index) => {
+                                                const uri = `${BASE_URL}${image.path}`;
+                                                const isSelected = selectedAvatar?.uri === uri;
 
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    <TextInput
-                        style={[styles.input, phoneError ? styles.errorInput : null]}
-                        value={phone}
-                        onChangeText={HandlePhonenumber}
-                        placeholder="Enter your phone number"
-                        keyboardType="phone-pad"
-                        maxLength={10}
-                    />
-                    {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
-                </View>
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={index}
+                                                        style={styles.avatarOption}
+                                                        onPress={() => {
+                                                            setSelectedAvatar({ uri });
+                                                            setModalVisible(false);
+                                                        }}
+                                                    >
+                                                        <Image
+                                                            source={{ uri }}
+                                                            style={[
+                                                                styles.avatarThumbnail,
+                                                                isSelected && styles.selectedAvatar,
+                                                            ]}
+                                                            resizeMode="cover"
+                                                        />
+                                                    </TouchableOpacity>
+                                                );
+                                            })}
+                                        </View>
+                                    </ScrollView>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    </Modal>
 
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Address</Text>
-                    <TextInput
-                        style={[styles.addressinput]}
-                        value={address}
-                        onChangeText={setAddress}
-                        placeholder="Type your Address"
-                        multiline
-                        numberOfLines={5}
-                    />
-                </View>
+                    <View style={styles.formContainer}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Email</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={email}
+                                placeholder="Enter your email"
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        </View>
 
-                <PressableButton style={styles.saveButton} title="Save" onPress={handleSave} />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Date of Birth</Text>
+                            <TextInput
+                                style={[styles.input, dateError ? styles.errorInput : null]}
+                                value={dateOfBirth}
+                                onChangeText={handleDateChange}
+                                placeholder="DD/MM/YYYY"
+                                keyboardType="numeric"
+                                maxLength={10}
+                            />
+                            {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Phone Number</Text>
+                            <TextInput
+                                style={[styles.input, phoneError ? styles.errorInput : null]}
+                                value={phone}
+                                onChangeText={HandlePhonenumber}
+                                placeholder="Enter your phone number"
+                                keyboardType="phone-pad"
+                                maxLength={10}
+                            />
+                            {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Address</Text>
+                            <TextInput
+                                style={styles.addressInput}
+                                value={address}
+                                onChangeText={setAddress}
+                                placeholder="Type your Address"
+                                multiline
+                                numberOfLines={5}
+                            />
+                        </View>
+
+                        <PressableButton 
+                            style={styles.saveButton} 
+                            title="Save" 
+                            onPress={handleSave} 
+                        />
+                    </View>
+                </ScrollView>
                 
-            </View>
-            </ScrollView>
-            <CustomAlert
-                visible={showAlert}
-                title={alertTitle}
-                message={alertMessage}
-                onConfirm={() => setShowAlert(false)}
-            />
-
-        </SafeAreaView>
+                <CustomAlert
+                    visible={showAlert}
+                    title={alertTitle}
+                    message={alertMessage}
+                    onConfirm={() => setShowAlert(false)}
+                />
+            </SafeAreaView>
         </View>
     );
 };
@@ -419,6 +444,12 @@ const styles = StyleSheet.create({
     closeButton: {
         padding: 5,
     },
+    loadingText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#666',
+        padding: 20,
+    },
     avatarGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -453,22 +484,7 @@ const styles = StyleSheet.create({
         color: '#666',
         marginBottom: 8,
     },
-    firstnameinput: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        marginBottom: 20,
-    },
-    surenameinput: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-    },
-    dateinput: {
+    input: {
         backgroundColor: '#fff',
         padding: 12,
         borderRadius: 8,
@@ -483,15 +499,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 5,
     },
-    input: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        marginBottom: 20,
-      },
-    addressinput: {
+    addressInput: {
         height: 100,
         textAlignVertical: 'top',
         backgroundColor: '#fff',
@@ -502,21 +510,12 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         backgroundColor: '#9346D2',
-        padding: 10,
+        padding: 15,
         paddingHorizontal: 20,
         borderRadius: 8,
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: 20,
     },
-    disabledButton: {
-        backgroundColor: '#ccc',
-    },
-    saveButtonText: {
-        color: 'Black',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-   
 });
 
 export default EditProfileScreen;

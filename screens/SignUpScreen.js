@@ -13,8 +13,11 @@ import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
+import { setProfile } from '../Store/userSlice';
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
+    const [username, setusername] = useState('');
+    const [usernameError, setusernameError] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [emailError, setemailError] = useState('');
@@ -27,83 +30,90 @@ const SignupScreen = ({ navigation }) => {
     };
 
     const dispatch = useDispatch();
-    const handleSignUp = async () => {
-        setemailError('');
-        setEmailError('');
-        setPasswordError('');
-        setConfirmPasswordError('');
+ const handleSignUp = async () => {
+    setemailError('');
+    setusernameError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
 
-        // Basic validation
-        if (!email.trim()) {
-            setemailError('email is required');
-            return;
-        }
-        if (!email.trim()) {
-            setEmailError('Email is required');
-            return;
-        }
-        if (!validateEmail(email)) {
-            setEmailError('Please enter a valid email');
-            return;
-        }
-        if (!password) {
-            setPasswordError('Password is required');
-            return;
-        }
-        if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters');
-            return;
-        }
-        if (!confirmPassword) {
-            setConfirmPasswordError('Please confirm your password');
-            return;
-        }
-        if (password !== confirmPassword) {
-            setConfirmPasswordError('Passwords do not match');
-            return;
-        }
+    if (!username.trim()) {
+        setusernameError('Username is required');
+        return;
+    }
 
+    if (!email.trim()) {
+        setemailError('Email is required');
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        setemailError('Please enter a valid email');
+        return;
+    }
+
+    if (!password) {
+        setPasswordError('Password is required');
+        return;
+    }
+
+    if (password.length < 6) {
+        setPasswordError('Password must be at least 6 characters');
+        return;
+    }
+
+    if (!confirmPassword) {
+        setConfirmPasswordError('Please confirm your password');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        setConfirmPasswordError('Passwords do not match');
+        return;
+    }
+
+    try {
+        console.log("Payload:", { username, email_id: email, password, confirm_password: confirmPassword });
+
+        const response = await fetch('http://192.168.0.208:3000/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                email_id: email,
+                password,
+                confirm_password: confirmPassword
+            })
+        });
+
+        const text = await response.text();
+        console.log("Raw Response:", text);
+
+        let data;
         try {
-            console.log("Payload:", { email, email_id: email, password, confirmPassword });
-           
-            const response = await fetch('http://192.168.0.208:3000/signup', {
-
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                 body: JSON.stringify({ email, email_id: email, password, confirm_password: confirmPassword })
-
-            });
-            console.log("response:", response);
-
-            const text = await response.text();
-            console.log("Raw Response:", text);
-
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error("Failed to parse JSON:", e.message);
-                setPasswordError('Invalid response from server');
-                return;
-            }
-            console.log("Parsed Data:", data);
-
-            if ( data.message === 'User created successfully') {
-                
-                navigation.navigate('Login');
-            } else {
-                if (data.errors) {
-                    if (data.errors.email) setemailError(data.errors.email);
-                    if (data.errors.email) setEmailError(data.errors.email);
-                    if (data.errors.password) setPasswordError(data.errors.password);
-                }
-            }
-        } catch (error) {
-            setPasswordError('Something went wrong. Please try again.');
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error("Failed to parse JSON:", e.message);
+            setPasswordError('Invalid response from server');
+            return;
         }
-    };
+
+        console.log("Parsed Data:", data);
+
+        if (data.message === 'User created successfully') {
+            dispatch(setProfile({ username }));
+            console.log('setProfile',setProfile)
+            navigation.navigate('Login');
+        } else if (data.errors) {
+            if (data.errors.username) setusernameError(data.errors.username);
+            if (data.errors.email) setemailError(data.errors.email);
+            if (data.errors.password) setPasswordError(data.errors.password);
+        } else {
+            Alert.alert("Signup Failed", data.message || "Something went wrong.");
+        }
+    } catch (error) {
+        setPasswordError('Something went wrong. Please try again.');
+    }
+};
 
     return (
         <LinearGradient
@@ -117,20 +127,20 @@ const SignupScreen = ({ navigation }) => {
                 />
 
                 <CustomTextInput
-                    value={email}
+                    value={username}
                     onChangeText={(text) => {
-                        setemail(text);
-                        if (emailError) setemailError('');
+                        setusername(text);
+                        if (usernameError) setusernameError('');
                     }}
-                    placeholder="email"
+                    placeholder="username"
                 />
-                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+                {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
                 <CustomTextInput
                     value={email}
                     onChangeText={(text) => {
                         setEmail(text);
-                        if (emailError) setEmailError('');
+                        if (emailError) setemailError('');
                     }}
                     placeholder="Email"
                     keyboardType="email-address"
