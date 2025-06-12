@@ -56,7 +56,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 setLoading(false);
             }
             else {
-                setLoading(false);
+                setLoading(false);     
                 setAlertTitle('Error');
                 setAlertMessage('No images found');
                 setShowAlert(true);
@@ -97,37 +97,33 @@ useEffect(() => {
     return () => backHandler.remove();
 }, [navigation]);
 
-const validateDate = (date) => {
-    // Remove any non-numeric characters
-    const cleanedDate = date.replace(/[^\d]/g, '');
+const validateAndFormatDate = (inputDate) => {
+    let formattedDate = inputDate.replace(/[^0-9]/g, '');
 
-    // Format the date as user types
-    let formattedDate = '';
-    if (cleanedDate.length > 0) {
-        formattedDate = cleanedDate.slice(0, 2);
-        if (cleanedDate.length > 2) {
-            formattedDate += '/' + cleanedDate.slice(2, 4);
-            if (cleanedDate.length > 4) {
-                formattedDate += '/' + cleanedDate.slice(4, 8);
-            }
-        }
+    // Add slashes as user types
+    if (formattedDate.length >= 4 && formattedDate.length <= 6) {
+        formattedDate = `${formattedDate.slice(0, 4)}/${formattedDate.slice(4)}`;
+    } else if (formattedDate.length > 6) {
+        formattedDate = `${formattedDate.slice(0, 4)}/${formattedDate.slice(4, 6)}/${formattedDate.slice(6, 8)}`;
     }
 
-    // Validate the date
+    // Validate the date if fully entered
     if (formattedDate.length === 10) {
-        const [day, month, year] = formattedDate.split('/').map(Number);
+        const [year, month, day] = formattedDate.split('/').map(Number);
         const date = new Date(year, month - 1, day);
 
         // Check if the date is valid
-        if (isNaN(date.getTime()) ||
+        if (
+            isNaN(date.getTime()) ||
             date.getDate() !== day ||
             date.getMonth() !== month - 1 ||
-            date.getFullYear() !== year) {
+            date.getFullYear() !== year
+        ) {
             setDateError('Please enter a valid date');
         } else {
             setDateError('');
         }
-    } else if (formattedDate.length > 0) {
+    } else if (formattedDate.length > 0 && formattedDate.length < 10) {
         setDateError('Please complete the date');
     } else {
         setDateError('');
@@ -364,7 +360,7 @@ return (
                             style={[styles.input, dateError ? styles.errorInput : null]}
                             value={dateOfBirth}
                             onChangeText={handleDateChange}
-                            placeholder="DD/MM/YYYY"
+                            placeholder="YYYY/MM/DD"
                             keyboardType="numeric"
                             maxLength={10}
                         />
