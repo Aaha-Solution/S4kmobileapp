@@ -26,10 +26,10 @@ const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-	const videos = useSelector(state => state.user.videos);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const [videos, setVideos] = useState([]);
 	const isHomeScreen = route.name === 'Home';
 	
 	const baseURL = 'http://192.168.0.241:3000/videos/by-category';

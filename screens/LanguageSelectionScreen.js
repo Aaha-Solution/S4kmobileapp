@@ -81,7 +81,6 @@ const LanguageSelectionScreen = ({ navigation }) => {
 			</TouchableOpacity>
 		);
 	};
-
 	return (
 		<LinearGradient colors={['#9346D2', '#5BC3F5']} style={styles.container}>
 			<View style={styles.innerContainer}>
