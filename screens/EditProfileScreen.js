@@ -196,7 +196,14 @@ const EditProfileScreen = ({ route, navigation }) => {
                     dateOfBirth,
                     phone,
                     address,
+
                 }));
+                console.log('Profile updated in Redux:', {
+                    username,
+                    dateOfBirth,
+                    phone,
+                    address,
+                });
 
                 // Save selected avatar if changed
                 if (selectedAvatar !== profile_avatar) {
@@ -210,11 +217,8 @@ const EditProfileScreen = ({ route, navigation }) => {
                 setAlertTitle('Success');
                 setAlertMessage('Profile updated successfully');
                 setShowAlert(true);
-                
-                // Navigate after alert is dismissed
-                setTimeout(() => {
                     navigation.navigate('ViewProfile');
-                }, 2000);
+                
             } else {
                 setAlertTitle('Error');
                 setAlertMessage(data.message || 'Failed to update profile');
@@ -314,6 +318,16 @@ const EditProfileScreen = ({ route, navigation }) => {
                     </Modal>
 
                     <View style={styles.formContainer}>
+
+                         <View style={styles.inputGroup}>
+                            <Text style={styles.label}>UserName</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={profile.username}
+                                placeholder="Enter your username"
+                                autoCapitalize="none"
+                            />
+                        </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
                             <TextInput

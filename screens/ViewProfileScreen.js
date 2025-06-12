@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert,BackHandler } from 'react-native';
+import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert, BackHandler } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../Components/PressableButton';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { updateProfile } from '../Store/userSlice';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
 	console.log("Profile Data:", profile);
+	const updateProfileData = useSelector(state => state.user.updateProfile);
+
 	const email = useSelector((state) => state.user.email) || '';
 	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
@@ -39,7 +42,7 @@ const ViewProfileScreen = ({ navigation }) => {
 				setSelectedAvatar(parsedAvatar);
 				setTempSelectedAvatar(parsedAvatar);
 			}
-		} 
+		}
 		catch (error) {
 			console.log('Error loading avatar:', error);
 		}
@@ -50,12 +53,58 @@ const ViewProfileScreen = ({ navigation }) => {
 		setModalVisible(false);
 	};
 
+	useEffect(() => {
+		const fetchProfileUpdate = async () => {
+			try {
+				const token = await AsyncStorage.getItem('token');
+				const response = await fetch(
+					`http://192.168.0.208:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				console.log("Raw response:", response);
+
+				const data = await response.json(); // 👈 Important!
+				console.log("Parsed JSON:", data);  // 👈 Check this!
+
+				if (data && data.users_id) {
+					console.log("Profile data received:", data);
+
+					// Optional: update profile state with data.profile or similar
+					dispatch(updateProfile({
+						email: data.email_id,
+						username: data.username,
+						address: data.address,
+						dateOfBirth: data.dob,
+						phone: data.ph_no,
+						avatar: data.avatar,
+					}))
+				} else {
+					console.log("Profile fetch failed:", data.message || data);
+				}
+
+			} catch (error) {
+				console.log("run Error", error);
+			}
+		};
+
+
+		fetchProfileUpdate();
+	}, []);
+
+	console.log("Update Profile Data:", updateProfileData);
+
 	const handleEditPress = () => {
 		navigation.navigate('EditProfileScreen', {
 			email: email,
 			address: profile.address,
 			dateOfBirth: profile.dateOfBirth,
 			username: profile.username,
+			phone: profile.phone,
 		});
 	};
 
@@ -67,6 +116,16 @@ const ViewProfileScreen = ({ navigation }) => {
 
 		return () => backHandler.remove();
 	}, [navigation]);
+	const formatDate = (isoString) => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -94,7 +153,7 @@ const ViewProfileScreen = ({ navigation }) => {
 						visible={modalVisible}
 						onRequestClose={() => setModalVisible(false)}
 					>
-						<TouchableOpacity 
+						<TouchableOpacity
 							style={styles.modalOverlay}
 							activeOpacity={1}
 							onPress={() => setModalVisible(false)}
@@ -102,7 +161,7 @@ const ViewProfileScreen = ({ navigation }) => {
 							<View style={styles.modalContent}>
 								<View style={styles.modalHeader}>
 									<Text style={styles.modalTitle}>Choose Avatar</Text>
-									<TouchableOpacity 
+									<TouchableOpacity
 										onPress={() => setModalVisible(false)}
 										style={styles.closeButton}
 									>
@@ -125,38 +184,39 @@ const ViewProfileScreen = ({ navigation }) => {
 												resizeMode="cover"
 											/>
 										</TouchableOpacity>
-									))} 
+									))}
 								</View>
 							</View>
 						</TouchableOpacity>
-					</Modal>   
+					</Modal>
 
-					<Text style={styles.name}>{profile.email}</Text>
+
+					<Text style={styles.name}>{profile.username}</Text>
 
 					<View style={styles.formContainer}>
-						<View style={styles.inputGroup}> 
+						<View style={styles.inputGroup}>
 							<Text style={styles.label}>UserName</Text>
 							<Text style={styles.readonlyText}>{profile.username}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>E-Mail</Text>
-							<Text style={styles.readonlyText}>{email || 'example@gmail.com'}</Text>
+							<Text style={styles.readonlyText}>{email}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Date of Birth</Text>
-							<Text style={styles.readonlyText}>{profile.dateOfBirth || 'DD/MM/YYYY'}</Text>
+							<Text style={styles.readonlyText}>{formatDate(profile.dateOfBirth)}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Phone Number</Text>
-							<Text style={styles.readonlyText}>{profile.phone || '+91 9999999999'}</Text>
+							<Text style={styles.readonlyText}>{profile.phone}</Text>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Address</Text>
-							<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address || 'Type Here'}</Text>
+							<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address}</Text>
 						</View>
 
 						<PressableButton
@@ -286,10 +346,10 @@ const styles = StyleSheet.create({
 	saveButton: {
 		backgroundColor: '#9346D2',
 		padding: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
+		paddingHorizontal: 20,
+		borderRadius: 8,
+		alignItems: 'center',
+		marginTop: 10,
 	},
 });
 

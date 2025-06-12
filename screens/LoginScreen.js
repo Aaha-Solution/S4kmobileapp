@@ -50,33 +50,7 @@ const LoginScreen = ({ navigation }) => {
         checkRememberedUser();
     }, []); // Empty dependency array means this runs once on component mount
 
-    // --- Effect to check for an existing authentication token and auto-navigate ---
-    // This handles cases where a user might be already logged in (e.g., app was closed, then reopened)
-    // and bypasses the login screen if a valid session token exists.
-    useEffect(() => {
-        const checkToken = async () => {
-            setLoading(true); // Start loading while checking for token
-            try {
-                const token = await AsyncStorage.getItem('token');
-                if (token) {
-                    // If a token exists, assume the user is already logged in
-                    // In a production app, you might want to validate this token with your API
-                    // (e.g., /verify-token endpoint) before automatically navigating.
-                    console.log('Existing token found, navigating to LanguageSelectionScreen.');
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'LanguageSelectionScreen' }],
-                    });
-                }
-            } catch (error) {
-                console.error('Error checking token in AsyncStorage:', error);
-            } finally {
-                setLoading(false); // Stop loading after token check is complete
-            }
-        };
-
-        checkToken();
-    }, []); // Empty dependency array means this runs once on component mount
+    
 
     // --- Function to handle the login process ---
     const handleLogin = async () => {
@@ -149,8 +123,10 @@ const LoginScreen = ({ navigation }) => {
             }
 
             // Dispatch user data to Redux store to update application state
+            if (data.user) {
+                console.log('Dispatching user data to Redux store:', data.user);
             dispatch(login(data.user));
-
+            }
             // Navigate to the LanguageSelectionScreen and reset the navigation stack
             // This prevents the user from going back to the login screen using the back button.
             navigation.reset({
