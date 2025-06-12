@@ -20,7 +20,7 @@ const ViewProfileScreen = ({ navigation }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 
 	const dispatch = useDispatch();
-
+   
 	const avatars = [
 		require('../assets/image/profile_avatar.png'),
 		require('../assets/image/avatar1.png'),
