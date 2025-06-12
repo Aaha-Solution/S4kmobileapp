@@ -111,7 +111,11 @@ const LoginScreen = ({ navigation }) => {
                 await Keychain.resetGenericPassword();
             }
 
+            // Dispatch user data to Redux store to update application state
             dispatch(login(data.user));
+
+            // Navigate to the LanguageSelectionScreen and reset the navigation stack
+            // This prevents the user from going back to the login screen using the back button.
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'LanguageSelectionScreen' }],

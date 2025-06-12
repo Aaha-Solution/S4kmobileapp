@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { View, ActivityIndicator, TouchableOpacity, StyleSheet, StatusBar, Dimensions, Text } from 'react-native';
+import React, { useState,useEffect } from 'react';
+import { View, ActivityIndicator, TouchableOpacity, StyleSheet, StatusBar, Dimensions, Text, BackHandler  } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
 const { width } = Dimensions.get('window');
+
+  
 
 const VideoPlayerScreen = ({ route, navigation }) => {
   const { videoUri } = route.params;
@@ -63,6 +64,15 @@ const VideoPlayerScreen = ({ route, navigation }) => {
     const seconds = Math.floor(timeSec % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.navigate('Home');
+      return true;
+    });
+      return () => backHandler.remove(); // cleanup
+ 
+  },[]);
 
   // If no valid video source found
   if (!videoSource) {
