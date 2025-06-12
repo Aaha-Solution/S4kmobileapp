@@ -58,7 +58,7 @@ const ViewProfileScreen = ({ navigation }) => {
 			try {
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`http://192.168.0.208:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
+					`http://192.168.0.241:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
