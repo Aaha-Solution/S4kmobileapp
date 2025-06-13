@@ -16,7 +16,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const username = profile?.username || '';
 
     // Base URL - consider moving to config file
-    const BASE_URL = 'http://192.168.0.241:3000';
+    const BASE_URL = 'http://192.168.0.209:3000';
     
     // State variables
     const [email, setemail] = useState(route.params?.email || '');
@@ -33,42 +33,43 @@ const EditProfileScreen = ({ route, navigation }) => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Load avatar images from server
-    useEffect(async () => {
-        const token = await AsyncStorage.getItem('token');
+   useEffect(() => {
+    const fetchAvatarImages = async () => {
         try {
-
+            const token = await AsyncStorage.getItem('token');
             const response = await fetch(`${BASE_URL}/api/images/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
+                    Authorization: `Bearer ${token}`,
                 },
-
             });
-            console.log('response', response);
+
             const data = await response.json();
             console.log('data', data);
+
             if (data && data.images) {
-                setImages(data.images.map(image => ({
-                    uri: `${BASE_URL}${image.path}`,
-                })));
-                setLoading(false);
-            }
-            else {
-                setLoading(false);     
+                setImages(
+                    data.images.map((image) => ({
+                        uri: `${BASE_URL}${image.path}`,
+                    }))
+                );
+            } else {
                 setAlertTitle('Error');
                 setAlertMessage('No images found');
                 setShowAlert(true);
             }
-            console.log('Images loaded:', data.images);
         } catch (error) {
             console.error('Error fetching images:', error);
-            setLoading(false);
             setAlertTitle('Error');
             setAlertMessage('Failed to load avatar images');
             setShowAlert(true);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    fetchAvatarImages(); // Call the async function inside useEffect
 }, []);
 
 // Load saved avatar from AsyncStorage
@@ -97,7 +98,7 @@ useEffect(() => {
     return () => backHandler.remove();
 }, [navigation]);
 
-const validateAndFormatDate = (inputDate) => {
+const validateAndFormatDate = (inputDate, setDateError) => {
     let formattedDate = inputDate.replace(/[^0-9]/g, '');
 
     // Add slashes as user types
@@ -112,7 +113,6 @@ const validateAndFormatDate = (inputDate) => {
         const [year, month, day] = formattedDate.split('/').map(Number);
         const date = new Date(year, month - 1, day);
 
-        // Check if the date is valid
         if (
             isNaN(date.getTime()) ||
             date.getDate() !== day ||
@@ -131,6 +131,7 @@ const validateAndFormatDate = (inputDate) => {
 
     return formattedDate;
 };
+
 
 const HandlePhonenumber = (phoneNumber) => {
     // Remove any non-digit characters
@@ -162,9 +163,10 @@ const HandlePhonenumber = (phoneNumber) => {
 };
 
 const handleDateChange = (text) => {
-    const formattedDate = validateDate(text);
+    const formattedDate = validateAndFormatDate(text, setDateError);
     setDateOfBirth(formattedDate);
 };
+
 
 const handleSave = async () => {
     if (!email || !dateOfBirth || !phone || !address) {

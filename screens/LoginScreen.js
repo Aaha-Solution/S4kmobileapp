@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
-import { login } from '../Store/userSlice';
+import { login, setProfile } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
@@ -47,24 +47,33 @@ const LoginScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-        const checkToken = async () => {
-            setLoading(true);
-            try {
-                const token = await AsyncStorage.getItem('token');
-                if (token) {
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'LanguageSelectionScreen' }],
-                    });
-                }
-            } catch (error) {
-                console.error('Token check error:', error);
-            } finally {
-                setLoading(false);
+    let isMounted = true;
+
+    const checkToken = async () => {
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (token && isMounted) {
+                dispatch(setProfile()); // Dispatch the token to Redux store
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'MainTabs' }],
+                });
             }
-        };
-        checkToken();
-    }, [navigation]);
+        } catch (error) {
+            console.error('Token check error:', error);
+        } finally {
+            if (isMounted) setLoading(false);
+        }
+    };
+
+    checkToken();
+
+    return () => {
+        isMounted = false; // cleanup to prevent memory leaks
+    };
+}, [navigation]);
+
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -90,7 +99,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.0.241:3000/login', {
+            const response = await fetch('http://192.168.0.209:3000/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
