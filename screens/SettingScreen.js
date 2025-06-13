@@ -77,36 +77,6 @@ const SettingsScreen = ({ route, navigation }) => {
 	}, [navigation]);
 
 
-	// 	try {
-	// 		const response = await fetch('http://192.168.0.208/smile4kids-Geethu/api/logout.php', {
-	// 			method: 'POST',
-	// 			headers: {
-	// 				'Content-Type': 'application/json',
-	// 			},
-	// 			body: JSON.stringify({ user_id: user.id }),
-	// 		});
-
-	// 		if (!response.ok) {
-	// 			throw new Error('Logout failed');
-	// 		}
-
-	// 		const result = await response.json();
-	// 		console.log('Logout success:', result);
-
-	// 		dispatch(logout());
-	// 		navigation.dispatch(
-	// 			CommonActions.reset({
-	// 				index: 0,
-	// 				routes: [{ name: 'Login' }],
-	// 			})
-	// 		);
-
-	// 	} catch (error) {
-	// 		console.error('Logout error:', error);
-	// 		setShowAlert(false);
-	// 	}
-	// };
-	
 const handleConfirmLogout = async () => {
 	console.log("handleConfirmLogout called");
 	const token = await AsyncStorage.getItem('token');

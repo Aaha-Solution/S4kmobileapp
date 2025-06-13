@@ -32,7 +32,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 	
-	const baseURL = 'http://192.168.0.208:3000/videos/by-category';
+	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
 
 	console.log("isHomeScreen", isHomeScreen);
 
