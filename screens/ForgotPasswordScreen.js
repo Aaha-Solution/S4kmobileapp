@@ -88,7 +88,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch("http://192.168.0.208:3000/forgot/send-otp", {
+            const response = await fetch("http://192.168.0.241:3000/forgot/send-otp", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',

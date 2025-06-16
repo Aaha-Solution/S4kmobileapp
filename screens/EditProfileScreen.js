@@ -16,7 +16,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const username = profile?.username || '';
 
     // Base URL - consider moving to config file
-    const BASE_URL = 'http://192.168.0.209:3000';
+    const BASE_URL = 'http://192.168.0.241:3000';
     
     // State variables
     const [email, setemail] = useState(route.params?.email || '');
@@ -252,10 +252,10 @@ const handleSave = async () => {
 
 return (
     <View style={{ flex: 1 }}>
-        <LinearGradient
-            colors={['#E0B0FF', '#ffffff']}
-            style={StyleSheet.absoluteFill}
-        />
+    <LinearGradient
+        colors={['#87CEEB', '#ADD8E6', '#F0F8FF']}
+        style={StyleSheet.absoluteFill}
+    />
         <SafeAreaView style={styles.container}>
             <ScrollView>
                 <View style={styles.header}>
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
     },
     saveButton: {
-        backgroundColor: '#9346D2',
+       // backgroundColor: '#9346D2',
         padding: 15,
         paddingHorizontal: 20,
         borderRadius: 8,

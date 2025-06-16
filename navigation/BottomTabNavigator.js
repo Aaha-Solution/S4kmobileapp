@@ -94,12 +94,12 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 									<Icon 
 										name={iconName} 
 										size={24} 
-										color={isFocused ? '#8A2BE2' : 'gray'} 
+										color={isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray'} 
 									/>
 									<Text 
 										style={[
 											styles.tabLabel, 
-											{ color: isFocused ? '#8A2BE2' : 'gray' }
+											{ color: isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray' }
 										]}
 									>
 										{label}
@@ -136,8 +136,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 							onPress={() => handleTabPress(route)}
 							style={styles.tabButton}
 						>
-							<Icon name={iconName} size={24} color={isFocused ? '#8A2BE2' : 'gray'} />
-							<Text style={[styles.tabLabel, { color: isFocused ? '#8A2BE2' : 'gray' }]}>{label}</Text>
+							<Icon name={iconName} size={24} color={isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray'} />
+							<Text style={[styles.tabLabel, { color: isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray' }]}>{label}</Text>
 						</TouchableOpacity>
 					);
 				})}
@@ -173,6 +173,7 @@ const BottomTabNavigator = () => {
 				headerStyle: { backgroundColor: '#87CEEB' },
 				headerTintColor: '#fff',
 				headerTitleStyle: { fontWeight: 'bold' },
+
 			}}
 		>
 			<Tab.Screen
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
 	tabBarContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-around',
-		backgroundColor: '#f9f9f9',
+		backgroundColor: '#F0F8FF',
 		height: 60,
 		paddingTop: 5,
 		paddingBottom: 5,

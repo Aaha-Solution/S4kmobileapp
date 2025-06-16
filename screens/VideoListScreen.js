@@ -32,9 +32,18 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 
-	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
+	const baseURL = 'http://smile4kids-mobilebackend.onrender.com/videos/by-category';
 
 	// Back button handler
+	const handleError = (error) => {
+		console.error("🔴 Video playback error:", error); // Log the error details
+		if (error && error.target) {
+			console.error("📌 Error target:", error.target);
+		}
+		setLoading(false);
+		setError(true);
+		alert("An error occurred during video playback. Please try again later.");
+	};
 	useEffect(() => {
 		if (!isHomeScreen) return;
 		const backAction = () => {
@@ -86,7 +95,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 		const formattedLevel = getFormattedLevel(selectedAgeGroup);
 		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
-
+		console.log("url", url)
 		try {
 			const response = await axios.get(url);
 			if (response.status === 200 && Array.isArray(response.data)) {
@@ -94,7 +103,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			} else {
 				setVideos([]);
 			}
-			console.log('response',response)
+			console.log('response', response)
 		} catch (error) {
 			console.error('API fetch error:', error);
 			setVideos([]);
@@ -128,13 +137,13 @@ const VideoListScreen = ({ navigation, route }) => {
 		setLanguage(langKey);
 	}, []);
 
-const renderItem = ({ item, index }) => (
-	<TouchableOpacity
-		style={styles.kidCard}
-		onPress={() => handleVideoPress(item)}
-		activeOpacity={0.9}
-	>
-		<Image
+	const renderItem = ({ item, index }) => (
+		<TouchableOpacity
+			style={styles.kidCard}
+			onPress={() => handleVideoPress(item)}
+			activeOpacity={0.9}
+		>
+			{/* <Image
 			source={
 				item.thumbnailUrl
 					? { uri: item.thumbnailUrl }
@@ -142,18 +151,18 @@ const renderItem = ({ item, index }) => (
 			}
 			style={styles.kidImage}
 			resizeMode="cover"
-		/>
-		<View style={styles.kidTextContainer}>
-			<Text style={styles.kidTitle} numberOfLines={2}>
-				{item.title || `Video ${index + 1}`}
-			</Text>
-			<Text style={styles.kidSubText}>
-				{item.duration ? `${item.duration} min` : 'Fun learning'}
-			</Text>
-		</View>
-		<Icon name="chevron-forward" size={24} color="#fff" />
-	</TouchableOpacity>
-);
+		/> */}
+			<View style={styles.kidTextContainer}>
+				<Text style={styles.kidTitle} numberOfLines={2}>
+					{item.title || `Video ${index + 1}`}
+				</Text>
+				<Text style={styles.kidSubText}>
+					{item.duration ? `${item.duration} min` : 'Fun learning'}
+				</Text>
+			</View>
+			<Icon name="chevron-forward" size={24} color="#fff" />
+		</TouchableOpacity>
+	);
 
 
 	return (
@@ -225,14 +234,14 @@ const styles = StyleSheet.create({
 		paddingTop: 10,
 	},
 	languageButton: {
-		backgroundColor: '#FF8C00', 
+		backgroundColor: '#FF8C00',
 		paddingVertical: 10,
 		borderRadius: 8,
 		flex: 1,
 		marginHorizontal: 5,
 		alignItems: 'center',
 	},
-	
+
 	languageButtonActive: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
 	},
@@ -310,7 +319,7 @@ const styles = StyleSheet.create({
 	kidCard: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: '#BDE894',
+		backgroundColor: 'white',
 		marginVertical: 8,
 		marginHorizontal: 12,
 		padding: 12,
@@ -341,7 +350,7 @@ const styles = StyleSheet.create({
 		color: '#6A5ACD',
 		marginTop: 4,
 	},
-	
+
 });
 
 export default VideoListScreen;
