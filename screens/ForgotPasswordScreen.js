@@ -225,7 +225,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 visible={showAlert}
                 title="Error"
                 message="Please enter a valid email address"
-                onConfirm={handleConfirmLogout}
+                
             />
         </LinearGradient>
     );

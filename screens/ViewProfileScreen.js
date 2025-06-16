@@ -11,6 +11,8 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
+	console.log('DOB from Redux:', profile.dateOfBirth);
+
 	console.log("Profile Data:", profile);
 	const updateProfileData = useSelector(state => state.user.updateProfile);
 
@@ -117,16 +119,18 @@ const ViewProfileScreen = ({ navigation }) => {
 		return () => backHandler.remove();
 	}, [navigation]);
 
-	const formatDate = (isoString) => {
-		if (!isoString) return '';
-
-		const date = new Date(isoString);
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, '0'); // month is 0-indexed
-		const day = String(date.getDate()).padStart(2, '0');
-
-		return `${year}/${month}/${day}`;
+	const formatDate = (dateString) => {
+		if (!dateString) return '';
+		const [year, month, day] = dateString.split('/');
+		const date = new Date(`${year}-${month}-${day}`);
+		if (isNaN(date)) return 'Invalid Date';
+		return date.toLocaleDateString('en-GB', {
+			year: 'numeric',
+			month: 'short',
+			day: '2-digit',
+		});
 	};
+
 
 
 	return (
