@@ -75,14 +75,14 @@ const VideoListScreen = ({ navigation, route }) => {
 	};
 
 	const getFormattedLevel = (ageGroup) => {
-		if (!ageGroup) return 'PreJunior';
+		if (!ageGroup) return 'Pre-Junior';
 		const lowerAgeGroup = ageGroup.toLowerCase();
 		if (lowerAgeGroup.includes('junior') && (lowerAgeGroup.includes('7') || lowerAgeGroup.includes('above'))) {
 			return 'Junior';
 		} else if (lowerAgeGroup.includes('pre-prep') || lowerAgeGroup.includes('4-6')) {
-			return 'PreJunior';
+			return 'Pre-Junior';
 		}
-		return 'PreJunior';
+		return 'Pre-Junior';
 	};
 
 	const fetchVideos = useCallback(async () => {
