@@ -26,7 +26,7 @@ const menuItems = [
 	{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
-  
+
 const SettingsScreen = ({ route, navigation }) => {
 	const { selectedAvatar } = route.params || {};
 	const email = useSelector((state) => state.user.email) || '';
@@ -48,7 +48,7 @@ const SettingsScreen = ({ route, navigation }) => {
 		}
 	}, [selectedAvatar]);
 
-	const loadAvatar = async () => {   
+	const loadAvatar = async () => {
 		try {
 			// await AsyncStorage.removeItem('selectedAvatar');
 			// console.log('User data removed');
@@ -56,7 +56,7 @@ const SettingsScreen = ({ route, navigation }) => {
 			if (savedAvatar) {
 				const parsedAvatar = JSON.parse(savedAvatar);
 				setTempSelectedAvatar(parsedAvatar);
-				console.log("savedAvatar",savedAvatar)
+				console.log("savedAvatar", savedAvatar)
 			} else {
 				console.log('No saved avatar found, using default:', profile_avatar);
 				setTempSelectedAvatar(profile_avatar);
@@ -77,49 +77,49 @@ const SettingsScreen = ({ route, navigation }) => {
 	}, [navigation]);
 
 
-const handleConfirmLogout = async () => {
-	console.log("handleConfirmLogout called");
-	const token = await AsyncStorage.getItem('token');
-	const savedEmail = await AsyncStorage.getItem('savedEmail');
-    const savedPassword = await AsyncStorage.getItem('savedPassword');
-    const rememberMe = await AsyncStorage.getItem('rememberMe');
-	
-  try {
+	const handleConfirmLogout = async () => {
+		console.log("handleConfirmLogout called");
+		const token = await AsyncStorage.getItem('token');
+		const savedEmail = await AsyncStorage.getItem('savedEmail');
+		const savedPassword = await AsyncStorage.getItem('savedPassword');
+		const rememberMe = await AsyncStorage.getItem('rememberMe');
 
-    await AsyncStorage.removeItem('token');	 
-    await AsyncStorage.removeItem('savedEmail'); // if you saved email	
-    await AsyncStorage.removeItem('savedPassword'); // if you saved password
-    await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
-	await AsyncStorage.removeItem('selectedAvatar'); // remove selected avatar
-	await AsyncStorage.removeItem('user'); // remove user data
-	await AsyncStorage.removeItem('userProfile'); 
-	
+		try {
 
-	 console.log("token:", token);
-    console.log("savedEmail:", savedEmail);
-    console.log("savedPassword:", savedPassword);
-    console.log("rememberMe:", rememberMe);
-
-	 const tokenAfterRemoval = await AsyncStorage.getItem('token');
-        console.log("token AFTER removal:", tokenAfterRemoval); // This should now be null
+			await AsyncStorage.removeItem('token');
+			await AsyncStorage.removeItem('savedEmail'); // if you saved email	
+			await AsyncStorage.removeItem('savedPassword'); // if you saved password
+			await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
+			await AsyncStorage.removeItem('selectedAvatar'); // remove selected avatar
+			await AsyncStorage.removeItem('user'); // remove user data
+			await AsyncStorage.removeItem('userProfile');
 
 
-    dispatch(logout()); // clear Redux user state
-	navigation.dispatch(
-			CommonActions.reset({
-				index: 0,
-				routes: [{ name: 'Login' }],
-			})
-		);
-	}  catch (error) {
-    console.error('Logout failed:', error);
-	setShowAlert(false);
-  }
-};
+			console.log("token:", token);
+			console.log("savedEmail:", savedEmail);
+			console.log("savedPassword:", savedPassword);
+			console.log("rememberMe:", rememberMe);
 
-const handleLogout =()=>{
-	setShowAlert(true);
-}
+			const tokenAfterRemoval = await AsyncStorage.getItem('token');
+			console.log("token AFTER removal:", tokenAfterRemoval); // This should now be null
+
+
+			dispatch(logout()); // clear Redux user state
+			navigation.dispatch(
+				CommonActions.reset({
+					index: 0,
+					routes: [{ name: 'Login' }],
+				})
+			);
+		} catch (error) {
+			console.error('Logout failed:', error);
+			setShowAlert(false);
+		}
+	};
+
+	const handleLogout = () => {
+		setShowAlert(true);
+	}
 	const handleCancelLogout = () => {
 		setShowAlert(false);
 	};
@@ -130,7 +130,7 @@ const handleLogout =()=>{
 			return true;
 		});
 
-		
+
 	});
 
 
@@ -180,7 +180,7 @@ const handleLogout =()=>{
 						</Pressable>
 					))}
 				</ScrollView>
-				
+
 				<CustomAlert
 					visible={showAlert}
 					title="Logout"
@@ -188,7 +188,7 @@ const handleLogout =()=>{
 					onConfirm={handleConfirmLogout}
 					onCancel={handleCancelLogout}
 				/>
-				
+
 			</SafeAreaView>
 			</LinearGradient>
 		</View>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
 		height: 100,
 		borderRadius: 50,
 		marginRight: 15,
-		
+
 	},
 	name: {
 		color: '#654321',

@@ -16,8 +16,8 @@ const EditProfileScreen = ({ route, navigation }) => {
     const username = profile?.username || '';
 
     // Base URL - consider moving to config file
-    const BASE_URL = 'http://192.168.0.209:3000';
-
+    const BASE_URL = 'http://192.168.0.241:3000';
+    
     // State variables
     const [email, setemail] = useState(route.params?.email || '');
     const [address, setAddress] = useState(route.params?.address || '');
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
     },
     saveButton: {
-        backgroundColor: '#9346D2',
+       // backgroundColor: '#9346D2',
         padding: 15,
         paddingHorizontal: 20,
         borderRadius: 8,
