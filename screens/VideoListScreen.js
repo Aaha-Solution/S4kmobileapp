@@ -143,15 +143,20 @@ const VideoListScreen = ({ navigation, route }) => {
 			onPress={() => handleVideoPress(item)}
 			activeOpacity={0.9}
 		>
-			{/* <Image
-			source={
-				item.thumbnailUrl
-					? { uri: item.thumbnailUrl }
-					: require('../assets/image/splash.png')
-			}
-			style={styles.kidImage}
-			resizeMode="cover"
-		/> */}
+			<Image
+				source={
+					item.thumbnailUrl
+						? { uri: item.thumbnailUrl }
+						: require('../assets/image/splash.png')
+				}
+				style={{
+					width: imageWidth,
+					height: imageWidth * 0.7,
+					borderRadius: 12,
+					backgroundColor: '#E6E6FA',
+				}}
+				resizeMode="contain"
+			/>
 			<View style={styles.kidTextContainer}>
 				<Text style={styles.kidTitle} numberOfLines={2}>
 					{item.title || `Video ${index + 1}`}
@@ -163,6 +168,8 @@ const VideoListScreen = ({ navigation, route }) => {
 			<Icon name="chevron-forward" size={24} color="#fff" />
 		</TouchableOpacity>
 	);
+	const screenWidth = Dimensions.get('window').width;
+	const imageWidth = screenWidth * 0.25;
 
 
 	return (
@@ -329,12 +336,6 @@ const styles = StyleSheet.create({
 		shadowRadius: 6,
 		shadowOffset: { width: 0, height: 2 },
 		elevation: 4,
-	},
-	kidImage: {
-		width: 70,
-		height: 70,
-		borderRadius: 16,
-		backgroundColor: '#E6E6FA',
 	},
 	kidTextContainer: {
 		flex: 1,
