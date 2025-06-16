@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
 	name: {
 		fontSize: 24,
 		fontWeight: 'bold',
-		color: 'purple',
+		color: '#FF8C00',
 		marginBottom: 10,
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -346,7 +346,6 @@ const styles = StyleSheet.create({
 		borderColor: '#8A2BE2',
 	},
 	saveButton: {
-		backgroundColor: '#9346D2',
 		padding: 10,
 		paddingHorizontal: 20,
 		borderRadius: 8,

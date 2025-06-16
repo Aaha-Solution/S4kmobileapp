@@ -17,7 +17,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(selectedAgeGroup);
 	const [items, setItems] = useState([
-		{ label: 'Pre-Prep (4-6 years)', value: 'Pre-Prep (4-6 years)' },
+		{ label: 'PreJunior (4-6 years)', value: 'PreJunior (4-6 years)' },
 		{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 	]);
 
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
 		zIndex: 1000,
 	},
 	dropdown: {
-		borderColor: '#E0B0FF',
+		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
 		borderRadius: 10,
 		width: 180,
 	},
 	dropdownContainer: {
-		borderColor: '#E0B0FF',
+		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
 		borderRadius: 10,
 	},

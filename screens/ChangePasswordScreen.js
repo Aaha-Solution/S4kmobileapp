@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
 		maxHeight: 80,
 	},
 	saveButton: {
-		backgroundColor: '#8A2BE2',
 		padding: 10,
 		width: '100%',
 		paddingVertical: 15,
@@ -207,15 +206,7 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		alignContent: 'center'
 	},
-	cancelButton: {
-		backgroundColor: '#ccc',
-		padding: 10,
-		paddingVertical: 15,
-		borderRadius: 12,
-		alignItems: 'center',
-		flex: 1,
-		marginLeft: 5,
-	},
+	
 });
 
 export default ChangePasswordScreen;
