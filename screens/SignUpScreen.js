@@ -80,7 +80,7 @@ const SignupScreen = ({ navigation }) => {
         try {
             console.log("Payload:", { email, email_id: email, password, confirmPassword });
            
-            const response = await fetch('http://192.168.0.241:3000/signup', {
+            const response = await fetch('http://192.168.0.209:3000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

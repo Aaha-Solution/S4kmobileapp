@@ -20,7 +20,7 @@ const ViewProfileScreen = ({ navigation }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 
 	const dispatch = useDispatch();
-   
+
 	const avatars = [
 		require('../assets/image/profile_avatar.png'),
 		require('../assets/image/avatar1.png'),
@@ -58,7 +58,7 @@ const ViewProfileScreen = ({ navigation }) => {
 			try {
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`http://192.168.0.241:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
+					`http://192.168.0.208:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
@@ -116,15 +116,17 @@ const ViewProfileScreen = ({ navigation }) => {
 
 		return () => backHandler.remove();
 	}, [navigation]);
+
 	const formatDate = (isoString) => {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-};
+		if (!isoString) return '';
+
+		const date = new Date(isoString);
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0'); // month is 0-indexed
+		const day = String(date.getDate()).padStart(2, '0');
+
+		return `${year}/${month}/${day}`;
+	};
 
 
 	return (
