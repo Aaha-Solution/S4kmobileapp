@@ -178,7 +178,8 @@ const BottomTabNavigator = () => {
 			<Tab.Screen
 				name="Setting"
 				component={SettingScreen}
-				options={{ title: 'Setting' }}
+				options={{ title: 'Setting',
+				 }}
 			/>
 			<Tab.Screen
 				name="Home"

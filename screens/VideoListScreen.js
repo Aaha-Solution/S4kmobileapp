@@ -32,7 +32,8 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 
-	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
+	// const baseURL = 'http://192.168.0.209:3000/videos/by-category';
+	const baseURL = 'https://smile4kids-mobilebackend.onrender.com/videos/list/panjabi/junior';
 
 	// Back button handler
 	useEffect(() => {

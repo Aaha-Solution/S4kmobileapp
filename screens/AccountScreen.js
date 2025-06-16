@@ -43,12 +43,7 @@ const AccountScreen = ({ route, navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[ '#E0B0FF', '#ffffff']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.profileContainer}>
@@ -93,6 +88,7 @@ const AccountScreen = ({ route, navigation }) => {
         
 
       </ScrollView>
+      </LinearGradient>
     </View>
   );
 };
@@ -102,7 +98,7 @@ export default AccountScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+   
   },
   header: {
     alignItems: 'center',

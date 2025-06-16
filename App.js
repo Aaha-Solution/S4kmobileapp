@@ -65,7 +65,7 @@ const App = () => (
 						headerTitleAlign: 'center',
 						headerTransparent: true,
 						headerStyle: {
-							backgroundColor: '#b388eb',
+							backgroundColor: '#87CEEB',
 						},
 						headerLeft: () => (
 							<Ionicons
@@ -87,7 +87,7 @@ const App = () => (
 					headerTintColor: '#fff',
 					headerTitleStyle: { fontWeight: 'bold' },
 					headerStyle: {
-						backgroundColor: '#b388eb',
+						backgroundColor: '#87CEEB',
 						
 					},
 					headerLeft: () => (
@@ -109,7 +109,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#b388eb',
+						backgroundColor: '#87CEEB',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -128,7 +128,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#b388eb',
+						backgroundColor: '#87CEEB',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -147,7 +147,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#b388eb',
+						backgroundColor: '#87CEEB',
 					},
 					headerLeft: () => (
 						<Ionicons
@@ -166,7 +166,7 @@ const App = () => (
 					headerTitleAlign: 'center',
 					headerTransparent: true,
 					headerStyle: {
-						backgroundColor: '#b388eb',
+						backgroundColor: '#87CEEB',
 					},
 					headerLeft: () => (
 						<Ionicons

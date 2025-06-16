@@ -45,7 +45,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 			return;
 		}
 		try {
-			const response = await fetch("http://192.168.0.208:3000/forgot/verify-otp", {
+			const response = await fetch("http://192.168.0.209:3000/forgot/verify-otp", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"

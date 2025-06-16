@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 	}
 
 		try{
-			const response = await fetch ("http://192.168.0.208:3000/forgot/reset-password",{
+			const response = await fetch ("http://192.168.0.209:3000/forgot/reset-password",{
 				method:"POST",
 				headers:{
 					"Content-type":"application/json"
@@ -51,12 +51,11 @@ const ResetPasswordScreen = ({ route }) => {
 			console.log("conform pass", confirmPassword);
 			const data = await response.json();
 			console.log("data:", data);
+
 			if (data.message === 'Password reset successful') {
 				console.log("success",data.message)
-				setAlertTitle("Success")
-				setAlertMessage("Your Password has been reset")
-				setShowAlert(true)
 				navigation.navigate("Login")
+				
 
 			}else{
 				console.log("error",data.message)
@@ -69,9 +68,7 @@ const ResetPasswordScreen = ({ route }) => {
 		}
 
 	};
-	const handleConfirmExit = ()=>{
-		setShowAlert(false)
-	}
+	
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.header}>
@@ -111,11 +108,7 @@ const ResetPasswordScreen = ({ route }) => {
 				) : null}
 	
 				<View style={styles.buttonWrapper}>
-					<PressableButton
-						title=" Reset My Password 🚀"
-						onPress={handleResetPassword}
-						style={styles.resetButton}
-					/>
+					
 				</View>
 	
 				<CustomAlert

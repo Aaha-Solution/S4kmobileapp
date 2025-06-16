@@ -140,12 +140,7 @@ const handleLogout =()=>{
 
 	return (
 		<View style={{ flex: 1 }}>
-			<LinearGradient
-				colors={['#f9f9f9', '#fff']}
-				start={{ x: 0.5, y: 0 }}
-				end={{ x: 0.5, y: 1 }}
-				style={StyleSheet.absoluteFill}
-			/>
+			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<SafeAreaView style={[styles.safeArea, { flex: 1 }]}> 
 				<View style={styles.header}>
 					<View style={styles.profileContainer}>
@@ -195,7 +190,9 @@ const handleLogout =()=>{
 				/>
 				
 			</SafeAreaView>
+			</LinearGradient>
 		</View>
+		
 	);
 };
 

@@ -240,12 +240,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <LinearGradient
-                colors={['#E0B0FF', '#ffffff']}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-                style={StyleSheet.absoluteFill}
-            />
+           <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
             <SafeAreaView style={styles.container}>
                 <ScrollView>
                     <View style={styles.header}>
@@ -396,6 +391,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     onConfirm={() => setShowAlert(false)}
                 />
             </SafeAreaView>
+            </LinearGradient>
         </View>
     );
 };
@@ -403,7 +399,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8',
+        
     },
     header: {
         alignItems: 'center',
