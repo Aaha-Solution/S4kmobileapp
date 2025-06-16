@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
 import { setEmail as setReduxEmail } from '../Store/userSlice';
 

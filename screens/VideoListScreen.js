@@ -5,16 +5,16 @@ import {
 	FlatList,
 	TouchableOpacity,
 	StyleSheet,
+	Image,
 	Dimensions,
 	BackHandler
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 // Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
@@ -26,25 +26,21 @@ const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-	const[videos, setVideos] = useState([]);
+	const [videos, setVideos] = useState([]);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
-	
+
 	const baseURL = 'http://192.168.0.241:3000/videos/by-category';
 
-	console.log("isHomeScreen", isHomeScreen);
-
-	// Handle back button for exit confirmation
+	// Back button handler
 	useEffect(() => {
 		if (!isHomeScreen) return;
-	
 		const backAction = () => {
-		  setShowAlert(true);
-		  return true;
+			setShowAlert(true);
+			return true;
 		};
-	
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 		return () => backHandler.remove();
 	}, [isHomeScreen]);
@@ -55,10 +51,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				setShowAlert(true);
 				return true;
 			};
-			const backHandler = BackHandler.addEventListener(
-				'hardwareBackPress',
-				backAction
-			);
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
@@ -72,50 +65,36 @@ const VideoListScreen = ({ navigation, route }) => {
 		setShowAlert(false);
 	};
 
-	// Function to get formatted level from age group
 	const getFormattedLevel = (ageGroup) => {
 		if (!ageGroup) return 'PreJunior';
-		
-		// Check if the age group contains "Junior" and mentions "7" or "above"
 		const lowerAgeGroup = ageGroup.toLowerCase();
 		if (lowerAgeGroup.includes('junior') && (lowerAgeGroup.includes('7') || lowerAgeGroup.includes('above'))) {
 			return 'Junior';
 		} else if (lowerAgeGroup.includes('pre-prep') || lowerAgeGroup.includes('4-6')) {
 			return 'PreJunior';
 		}
-		
-		return 'PreJunior'; // Default fallback
+		return 'PreJunior';
 	};
 
-	// Fetch videos from API
 	const fetchVideos = useCallback(async () => {
 		if (!selectedAgeGroup || !language) {
-			 ([]);
+			setVideos([]);
 			return;
 		}
-
 		setLoading(true);
 		setVideos([]);
 
 		const formattedLevel = getFormattedLevel(selectedAgeGroup);
 		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
 
-		console.log('🔍 selectedAgeGroup:', selectedAgeGroup);
-		console.log('🔍 language:', language);
-		console.log('🔍 formattedLevel:', formattedLevel);
-		console.log('🔍 API URL:', url);
-
 		try {
 			const response = await axios.get(url);
-			console.log('🔍 API Response:', response.data);
-			
 			if (response.status === 200 && Array.isArray(response.data)) {
-				console.log('📦 Received videos:', response.data.length);
 				setVideos(response.data);
 			} else {
-				console.warn('Unexpected API response format');
 				setVideos([]);
 			}
+			console.log('response',response)
 		} catch (error) {
 			console.error('API fetch error:', error);
 			setVideos([]);
@@ -124,14 +103,10 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 	}, [language, selectedAgeGroup]);
 
-	// Fetch videos when language or age group changes
 	useEffect(() => {
-		console.log('Current language:', language);
-		console.log('Current age group:', selectedAgeGroup);
 		fetchVideos();
 	}, [selectedAgeGroup, language, fetchVideos]);
 
-	// Update language when selectedLanguage changes
 	useEffect(() => {
 		if (selectedLanguage) {
 			setLanguage(selectedLanguage);
@@ -140,15 +115,12 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	useEffect(() => {
 		const unsubscribe = navigation.addListener('focus', () => {
-			console.log('Screen focused - refreshing videos');
 			fetchVideos();
 		});
-
 		return unsubscribe;
 	}, [navigation, fetchVideos]);
 
 	const handleVideoPress = useCallback((videoItem) => {
-		// Pass the entire video item to VideoPlayer
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
 
@@ -156,8 +128,36 @@ const VideoListScreen = ({ navigation, route }) => {
 		setLanguage(langKey);
 	}, []);
 
+const renderItem = ({ item, index }) => (
+	<TouchableOpacity
+		style={styles.kidCard}
+		onPress={() => handleVideoPress(item)}
+		activeOpacity={0.9}
+	>
+		<Image
+			source={
+				item.thumbnailUrl
+					? { uri: item.thumbnailUrl }
+					: require('../assets/image/splash.png')
+			}
+			style={styles.kidImage}
+			resizeMode="cover"
+		/>
+		<View style={styles.kidTextContainer}>
+			<Text style={styles.kidTitle} numberOfLines={2}>
+				{item.title || `Video ${index + 1}`}
+			</Text>
+			<Text style={styles.kidSubText}>
+				{item.duration ? `${item.duration} min` : 'Fun learning'}
+			</Text>
+		</View>
+		<Icon name="chevron-forward" size={24} color="#fff" />
+	</TouchableOpacity>
+);
+
+
 	return (
-		<LinearGradient colors={['#f9f9f9', '#fff']} style={styles.container}>
+		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
 				{Object.keys(languageLabels).map((langKey) => (
 					<TouchableOpacity
@@ -177,40 +177,25 @@ const VideoListScreen = ({ navigation, route }) => {
 				<Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
 			</View>
 
-			{/* Loading indicator */}
 			{loading && (
 				<View style={styles.loadingContainer}>
 					<Text style={styles.loadingText}>Loading videos...</Text>
 				</View>
 			)}
 
-			{/* Video Grid */}
 			<FlatList
 				data={videos}
 				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
-				numColumns={2}
-				contentContainerStyle={styles.gridContainer}
-				renderItem={({ item, index }) => (
-					item ? (
-						<TouchableOpacity
-							style={styles.videoItem}
-							onPress={() => handleVideoPress(item)}
-						>
-							<Icon name="play-circle-fill" size={40} color="#9346D2" />
-							<Text style={styles.videoText}>
-								{item.title || `Video ${index + 1}`}
-							</Text>
-						</TouchableOpacity>
-					) : null
-				)}
+				contentContainerStyle={styles.listContainer}
+				renderItem={renderItem}
 				ListEmptyComponent={() => (
 					<View style={styles.emptyContainer}>
 						<Text style={styles.emptyText}>
-							{loading 
-								? 'Loading videos...' 
+							{loading
+								? 'Loading videos...'
 								: selectedAgeGroup
-								? 'No videos available for this selection'
-								: 'Please select an age group'
+									? 'No videos available for this selection'
+									: 'Please select an age group'
 							}
 						</Text>
 					</View>
@@ -240,15 +225,16 @@ const styles = StyleSheet.create({
 		paddingTop: 10,
 	},
 	languageButton: {
-		backgroundColor: 'black',
+		backgroundColor: '#FF8C00', 
 		paddingVertical: 10,
 		borderRadius: 8,
 		flex: 1,
 		marginHorizontal: 5,
 		alignItems: 'center',
 	},
+	
 	languageButtonActive: {
-		backgroundColor: '#9346D2',
+		backgroundColor: 'rgba(76, 175, 80, 0.9)',
 	},
 	languageButtonText: {
 		color: 'white',
@@ -260,7 +246,7 @@ const styles = StyleSheet.create({
 		width: 200,
 		alignSelf: 'center',
 		paddingHorizontal: 20,
-		backgroundColor: '#9346D2',
+		backgroundColor: '#FF8C00',
 		marginTop: 20,
 		borderRadius: 25,
 		alignItems: 'center',
@@ -278,33 +264,37 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#666',
 	},
-	loadingContainer: {
-		padding: 20,
-		alignItems: 'center',
-	},
-	loadingText: {
-		fontSize: 16,
-		color: '#666',
-	},
-	gridContainer: {
+	listContainer: {
 		padding: 10,
 		flexGrow: 1,
 	},
-	videoItem: {
-		backgroundColor: '#d3d3d3',
-		flex: 1,
-		aspectRatio: 1,
-		margin: 8,
-		borderRadius: 10,
-		justifyContent: 'center',
+	videoListItem: {
+		flexDirection: 'row',
 		alignItems: 'center',
+		backgroundColor: 'white',
+		marginVertical: 8,
+		marginHorizontal: 12,
+		padding: 10,
+		borderRadius: 12,
+		elevation: 2,
+		shadowColor: '#000',
+		shadowOpacity: 0.1,
+		shadowOffset: { width: 0, height: 1 },
 	},
-	videoText: {
-		marginTop: 10,
-		fontWeight: '600',
+	thumbnailImage: {
+		width: 80,
+		height: 80,
+		borderRadius: 10,
+		backgroundColor: '#ccc',
+	},
+	videoTextContainer: {
+		marginLeft: 12,
+		flex: 1,
+	},
+	videoTitle: {
 		fontSize: 16,
-		textAlign: 'center',
-		paddingHorizontal: 5,
+		fontWeight: '600',
+		color: '#333',
 	},
 	emptyContainer: {
 		flex: 1,
@@ -317,6 +307,41 @@ const styles = StyleSheet.create({
 		color: '#666',
 		textAlign: 'center',
 	},
+	kidCard: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#BDE894',
+		marginVertical: 8,
+		marginHorizontal: 12,
+		padding: 12,
+		borderRadius: 16,
+		shadowColor: '#000',
+		shadowOpacity: 0.2,
+		shadowRadius: 6,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 4,
+	},
+	kidImage: {
+		width: 70,
+		height: 70,
+		borderRadius: 16,
+		backgroundColor: '#E6E6FA',
+	},
+	kidTextContainer: {
+		flex: 1,
+		marginLeft: 12,
+	},
+	kidTitle: {
+		fontSize: 16,
+		fontWeight: 'bold',
+		color: '#4B0082',
+	},
+	kidSubText: {
+		fontSize: 13,
+		color: '#6A5ACD',
+		marginTop: 4,
+	},
+	
 });
 
 export default VideoListScreen;

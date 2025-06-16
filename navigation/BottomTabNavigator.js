@@ -8,7 +8,7 @@ import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
-
+import LinearGradient from 'react-native-linear-gradient';
 const Tab = createBottomTabNavigator();
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
@@ -76,6 +76,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	return (
 		<TouchableWithoutFeedback onPress={handleOutsidePress}>
+		
 			<View style={styles.tabBarContainer}>
 				{state.routes.map((route, index) => {
 					const { options } = descriptors[route.key];
@@ -169,7 +170,7 @@ const BottomTabNavigator = () => {
 			screenOptions={{
 				headerShown: true,
 				headerTitleAlign: 'center',
-				headerStyle: { backgroundColor: '#b388eb' },
+				headerStyle: { backgroundColor: '#87CEEB' },
 				headerTintColor: '#fff',
 				headerTitleStyle: { fontWeight: 'bold' },
 			}}
@@ -199,6 +200,9 @@ const BottomTabNavigator = () => {
 };
 
 const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	  },
 	tabBarContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-around',

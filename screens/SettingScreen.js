@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Ale
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import avatar1 from '../assets/image/avatar1.png';
 import avatar2 from '../assets/image/avatar2.png';
