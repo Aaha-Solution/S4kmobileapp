@@ -45,7 +45,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     },
                 });
 
-                const data = await response.json(); // ✅ FIX: Await and assign
+                const data = await response.json(); 
                 console.log('Fetched avatar images:', data);
                 setImages(data);
 
@@ -53,7 +53,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 console.error('Failed to fetch avatars:', error);
             }
         };
-
+ 
         fetchAvatar();
     }, []);
 
