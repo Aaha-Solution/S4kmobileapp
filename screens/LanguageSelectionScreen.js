@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 // import LottieView from 'lottie-react-native'; // Uncomment if using Lottie
 
 const { width } = Dimensions.get('window');

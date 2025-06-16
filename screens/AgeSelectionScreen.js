@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 
 const ageGroups = [
   { id: '1', name: 'PreJunior (4–6 years)' },

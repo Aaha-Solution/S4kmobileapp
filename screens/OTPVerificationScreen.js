@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
 import PressableButton from '../component/PressableButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
 
 const OTPVerificationScreen = ({ navigation }) => {

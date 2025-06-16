@@ -46,25 +46,25 @@ const LoginScreen = ({ navigation }) => {
         checkRememberedUser();
     }, []);
 
-    useEffect(() => {
-        const checkToken = async () => {
-            setLoading(true);
-            try {
-                const token = await AsyncStorage.getItem('token');
-                if (token) {
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'LanguageSelectionScreen' }],
-                    });
-                }
-            } catch (error) {
-                console.error('Token check error:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        checkToken();
-    }, [navigation]);
+    // useEffect(() => {
+    //     const checkToken = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const token = await AsyncStorage.getItem('token');
+    //             if (token) {
+    //                 navigation.reset({
+    //                     index: 0,
+    //                     routes: [{ name: 'LanguageSelectionScreen' }],
+    //                 });
+    //             }
+    //         } catch (error) {
+    //             console.error('Token check error:', error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     checkToken();
+    // }, [navigation]);
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 

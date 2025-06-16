@@ -37,7 +37,7 @@ const App = () => (
 						title: 'Language',
 						headerTitleAlign: 'center',
 						headerStyle: { backgroundColor: '#87CEEB',  },
-						headerTintColor: '#fff',
+						headerTintColor: '#4B0082',
 						headerTitleStyle: { fontWeight: 'bold' },
 						headerLeft: () => null,
 					}}
@@ -50,7 +50,7 @@ const App = () => (
 						title: 'Age Group',
 						headerTitleAlign: 'center',
 						headerStyle: { backgroundColor: '#87CEEB' },
-						headerTintColor: '#fff',
+						headerTintColor: '#4B0082',
 						headerTitleStyle: { fontWeight: 'bold' },
 					}}
 				/>

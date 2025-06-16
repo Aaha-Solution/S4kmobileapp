@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable } from 'react-native';
-import PressableButton from '../Components/PressableButton';
+import PressableButton from '../component/PressableButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';

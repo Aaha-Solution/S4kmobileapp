@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 
 const ResetPasswordScreen = ({ route }) => {
 	const { email,otp } = route.params;

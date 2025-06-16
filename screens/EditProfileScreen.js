@@ -3,11 +3,11 @@ import { View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, Scro
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { setProfile } from '../Store/userSlice';
-import PressableButton from '../Components/PressableButton';
+import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profile_avatar from '../assets/image/profile_avatar.png';
-import CustomAlert from '../Components/CustomAlertMessage';
+import CustomAlert from '../component/CustomAlertMessage';
 import { useDispatch, useSelector } from 'react-redux';
 
 const EditProfileScreen = ({ route, navigation }) => {
@@ -252,8 +252,6 @@ return (
     <View style={{ flex: 1 }}>
         <LinearGradient
             colors={['#E0B0FF', '#ffffff']}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.container}>
