@@ -99,7 +99,8 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.0.241:3000/login', {
+
+            const response = await fetch('https://smile4kids-mobilebackend.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
