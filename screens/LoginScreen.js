@@ -47,32 +47,39 @@ const LoginScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-    let isMounted = true;
+        let isMounted = true;
 
-    const checkToken = async () => {
-        setLoading(true);
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (token && isMounted) {
-                dispatch(setProfile()); // Dispatch the token to Redux store
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'MainTabs' }],
-                });
+        const checkToken = async () => {
+            setLoading(true);
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const userData = await AsyncStorage.getItem('user');
+
+                if (!token) return;
+
+                if (token && userData) {
+                    dispatch(login(JSON.parse(userData)));
+
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'MainTabs' }],
+                    });
+                }
+
+            } catch (error) {
+                console.error('Token check error:', error);
+            } finally {
+                if (isMounted) setLoading(false);
             }
-        } catch (error) {
-            console.error('Token check error:', error);
-        } finally {
-            if (isMounted) setLoading(false);
-        }
-    };
+        };
 
-    checkToken();
 
-    return () => {
-        isMounted = false; // cleanup to prevent memory leaks
-    };
-}, [navigation]);
+        checkToken();
+
+        return () => {
+            isMounted = false; // cleanup to prevent memory leaks
+        };
+    }, [navigation]);
 
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -105,10 +112,11 @@ const LoginScreen = ({ navigation }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
             });
-            console.log('RESPONse',response)
+            console.log('RESPONse', response)
 
             const data = await response.json();
-            console.log('data',data)
+            console.log('data', data)
+            await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
             if (!response.ok) {
                 Alert.alert('Login Failed', data.message || 'Invalid credentials');
@@ -125,13 +133,25 @@ const LoginScreen = ({ navigation }) => {
 
             // Dispatch user data to Redux store to update application state
             dispatch(login(data.user));
+            console.log('User logged in:', data.user);
 
+            if (data.user.selectedLanguage && data.user.selectedAgeGroup) {
+                console.log('selectedLanguage:', data.user.selectedLanguage);
+                console.log('selectedAgeGroup:', data.user.selectedAgeGroup);
+
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'MainTabs' }],
+                });
+            } else {
+                // If the user has not selected language or age group, navigate to LanguageSelectionScreen
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'LanguageSelectionScreen' }],
+                });
+            }
             // Navigate to the LanguageSelectionScreen and reset the navigation stack
             // This prevents the user from going back to the login screen using the back button.
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'LanguageSelectionScreen' }],
-            });
 
         } catch (error) {
             Alert.alert('Error', 'Network issue. Try again.');
@@ -161,11 +181,11 @@ const LoginScreen = ({ navigation }) => {
                 </View>
 
                 <Text style={styles.loginTitle}>
-                <Text style={{ color: '#D2042D' }}>L</Text>
-                <Text style={{ color: '#E97451' }}>O</Text>
-                <Text style={{ color: '#FDDA0D' }}>G</Text>
-                <Text style={{ color: '#50C878' }}>I</Text>
-                <Text style={{ color: '#4169E1' }}>N</Text>
+                    <Text style={{ color: '#D2042D' }}>L</Text>
+                    <Text style={{ color: '#E97451' }}>O</Text>
+                    <Text style={{ color: '#FDDA0D' }}>G</Text>
+                    <Text style={{ color: '#50C878' }}>I</Text>
+                    <Text style={{ color: '#4169E1' }}>N</Text>
                 </Text>
 
                 <View>
@@ -247,11 +267,11 @@ const LoginScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: 
-    { 
-        flex: 1 
+    container:
+    {
+        flex: 1
     },
-    topGraphics: 
+    topGraphics:
     {
         position: 'absolute',
         top: height * 0.05,
@@ -390,7 +410,7 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         zIndex: 2,
     },
- 
+
     signUpContainer: {
         position: 'absolute',
         bottom: 33,

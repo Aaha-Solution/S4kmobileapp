@@ -173,7 +173,8 @@ const BottomTabNavigator = () => {
 				headerStyle: { backgroundColor: '#87CEEB' },
 				headerTintColor: '#fff',
 				headerTitleStyle: { fontWeight: 'bold' },
-
+				headerTitleAllowFontScaling: true,
+				fontFamily: 'Times New Roman',
 			}}
 		>
 			<Tab.Screen

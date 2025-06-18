@@ -42,11 +42,13 @@ const ChangePasswordScreen = ({ navigation }) => {
 
 		try {
 			const token = await AsyncStorage.getItem('token');
-			const response = await fetch("http://192.168.0.208:3000/forgot/change-password", {
+			console.log('Token:', token);
+			const response = await fetch("https://smile4kids-mobilebackend.onrender.com/forgot/change-password", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
+
 				},
 				body: JSON.stringify({
 					email_id: email,
@@ -55,6 +57,14 @@ const ChangePasswordScreen = ({ navigation }) => {
 					confirm_password: confirmPassword,
 				}),
 			});
+			console.log('Authorization Header:', token)
+
+			if (!token) {
+				Alert.alert('Error', 'No token found. Please log in again.');
+				navigation.navigate('Login');
+				return;
+			}
+
 
 			const data = await response.json();
 			if (data.message === "Password changed successfully") {
@@ -206,7 +216,7 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		alignContent: 'center'
 	},
-	
+
 });
 
 export default ChangePasswordScreen;

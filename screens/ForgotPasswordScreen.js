@@ -88,7 +88,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch("http://192.168.0.209:3000/forgot/send-otp", {
+            const response = await fetch("https://smile4kids-mobilebackend.onrender.com/forgot/send-otp", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
