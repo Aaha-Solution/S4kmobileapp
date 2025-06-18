@@ -23,7 +23,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 	const [error, setError] = useState('');
 	const [alertTitle, setAlertTitle] = useState('');
 	const [alertMessage, setAlertMessage] = useState('');
-	const [showAlert, setShowAlert] = useState(false);
+	const [ showAlert, setShowAlert] = useState(false);
 	const inputs = useRef([]);
 	const dispatch = useDispatch();
 	const handleChange = (text, index) => {
@@ -45,7 +45,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 			return;
 		}
 		try {
-			const response = await fetch("http://192.168.0.209:3000/forgot/verify-otp", {
+			const response = await fetch("https://smile4kids-mobilebackend.onrender.com/forgot/verify-otp", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"

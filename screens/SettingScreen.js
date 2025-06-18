@@ -227,6 +227,8 @@ const styles = StyleSheet.create({
 		height: 100,
 		borderRadius: 50,
 		marginRight: 15,
+		borderColor: 'white',
+		borderWidth: 2,
 
 	},
 	name: {

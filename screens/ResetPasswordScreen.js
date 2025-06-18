@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 	}
 
 		try{
-			const response = await fetch ("http://192.168.0.209:3000/forgot/reset-password",{
+			const response = await fetch ("https://smile4kids-mobilebackend.onrender.com/forgot/reset-password",{
 				method:"POST",
 				headers:{
 					"Content-type":"application/json"
@@ -68,6 +68,8 @@ const ResetPasswordScreen = ({ route }) => {
 		}
 
 	};
+
+	
 	
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
@@ -108,6 +110,11 @@ const ResetPasswordScreen = ({ route }) => {
 				) : null}
 	
 				<View style={styles.buttonWrapper}>
+					<PressableButton
+						title="Reset Password"
+						onPress={handleResetPassword}
+						style={styles.resetButton}
+					/>
 					
 				</View>
 	
@@ -115,8 +122,8 @@ const ResetPasswordScreen = ({ route }) => {
 					visible={showAlert}
 					title={alertTitle}
 					message={alertMessage}
-					onConfirm={handleConfirmExit}
-					onCancel={() => setShowAlert(false)}
+					onConfirm={() => setShowAlert(false)}
+					
 				/>
 			</View>
 		</LinearGradient>
