@@ -16,7 +16,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const username = profile?.username || '';
 
     // Base URL - consider moving to config file
-    const BASE_URL = 'http://192.168.0.241:3000';
+    const BASE_URL = 'https://smile4kids-mobilebackend.onrender.com';
     
     // State variables
     const [email, setemail] = useState(route.params?.email || '');
@@ -231,12 +231,12 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
         }
     };
+
     const handleSelectAvatar = async (avatarUrl) => {
         setSelectedAvatar(avatarUrl); // update local state
         dispatch(setProfile({ selectedAvatar: avatarUrl })); // save in Redux
         await AsyncStorage.setItem('selectedAvatar', JSON.stringify(avatarUrl));
     };
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -414,6 +414,8 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         marginBottom: 10,
+        borderWidth: 2,
+        borderColor: 'white',
     },
     editButton: {
         position: 'absolute',

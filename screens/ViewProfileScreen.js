@@ -12,8 +12,8 @@ import { useDispatch } from 'react-redux';
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
 	console.log('DOB from Redux:', profile.dateOfBirth);
-
 	console.log("Profile Data:", profile);
+
 	const updateProfileData = useSelector(state => state.user.updateProfile);
 
 	const email = useSelector((state) => state.user.email) || '';
@@ -70,8 +70,8 @@ const ViewProfileScreen = ({ navigation }) => {
 
 				console.log("Raw response:", response);
 
-				const data = await response.json(); // 👈 Important!
-				console.log("Parsed JSON:", data);  // 👈 Check this!
+				const data = await response.json(); 
+				console.log("Parsed JSON:", data);  
 
 				if (data && data.users_id) {
 					console.log("Profile data received:", data);
@@ -93,7 +93,6 @@ const ViewProfileScreen = ({ navigation }) => {
 				console.log("run Error", error);
 			}
 		};
-
 
 		fetchProfileUpdate();
 	}, []);
@@ -131,103 +130,101 @@ const ViewProfileScreen = ({ navigation }) => {
 		});
 	};
 
-
-
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-			<SafeAreaView style={styles.container}>
-				<ScrollView>
-					<View style={styles.header}>
-						<View style={styles.profileContainer}>
-							<Image
-								source={tempSelectedAvatar}
-								style={styles.avatar}
-								resizeMode="cover"
+				<SafeAreaView style={styles.container}>
+					<ScrollView>
+						<View style={styles.header}>
+							<View style={styles.profileContainer}>
+								<Image
+									source={tempSelectedAvatar}
+									style={styles.avatar}
+									resizeMode="cover"
+								/>
+							</View>
+						</View>
+
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={modalVisible}
+							onRequestClose={() => setModalVisible(false)}
+						>
+							<TouchableOpacity
+								style={styles.modalOverlay}
+								activeOpacity={1}
+								onPress={() => setModalVisible(false)}
+							>
+								<View style={styles.modalContent}>
+									<View style={styles.modalHeader}>
+										<Text style={styles.modalTitle}>Choose Avatar</Text>
+										<TouchableOpacity
+											onPress={() => setModalVisible(false)}
+											style={styles.closeButton}
+										>
+											<Ionicons name="close" size={24} color="black" />
+										</TouchableOpacity>
+									</View>
+									<View style={styles.avatarGrid}>
+										{avatars.map((avatar, index) => (
+											<TouchableOpacity
+												key={index}
+												style={styles.avatarOption}
+												onPress={() => handleAvatarSelect(avatar)}
+											>
+												<Image
+													source={avatar}
+													style={[
+														styles.avatarThumbnail,
+														tempSelectedAvatar === avatar && styles.selectedAvatar
+													]}
+													resizeMode="cover"
+												/>
+											</TouchableOpacity>
+										))}
+									</View>
+								</View>
+							</TouchableOpacity>
+						</Modal>
+
+
+						<Text style={styles.name}>{profile.username}</Text>
+
+						<View style={styles.formContainer}>
+							<View style={styles.inputGroup}>
+								<Text style={styles.label}>UserName</Text>
+								<Text style={styles.readonlyText}>{profile.username}</Text>
+							</View>
+
+							<View style={styles.inputGroup}>
+								<Text style={styles.label}>E-Mail</Text>
+								<Text style={styles.readonlyText}>{email}</Text>
+							</View>
+
+							<View style={styles.inputGroup}>
+								<Text style={styles.label}>Date of Birth</Text>
+								<Text style={styles.readonlyText}>{formatDate(profile.dateOfBirth)}</Text>
+							</View>
+
+							<View style={styles.inputGroup}>
+								<Text style={styles.label}>Phone Number</Text>
+								<Text style={styles.readonlyText}>{profile.phone}</Text>
+							</View>
+
+							<View style={styles.inputGroup}>
+								<Text style={styles.label}>Address</Text>
+								<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address}</Text>
+							</View>
+
+							<PressableButton
+								style={styles.saveButton}
+								title="Edit"
+								onPress={handleEditPress}
 							/>
 						</View>
-					</View>
-
-					<Modal
-						animationType="slide"
-						transparent={true}
-						visible={modalVisible}
-						onRequestClose={() => setModalVisible(false)}
-					>
-						<TouchableOpacity
-							style={styles.modalOverlay}
-							activeOpacity={1}
-							onPress={() => setModalVisible(false)}
-						>
-							<View style={styles.modalContent}>
-								<View style={styles.modalHeader}>
-									<Text style={styles.modalTitle}>Choose Avatar</Text>
-									<TouchableOpacity
-										onPress={() => setModalVisible(false)}
-										style={styles.closeButton}
-									>
-										<Ionicons name="close" size={24} color="black" />
-									</TouchableOpacity>
-								</View>
-								<View style={styles.avatarGrid}>
-									{avatars.map((avatar, index) => (
-										<TouchableOpacity
-											key={index}
-											style={styles.avatarOption}
-											onPress={() => handleAvatarSelect(avatar)}
-										>
-											<Image
-												source={avatar}
-												style={[
-													styles.avatarThumbnail,
-													tempSelectedAvatar === avatar && styles.selectedAvatar
-												]}
-												resizeMode="cover"
-											/>
-										</TouchableOpacity>
-									))}
-								</View>
-							</View>
-						</TouchableOpacity>
-					</Modal>
-
-
-					<Text style={styles.name}>{profile.username}</Text>
-
-					<View style={styles.formContainer}>
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>UserName</Text>
-							<Text style={styles.readonlyText}>{profile.username}</Text>
-						</View>
-
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>E-Mail</Text>
-							<Text style={styles.readonlyText}>{email}</Text>
-						</View>
-
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Date of Birth</Text>
-							<Text style={styles.readonlyText}>{formatDate(profile.dateOfBirth)}</Text>
-						</View>
-
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Phone Number</Text>
-							<Text style={styles.readonlyText}>{profile.phone}</Text>
-						</View>
-
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Address</Text>
-							<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address}</Text>
-						</View>
-
-						<PressableButton
-							style={styles.saveButton}
-							title="Edit"
-							onPress={handleEditPress}
-						/>
-					</View>
-				</ScrollView>
-			</SafeAreaView>
+					</ScrollView>
+				</SafeAreaView>
 			</LinearGradient>
 		</View>
 	);
@@ -236,7 +233,7 @@ const ViewProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		
+
 	},
 	header: {
 		alignItems: 'center',
@@ -251,6 +248,8 @@ const styles = StyleSheet.create({
 		height: 100,
 		borderRadius: 50,
 		marginBottom: 10,
+		borderWidth: 2,
+		borderColor: 'white',
 	},
 	editButton: {
 		position: 'absolute',
