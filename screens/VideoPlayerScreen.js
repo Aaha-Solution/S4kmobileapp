@@ -67,7 +67,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      navigation.navigate('Home');
+      navigation.navigate('MainTabs');
       return true;
     });
       return () => backHandler.remove(); // cleanup

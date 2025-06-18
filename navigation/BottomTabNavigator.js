@@ -8,11 +8,11 @@ import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
-import LinearGradient from 'react-native-linear-gradient';
+import Toast from 'react-native-toast-message';
 const Tab = createBottomTabNavigator();
-
 const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
+	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(selectedAgeGroup);
@@ -48,7 +48,18 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	};
 
 	const handleTabPress = (route) => {
+		if (!isPaid) {
+			Toast.show({
+				type: 'error',
+				text1: ' ⚠ Please complete payment to proceed further',
+				position: 'bottom',
+				visibilityTime: 3000,
+			  });			  
+			return;
+		}
+	
 		handleOutsidePress();
+	
 		if (route.name === 'Age') {
 			setOpen(!open);
 			navigation.navigate('Age');
@@ -56,6 +67,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 			navigation.navigate(route.name);
 		}
 	};
+	
 	
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -123,6 +135,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 											scrollViewProps={{
 												nestedScrollEnabled: true,
 											}}
+											disabled={!isPaid} // <- disable until paid
 										/>
 									</View>
 								)}

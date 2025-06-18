@@ -18,6 +18,7 @@ import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SignupScreen from './screens/SignUpScreen.js';
+import Toast from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
 const App = () => (
@@ -181,6 +182,7 @@ const App = () => (
 				
 			</Stack.Navigator>
 		</NavigationContainer>
+		<Toast />
 	</Provider>
 );
 export default App;

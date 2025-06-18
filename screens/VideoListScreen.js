@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { setPaidStatus } from '../Store/userSlice';
 // Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
@@ -24,6 +25,7 @@ const languageLabels = {
 
 const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
+	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const [videos, setVideos] = useState([]);
@@ -75,14 +77,14 @@ const VideoListScreen = ({ navigation, route }) => {
 	};
 
 	const getFormattedLevel = (ageGroup) => {
-		if (!ageGroup) return 'Pre-Junior';
+		if (!ageGroup) return 'Pre_Junior';
 		const lowerAgeGroup = ageGroup.toLowerCase();
 		if (lowerAgeGroup.includes('junior') && (lowerAgeGroup.includes('7') || lowerAgeGroup.includes('above'))) {
 			return 'Junior';
-		} else if (lowerAgeGroup.includes('pre-prep') || lowerAgeGroup.includes('4-6')) {
-			return 'Pre-Junior';
+		} else if (lowerAgeGroup.includes('Pre_Junior') || lowerAgeGroup.includes('4-6')) {
+			return 'Pre_Junior';
 		}
-		return 'Pre-Junior';
+		return 'Pre_Junior';
 	};
 
 	const fetchVideos = useCallback(async () => {
@@ -226,7 +228,29 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
+
+			{!isPaid && (
+				<View style={styles.blurOverlay}>
+					<View style={styles.blurContent}>
+						<Text style={styles.blurTitle}>Unlock All Videos</Text>
+						<Text style={styles.blurDescription}>
+							Pay £45 to access fun & engaging kids videos
+						</Text>
+						<TouchableOpacity
+							onPress={() => {
+								// Simulate payment success
+								dispatch(setPaidStatus(true));
+							}}
+							style={styles.payNowButton}
+						>
+							<Text style={styles.payNowText}>Pay £45</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			)}
+
 		</LinearGradient>
+
 	);
 };
 
@@ -351,6 +375,51 @@ const styles = StyleSheet.create({
 		color: '#6A5ACD',
 		marginTop: 4,
 	},
+	blurOverlay: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 999,
+	},
+
+	blurContent: {
+		backgroundColor: '#fff',
+		padding: 30,
+		borderRadius: 20,
+		alignItems: 'center',
+		width: '80%',
+		elevation: 10,
+	},
+
+	blurTitle: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#4B0082',
+		marginBottom: 10,
+		textAlign: 'center',
+	},
+
+	blurDescription: {
+		fontSize: 16,
+		color: '#555',
+		textAlign: 'center',
+		marginBottom: 20,
+	},
+
+	payNowButton: {
+		backgroundColor: '#FF8C00',
+		paddingVertical: 12,
+		paddingHorizontal: 30,
+		borderRadius: 25,
+	},
+
+	payNowText: {
+		color: '#fff',
+		fontSize: 16,
+		fontWeight: 'bold',
+	},
+
 
 });
 

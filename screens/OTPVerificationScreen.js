@@ -74,8 +74,6 @@ const OTPVerificationScreen = ({ navigation }) => {
 			setShowAlert(true);
 		}
 	};
-
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			{/* Header */}

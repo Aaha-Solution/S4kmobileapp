@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   isLoggedIn: false,
+  isPaid: false,
   user: {
     email: 'Guest User',
     username: '',
@@ -13,6 +14,7 @@ const initialState = {
   },
   selectedLanguage: null,
   selectedAgeGroup: null,
+
   email: null,
   videos: [],
 };
@@ -65,6 +67,9 @@ const userSlice = createSlice({
     addVideo: (state, action) => {
       state.videos.push(action.payload);
     },
+    setPaidStatus: (state, action) => {
+      state.isPaid = action.payload;
+    },
   },
 });
 
@@ -78,6 +83,6 @@ export const {
   updateProfile,
   setVideos,
   addVideo,
+  setPaidStatus
 } = userSlice.actions;
-
 export default userSlice.reducer;
