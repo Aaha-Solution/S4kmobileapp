@@ -177,8 +177,6 @@ const VideoListScreen = ({ navigation, route }) => {
 	);
 	const screenWidth = Dimensions.get('window').width;
 	const imageWidth = screenWidth * 0.25;
-
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
@@ -254,7 +252,6 @@ const VideoListScreen = ({ navigation, route }) => {
 				</View>
 			)}
 		</LinearGradient>
-
 	);
 };
 

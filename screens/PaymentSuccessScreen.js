@@ -12,8 +12,7 @@ const PaymentSuccessScreen = () => {
         index: 0,
         routes: [{ name: 'MainTabs' }],
       });
-    }, 4000);
-
+    }, 2000);
     return () => clearTimeout(timer);
   }, [navigation]);
 
