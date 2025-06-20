@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { BlurView } from '@react-native-community/blur';
 import { setPaidStatus } from '../Store/userSlice';
 // Language short labels
 const languageLabels = {
@@ -36,6 +37,10 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const baseURL = 'http://smile4kids-mobilebackend.onrender.com/videos/by-category';
 
+	// Debug the Redux value
+	useEffect(() => {
+		console.log('🟡 isPaid from Redux:', isPaid);
+	}, [isPaid]);
 	// Back button handler
 	const handleError = (error) => {
 		console.error("🔴 Video playback error:", error); // Log the error details
@@ -228,7 +233,6 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
-
 			{!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
@@ -238,17 +242,17 @@ const VideoListScreen = ({ navigation, route }) => {
 						</Text>
 						<TouchableOpacity
 							onPress={() => {
-								// Simulate payment success
 								dispatch(setPaidStatus(true));
+								navigation.navigate('PaymentSuccessScreen');
 							}}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>
 						</TouchableOpacity>
+
 					</View>
 				</View>
 			)}
-
 		</LinearGradient>
 
 	);
@@ -382,7 +386,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		zIndex: 999,
 	},
-
 	blurContent: {
 		backgroundColor: '#fff',
 		padding: 30,
@@ -391,7 +394,6 @@ const styles = StyleSheet.create({
 		width: '80%',
 		elevation: 10,
 	},
-
 	blurTitle: {
 		fontSize: 20,
 		fontWeight: 'bold',
@@ -399,7 +401,6 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		textAlign: 'center',
 	},
-
 	blurDescription: {
 		fontSize: 16,
 		color: '#555',

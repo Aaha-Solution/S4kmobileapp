@@ -37,6 +37,7 @@ const userSlice = createSlice({
       state.isLoggedIn = true;
       state.user = normalizedUser;
       state.email = normalizedUser.email;
+      state.isPaid = action.payload.isPaid || false; // ✅ Add this line
     },
     logout: (state) => {
       state.isLoggedIn = false;
