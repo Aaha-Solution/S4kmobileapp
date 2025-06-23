@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { BlurView } from '@react-native-community/blur';
 import { setPaidStatus, setProfile } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Language short labels
@@ -42,6 +43,10 @@ const VideoListScreen = ({ navigation, route }) => {
 		console.log('Redux Selected Language:', selectedLanguage);
 	}, [selectedAgeGroup, selectedLanguage]);
 
+	// Debug the Redux value
+	useEffect(() => {
+		console.log('🟡 isPaid from Redux:', isPaid);
+	}, [isPaid]);
 	// Back button handler
 	const handleError = (error) => {
 		console.error("🔴 Video playback error:", error); // Log the error details
@@ -179,8 +184,6 @@ const VideoListScreen = ({ navigation, route }) => {
 	);
 	const screenWidth = Dimensions.get('window').width;
 	const imageWidth = screenWidth * 0.25;
-
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
@@ -235,7 +238,6 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
-
 			{!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
@@ -245,19 +247,18 @@ const VideoListScreen = ({ navigation, route }) => {
 						</Text>
 						<TouchableOpacity
 							onPress={() => {
-								// Simulate payment success
 								dispatch(setPaidStatus(true));
+								navigation.navigate('PaymentSuccessScreen');
 							}}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>
 						</TouchableOpacity>
+
 					</View>
 				</View>
 			)}
-
 		</LinearGradient>
-
 	);
 };
 
@@ -389,7 +390,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		zIndex: 999,
 	},
-
 	blurContent: {
 		backgroundColor: '#fff',
 		padding: 30,
@@ -398,7 +398,6 @@ const styles = StyleSheet.create({
 		width: '80%',
 		elevation: 10,
 	},
-
 	blurTitle: {
 		fontSize: 20,
 		fontWeight: 'bold',
@@ -406,7 +405,6 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		textAlign: 'center',
 	},
-
 	blurDescription: {
 		fontSize: 16,
 		color: '#555',
