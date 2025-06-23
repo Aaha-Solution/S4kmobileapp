@@ -93,6 +93,7 @@ const SettingsScreen = ({ route, navigation }) => {
 			await AsyncStorage.removeItem('selectedAvatar'); // remove selected avatar
 			await AsyncStorage.removeItem('user'); // remove user data
 			await AsyncStorage.removeItem('userProfile');
+			await AsyncStorage.removeItem('selectedPreferences');
 
 
 			console.log("token:", token);

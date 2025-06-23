@@ -15,7 +15,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { setPaidStatus } from '../Store/userSlice';
+import { setPaidStatus, setProfile } from '../Store/userSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
@@ -35,6 +36,11 @@ const VideoListScreen = ({ navigation, route }) => {
 	const isHomeScreen = route.name === 'Home';
 
 	const baseURL = 'http://smile4kids-mobilebackend.onrender.com/videos/by-category';
+
+	useEffect(() => {
+		console.log('Redux Selected Age Group:', selectedAgeGroup);
+		console.log('Redux Selected Language:', selectedLanguage);
+	}, [selectedAgeGroup, selectedLanguage]);
 
 	// Back button handler
 	const handleError = (error) => {
@@ -75,6 +81,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleCancelExit = () => {
 		setShowAlert(false);
 	};
+	console.log("Sending preferences:", selectedAgeGroup, selectedLanguage);
 
 	const getFormattedLevel = (ageGroup) => {
 		if (!ageGroup) return 'Pre_Junior';
@@ -89,7 +96,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const fetchVideos = useCallback(async () => {
 		if (!selectedAgeGroup || !language) {
-			setVideos([]);
+			setVideos([]);  
 			return;
 		}
 		setLoading(true);

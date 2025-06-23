@@ -53,7 +53,7 @@ const AccountScreen = ({ route, navigation }) => {
               resizeMode="cover"
             />
             <Text style={styles.name}>
-				<Text style={{color: '#6E00B3'}}>My </Text>
+				<Text style={{color: 'orange'}}>My </Text>
 				<Text style={{color: 'black'}}>Account</Text>
 			</Text>
           </View>
@@ -120,6 +120,8 @@ const styles = StyleSheet.create({
     color: 'Black',
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 20,
+
   },
   menuContainer: {
     marginTop: 10,

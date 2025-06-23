@@ -115,15 +115,15 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: '#00',
-        borderRadius: 16,
+        borderRadius: 2,
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderWidth: 0,
         borderColor: '#00',
         shadowColor: '#00',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
-        shadowRadius: 4,
+        shadowRadius: 0.5,
         elevation: 2,
     },
     ageOption: {
