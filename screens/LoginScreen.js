@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
-import { login, setProfile } from '../Store/userSlice';
+import { login, setProfile, setLanguage, setAgeGroup } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
@@ -27,6 +27,8 @@ const LoginScreen = ({ navigation }) => {
     const [rememberMe, setRememberMe] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [selectedLanguage, setSelectedLanguage] = useState('');
+    const [selectedAgeGroup, setSelectedAgeGroup] = useState('');
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
@@ -39,6 +41,8 @@ const LoginScreen = ({ navigation }) => {
                     setPassword(credentials.password);
                     setRememberMe(true);
                 }
+
+                
             } catch (error) {
                 console.error('Keychain error:', error);
             }
@@ -72,17 +76,15 @@ const LoginScreen = ({ navigation }) => {
                 if (isMounted) setLoading(false);
             }
         };
-
-
         checkToken();
-
         return () => {
             isMounted = false; // cleanup to prevent memory leaks
         };
     }, [navigation]);
 
-
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    
 
     const handleLogin = async () => {
         setEmailError('');
@@ -106,7 +108,6 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-
             const response = await fetch('https://smile4kids-mobilebackend.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -127,31 +128,38 @@ const LoginScreen = ({ navigation }) => {
 
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
+
+                await AsyncStorage.setItem('selectedPreferences', JSON.stringify({
+                    selectedAgeGroup,
+                    selectedLanguage,
+                }));
+
             } else {
                 await Keychain.resetGenericPassword();
+                await AsyncStorage.removeItem('selectedPreferences');
             }
 
             // Dispatch user data to Redux store to update application state
             dispatch(login(data.user));
-            console.log('User logged in:', data.user);
+            dispatch(setLanguage(data.user.language));
+            dispatch(setAgeGroup(data.user.age));
+            dispatch(setProfile({
+                selectedLanguage: data.user.language,
+                selectedAgeGroup: data.user.age,
+            }));
 
-            if (data.user.selectedLanguage && data.user.selectedAgeGroup) {
-                console.log('selectedLanguage:', data.user.selectedLanguage);
-                console.log('selectedAgeGroup:', data.user.selectedAgeGroup);
-
+            if (data.user.language && data.user.age) {
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'MainTabs' }],
                 });
             } else {
-                // If the user has not selected language or age group, navigate to LanguageSelectionScreen
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'LanguageSelectionScreen' }],
                 });
             }
-            // Navigate to the LanguageSelectionScreen and reset the navigation stack
-            // This prevents the user from going back to the login screen using the back button.
+
 
         } catch (error) {
             Alert.alert('Error', 'Network issue. Try again.');
@@ -410,7 +418,6 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         zIndex: 2,
     },
-
     signUpContainer: {
         position: 'absolute',
         bottom: 33,

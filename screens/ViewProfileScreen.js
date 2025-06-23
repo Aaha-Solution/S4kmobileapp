@@ -60,7 +60,7 @@ const ViewProfileScreen = ({ navigation }) => {
 			try {
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`http://192.168.0.208:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
+					`https://smile4kids-mobilebackend.onrender.com/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
@@ -70,8 +70,8 @@ const ViewProfileScreen = ({ navigation }) => {
 
 				console.log("Raw response:", response);
 
-				const data = await response.json(); 
-				console.log("Parsed JSON:", data);  
+				const data = await response.json();
+				console.log("Parsed JSON:", data);
 
 				if (data && data.users_id) {
 					console.log("Profile data received:", data);
@@ -119,16 +119,18 @@ const ViewProfileScreen = ({ navigation }) => {
 	}, [navigation]);
 
 	const formatDate = (dateString) => {
-		if (!dateString) return '';
-		const [year, month, day] = dateString.split('/');
-		const date = new Date(`${year}-${month}-${day}`);
-		if (isNaN(date)) return 'Invalid Date';
-		return date.toLocaleDateString('en-GB', {
-			year: 'numeric',
-			month: 'short',
-			day: '2-digit',
-		});
-	};
+	if (!dateString) return '';
+	const [year, month, day] = dateString.split('/');
+	const date = new Date(`${year}-${month}-${day}`);
+	if (isNaN(date.getTime())) return 'Invalid Date';
+
+	return date.toLocaleDateString('en-GB', {
+		year: 'numeric',
+		month: 'short',
+		day: '2-digit',
+	});
+};
+
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -222,6 +224,7 @@ const ViewProfileScreen = ({ navigation }) => {
 								title="Edit"
 								onPress={handleEditPress}
 							/>
+						
 						</View>
 					</ScrollView>
 				</SafeAreaView>

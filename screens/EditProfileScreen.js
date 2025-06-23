@@ -17,7 +17,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     // Base URL - consider moving to config file
     const BASE_URL = 'https://smile4kids-mobilebackend.onrender.com';
-    
+
     // State variables
     const [email, setemail] = useState(route.params?.email || '');
     const [address, setAddress] = useState(route.params?.address || '');
@@ -35,6 +35,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         const fetchAvatar = async () => {
+
             try {
                 const token = await AsyncStorage.getItem('token');
                 const response = await fetch(`${BASE_URL}/api/images/`, {
@@ -45,7 +46,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     },
                 });
 
-                const data = await response.json(); 
+                const data = await response.json();
                 console.log('Fetched avatar images:', data);
                 setImages(data);
 
@@ -53,7 +54,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 console.error('Failed to fetch avatars:', error);
             }
         };
- 
+
         fetchAvatar();
     }, []);
 
@@ -81,31 +82,35 @@ const EditProfileScreen = ({ route, navigation }) => {
     }, [navigation]);
 
     const validateAndFormatDate = (inputDate, setDateError) => {
-        let formattedDate = inputDate.replace(/[^0-9]/g, '');
+        // Remove non-digit characters
+        let raw = inputDate.replace(/\D/g, '');
 
-        // Add slashes as user types
-        if (formattedDate.length >= 4 && formattedDate.length <= 6) {
-            formattedDate = `${formattedDate.slice(0, 4)}/${formattedDate.slice(4)}`;
-        } else if (formattedDate.length > 6) {
-            formattedDate = `${formattedDate.slice(0, 4)}/${formattedDate.slice(4, 6)}/${formattedDate.slice(6, 8)}`;
+        // Format: yyyy/mm/dd
+        let formattedDate = raw;
+        if (raw.length > 4 && raw.length <= 6) {
+            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4)}`;
+        } else if (raw.length > 6) {
+            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
         }
 
-        // Validate the date if fully entered
-        if (formattedDate.length === 10) {
-            const [year, month, day] = formattedDate.split('/').map(Number);
+        // Validate if full date is entered
+        if (raw.length === 8) {
+            const year = parseInt(raw.slice(0, 4), 10);
+            const month = parseInt(raw.slice(4, 6), 10);
+            const day = parseInt(raw.slice(6, 8), 10);
+
             const date = new Date(year, month - 1, day);
 
             if (
-                isNaN(date.getTime()) ||
-                date.getDate() !== day ||
-                date.getMonth() !== month - 1 ||
-                date.getFullYear() !== year
+                date.getFullYear() !== year ||
+                date.getMonth() + 1 !== month ||
+                date.getDate() !== day
             ) {
                 setDateError('Please enter a valid date');
             } else {
                 setDateError('');
             }
-        } else if (formattedDate.length > 0 && formattedDate.length < 10) {
+        } else if (raw.length > 0 && raw.length < 8) {
             setDateError('Please complete the date');
         } else {
             setDateError('');
@@ -113,6 +118,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
         return formattedDate;
     };
+
 
 
     const HandlePhonenumber = (phoneNumber) => {
@@ -213,9 +219,6 @@ const EditProfileScreen = ({ route, navigation }) => {
                     username, email, dateOfBirth, phone, address
                 }));
 
-                setAlertTitle('Success');
-                setAlertMessage('Profile updated successfully');
-                setShowAlert(true);
                 navigation.navigate('ViewProfile');
 
             } else {
@@ -240,157 +243,157 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     return (
         <View style={{ flex: 1 }}>
-           <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-            <SafeAreaView style={styles.container}>
-                <ScrollView>
-                    <View style={styles.header}>
-                        <View style={styles.profileContainer}>
-                            <Image
-                                source={selectedAvatar}
-                                style={styles.avatar}
-                                resizeMode="cover"
-                            />
-                            <TouchableOpacity
-                                style={styles.editButton}
-                                onPress={() => setModalVisible(true)}
-                            >
-                                <Ionicons name="camera" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(false)}
-                    >
-                        <TouchableOpacity
-                            style={styles.modalOverlay}
-                            activeOpacity={1}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            <View style={styles.modalContent}>
-                                <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Choose Avatar</Text>
-                                    <TouchableOpacity
-                                        onPress={() => setModalVisible(false)}
-                                        style={styles.closeButton}
-                                    >
-                                        <Ionicons name="close" size={24} color="black" />
-                                    </TouchableOpacity>
-                                </View>
-
-                                {loading ? (
-                                    <Text style={styles.loadingText}>Loading avatars...</Text>
-                                ) : (
-                                    <ScrollView>
-                                        <View style={styles.avatarGrid}>
-                                            {images.map((image, index) => {
-                                                const uri = `${BASE_URL}${image.path}`;
-                                                const isSelected = selectedAvatar?.uri === uri;
-
-                                                return (
-                                                    <TouchableOpacity
-                                                        key={index}
-                                                        style={styles.avatarOption}
-                                                        onPress={() => {
-                                                            handleSelectAvatar()
-                                                        }}
-                                                    >
-                                                        <Image
-                                                            source={
-                                                                profile?.selectedAvatar
-                                                                    ? { uri: profile.selectedAvatar }
-                                                                    : require('../assets/image/profile_avatar.png') // fallback image
-                                                            }
-                                                            style={styles.avatar}
-                                                        />
-                                                    </TouchableOpacity>
-                                                );
-                                            })}
-                                        </View>
-                                    </ScrollView>
-                                )}
+            <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+                <SafeAreaView style={styles.container}>
+                    <ScrollView>
+                        <View style={styles.header}>
+                            <View style={styles.profileContainer}>
+                                <Image
+                                    source={selectedAvatar}
+                                    style={styles.avatar}
+                                    resizeMode="cover"
+                                />
+                                <TouchableOpacity
+                                    style={styles.editButton}
+                                    onPress={() => setModalVisible(true)}
+                                >
+                                    <Ionicons name="camera" size={20} color="white" />
+                                </TouchableOpacity>
                             </View>
-                        </TouchableOpacity>
-                    </Modal>
-
-                    <View style={styles.formContainer}>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>UserName</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.username}
-                                placeholder="Enter your username"
-                                autoCapitalize="none"
-                            />
-                        </View>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Email</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={email}
-                                placeholder="Enter your email"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                            />
                         </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Date of Birth</Text>
-                            <TextInput
-                                style={[styles.input, dateError ? styles.errorInput : null]}
-                                value={dateOfBirth}
-                                onChangeText={handleDateChange}
-                                placeholder="YYYY/MM/DD"
-                                keyboardType="numeric"
-                                maxLength={10}
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible}
+                            onRequestClose={() => setModalVisible(false)}
+                        >
+                            <TouchableOpacity
+                                style={styles.modalOverlay}
+                                activeOpacity={1}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <View style={styles.modalContent}>
+                                    <View style={styles.modalHeader}>
+                                        <Text style={styles.modalTitle}>Choose Avatar</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setModalVisible(false)}
+                                            style={styles.closeButton}
+                                        >
+                                            <Ionicons name="close" size={24} color="black" />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    {loading ? (
+                                        <Text style={styles.loadingText}>Loading avatars...</Text>
+                                    ) : (
+                                        <ScrollView>
+                                            <View style={styles.avatarGrid}>
+                                                {images.map((image, index) => {
+                                                    const uri = `${BASE_URL}${image.path}`;
+                                                    const isSelected = selectedAvatar?.uri === uri;
+
+                                                    return (
+                                                        <TouchableOpacity
+                                                            key={index}
+                                                            style={styles.avatarOption}
+                                                            onPress={() => {
+                                                                handleSelectAvatar()
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                source={
+                                                                    profile?.selectedAvatar
+                                                                        ? { uri: profile.selectedAvatar }
+                                                                        : require('../assets/image/profile_avatar.png') // fallback image
+                                                                }
+                                                                style={styles.avatar}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    );
+                                                })}
+                                            </View>
+                                        </ScrollView>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                        </Modal>
+
+                        <View style={styles.formContainer}>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>UserName</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={profile.username}
+                                    placeholder="Enter your username"
+                                    autoCapitalize="none"
+                                />
+                            </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Email</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={email}
+                                    placeholder="Enter your email"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Date of Birth</Text>
+                                <TextInput
+                                    style={[styles.input, dateError ? styles.errorInput : null]}
+                                    value={dateOfBirth}
+                                    onChangeText={handleDateChange}
+                                    placeholder="YYYY/MM/DD"
+                                    keyboardType="numeric"
+                                    maxLength={10}
+                                />
+                                {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Phone Number</Text>
+                                <TextInput
+                                    style={[styles.input, phoneError ? styles.errorInput : null]}
+                                    value={phone}
+                                    onChangeText={HandlePhonenumber}
+                                    placeholder="Enter your phone number"
+                                    keyboardType="phone-pad"
+                                    maxLength={10}
+                                />
+                                {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Address</Text>
+                                <TextInput
+                                    style={styles.addressInput}
+                                    value={address}
+                                    onChangeText={setAddress}
+                                    placeholder="Type your Address"
+                                    multiline
+                                    numberOfLines={5}
+                                />
+                            </View>
+
+                            <PressableButton
+                                style={styles.saveButton}
+                                title="Save"
+                                onPress={handleSave}
                             />
-                            {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
                         </View>
+                    </ScrollView>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Phone Number</Text>
-                            <TextInput
-                                style={[styles.input, phoneError ? styles.errorInput : null]}
-                                value={phone}
-                                onChangeText={HandlePhonenumber}
-                                placeholder="Enter your phone number"
-                                keyboardType="phone-pad"
-                                maxLength={10}
-                            />
-                            {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Address</Text>
-                            <TextInput
-                                style={styles.addressInput}
-                                value={address}
-                                onChangeText={setAddress}
-                                placeholder="Type your Address"
-                                multiline
-                                numberOfLines={5}
-                            />
-                        </View>
-
-                        <PressableButton
-                            style={styles.saveButton}
-                            title="Save"
-                            onPress={handleSave}
-                        />
-                    </View>
-                </ScrollView>
-
-                <CustomAlert
-                    visible={showAlert}
-                    title={alertTitle}
-                    message={alertMessage}
-                    onConfirm={() => setShowAlert(false)}
-                />
-            </SafeAreaView>
+                    <CustomAlert
+                        visible={showAlert}
+                        title={alertTitle}
+                        message={alertMessage}
+                        onConfirm={() => setShowAlert(false)}
+                    />
+                </SafeAreaView>
             </LinearGradient>
         </View>
     );
@@ -399,7 +402,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        
+
     },
     header: {
         alignItems: 'center',
@@ -525,7 +528,7 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
     },
     saveButton: {
-       // backgroundColor: '#9346D2',
+        // backgroundColor: '#9346D2',
         padding: 15,
         paddingHorizontal: 20,
         borderRadius: 8,
