@@ -122,36 +122,31 @@ const SignupScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-          
-          {/* Top Graphics */}
+
+          {/* Sun and cloud */}
           <View style={styles.topGraphics}>
             <Image source={require('../assets/image/sun.png')} style={styles.sun} />
             <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
           </View>
 
-          {/* Main Content */}
-          <View style={styles.mainContent}>
-            {/* Logo Section */}
-            <View style={styles.logoContainer}>
-              <Image source={require('../assets/image/splash.png')} style={styles.logo} resizeMode="contain" />
-              <Text style={styles.signupTitle}>
-                <Text style={{ color: '#D2042D' }}>S</Text>
-                <Text style={{ color: '#E97451' }}>I</Text>
-                <Text style={{ color: '#FDDA0D' }}>G</Text>
-                <Text style={{ color: '#50C878' }}>N</Text>
-                <Text style={{ color: '#4169E1' }}> </Text>
-                <Text style={{ color: '#9370DB' }}>U</Text>
-                <Text style={{ color: '#FF1493' }}>P</Text>
-              </Text>
-            </View>
+          {/* Content */}
+          <View style={[styles.mainContent, !keyboardVisible && { marginBottom: 80 }]}>
+            <Image source={require('../assets/image/splash.png')} style={styles.logo} resizeMode="contain" />
+            <Text style={styles.signupTitle}>
+              <Text style={{ color: '#D2042D' }}>S</Text>
+              <Text style={{ color: '#E97451' }}>I</Text>
+              <Text style={{ color: '#FDDA0D' }}>G</Text>
+              <Text style={{ color: '#50C878' }}>N</Text>
+              <Text style={{ color: '#4169E1' }}> </Text>
+              <Text style={{ color: '#9370DB' }}>U</Text>
+              <Text style={{ color: '#FF1493' }}>P</Text>
+            </Text>
 
-            {/* Input Fields */}
             <View style={styles.inputContainer}>
               <CustomTextInput
                 value={username}
@@ -198,7 +193,6 @@ const SignupScreen = ({ navigation }) => {
               {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
             </View>
 
-            {/* Sign Up Button */}
             <View style={styles.buttonContainer}>
               {loading ? (
                 <ActivityIndicator size="large" color="#FF8C00" />
@@ -213,7 +207,7 @@ const SignupScreen = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Bottom Elements */}
+          {/* Bottom image and login only when keyboard is hidden */}
           {!keyboardVisible && (
             <>
               <View style={styles.bottomGraphics}>
@@ -236,9 +230,11 @@ const SignupScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
-  },
+  container: 
+  {
+     flex: 1
+   },
+
   topGraphics: {
     position: 'absolute',
     top: height * 0.05,
@@ -265,19 +261,15 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: height * 0.12,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 35,
+    paddingHorizontal: 40,
+    marginTop: -50, 
   },
   logo: {
-    width: 140,
-    height: 110,
-    marginBottom: 12,
+    width: 160,
+    height: 130,
+    marginBottom: 10,
   },
   signupTitle: {
     fontSize: 32,
@@ -285,38 +277,31 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+    marginBottom: 20,
     letterSpacing: 1,
     shadowColor: '#000',
   },
   inputContainer: {
     width: '100%',
     maxWidth: 350,
-    marginBottom: 20,
   },
   errorText: {
     color: '#FF4444',
-    fontSize: 13,
+    fontSize: 12,
     marginTop: -8,
     marginBottom: 8,
     marginLeft: 15,
     fontWeight: '500',
   },
   buttonContainer: {
-    width: '100%',
-    maxWidth: 350,
+    marginTop: 20,
     alignItems: 'center',
-    marginBottom: 25,
   },
   signupButton: {
     backgroundColor: '#FF8C00',
-    paddingVertical: 10,
-    borderRadius: 25,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 30,
   },
   signupButtonText: {
     color: 'white',
@@ -326,16 +311,14 @@ const styles = StyleSheet.create({
   },
   bottomGraphics: {
     position: 'absolute',
-    bottom: 85,
+    bottom: 80,
     left: 0,
     right: 0,
     alignItems: 'center',
-    height: height * 0.2,
-    justifyContent: 'center',
   },
   kidsImage: {
     width: width * 0.45,
-    height: height * 0.16,
+    height: height * 0.18,
     resizeMode: 'contain',
   },
   loginContainer: {
@@ -347,19 +330,13 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
-    paddingVertical: 16,
-    paddingHorizontal: 45,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   loginText: {
     color: '#fff',
-    fontSize: 15,
-    textAlign: 'center',
+    fontSize: 16,
     fontWeight: '600',
   },
   loginLink: {
