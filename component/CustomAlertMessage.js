@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#666',
 	},
 	confirmButton: {
-		backgroundColor: '#9346D2',
+		backgroundColor: '#FF8C00',
 	},
 	buttonText: {
 		color: 'white',

@@ -81,43 +81,45 @@ const EditProfileScreen = ({ route, navigation }) => {
         return () => backHandler.remove();
     }, [navigation]);
 
-    const validateAndFormatDate = (inputDate, setDateError) => {
-        // Remove non-digit characters
-        let raw = inputDate.replace(/\D/g, '');
+ const validateAndFormatDate = (inputDate, setDateError) => {
+    // Remove non-digit characters
+    let raw = inputDate.replace(/\D/g, '');
 
-        // Format: yyyy/mm/dd
-        let formattedDate = raw;
-        if (raw.length > 4 && raw.length <= 6) {
-            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4)}`;
-        } else if (raw.length > 6) {
-            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
-        }
+    let formattedDate = '';
+    if (raw.length >= 5 && raw.length <= 6) {
+        formattedDate = `${raw.slice(0, 4)}/${raw.slice(4)}`;
+    } else if (raw.length >= 7) {
+        formattedDate = `${raw.slice(0, 4)}/${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
+    } else {
+        formattedDate = raw;
+    }
 
-        // Validate if full date is entered
-        if (raw.length === 8) {
-            const year = parseInt(raw.slice(0, 4), 10);
-            const month = parseInt(raw.slice(4, 6), 10);
-            const day = parseInt(raw.slice(6, 8), 10);
+    // Validation
+    if (raw.length === 8) {
+        const year = parseInt(raw.slice(0, 4), 10);
+        const month = parseInt(raw.slice(4, 6), 10);
+        const day = parseInt(raw.slice(6, 8), 10);
 
-            const date = new Date(year, month - 1, day);
+        const date = new Date(year, month - 1, day);
 
-            if (
-                date.getFullYear() !== year ||
-                date.getMonth() + 1 !== month ||
-                date.getDate() !== day
-            ) {
-                setDateError('Please enter a valid date');
-            } else {
-                setDateError('');
-            }
-        } else if (raw.length > 0 && raw.length < 8) {
-            setDateError('Please complete the date');
+        if (
+            date.getFullYear() !== year ||
+            date.getMonth() + 1 !== month ||
+            date.getDate() !== day
+        ) {
+            setDateError('Please enter a valid date');
         } else {
             setDateError('');
         }
+    } else if (raw.length > 0 && raw.length < 8) {
+        setDateError('Please complete the date');
+    } else {
+        setDateError('');
+    }
 
-        return formattedDate;
-    };
+    // ✅ Return only if formatted as full YYYY/MM/DD or in-progress format
+    return formattedDate;
+};
 
 
 
@@ -154,6 +156,19 @@ const EditProfileScreen = ({ route, navigation }) => {
         const formattedDate = validateAndFormatDate(text, setDateError);
         setDateOfBirth(formattedDate);
     };
+const toMySQLDate = (formattedDate) => {
+    if (!formattedDate) return null;
+    const parts = formattedDate.split('/');
+    if (parts.length !== 3 || parts.some(part => part.length < 2)) return null;
+
+    const [year, month, day] = parts;
+    if (
+        isNaN(year) || isNaN(month) || isNaN(day) ||
+        year.length !== 4 || month.length !== 2 || day.length !== 2
+    ) return null;
+
+    return `${year}-${month}-${day}`;
+};
 
 
     const handleSave = async () => {
@@ -185,7 +200,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 body: JSON.stringify({
                     username,
                     email_id: email,
-                    dob: dateOfBirth,
+                    dob: toMySQLDate(dateOfBirth), 
                     ph_no: phone,
                     address: address,
                 }),

@@ -46,6 +46,8 @@ const LoginScreen = ({ navigation }) => {
                     setPassword(credentials.password);
                     setRememberMe(true);
                 }
+
+
             } catch (error) {
                 console.error('Keychain error:', error);
             }
@@ -78,6 +80,8 @@ const LoginScreen = ({ navigation }) => {
     }, [navigation]);
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+
 
     const handleLogin = async () => {
         setEmailError('');
@@ -112,10 +116,19 @@ const LoginScreen = ({ navigation }) => {
             await AsyncStorage.setItem('token', data.token);
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
+
+                const userLang = data.user.language;
+                const userAge = data.user.age;
+
+                setSelectedLanguage(userLang);
+                setSelectedAgeGroup(userAge);
+
                 await AsyncStorage.setItem('selectedPreferences', JSON.stringify({
-                    selectedAgeGroup,
-                    selectedLanguage,
+                    selectedAgeGroup: userAge,
+                    selectedLanguage: userLang,
                 }));
+
+
             } else {
                 await Keychain.resetGenericPassword();
                 await AsyncStorage.removeItem('selectedPreferences');

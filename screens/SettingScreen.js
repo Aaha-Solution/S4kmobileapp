@@ -26,7 +26,6 @@ const menuItems = [
 	{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
 	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 ];
-
 const SettingsScreen = ({ route, navigation }) => {
 	const { selectedAvatar } = route.params || {};
 	const email = useSelector((state) => state.user.email) || '';
@@ -76,7 +75,6 @@ const SettingsScreen = ({ route, navigation }) => {
 		return unsubscribe;
 	}, [navigation]);
 
-
 	const handleConfirmLogout = async () => {
 		console.log("handleConfirmLogout called");
 		const token = await AsyncStorage.getItem('token');
@@ -95,7 +93,6 @@ const SettingsScreen = ({ route, navigation }) => {
 			await AsyncStorage.removeItem('userProfile');
 			await AsyncStorage.removeItem('selectedPreferences');
 
-
 			console.log("token:", token);
 			console.log("savedEmail:", savedEmail);
 			console.log("savedPassword:", savedPassword);
@@ -103,7 +100,6 @@ const SettingsScreen = ({ route, navigation }) => {
 
 			const tokenAfterRemoval = await AsyncStorage.getItem('token');
 			console.log("token AFTER removal:", tokenAfterRemoval); // This should now be null
-
 
 			dispatch(logout()); // clear Redux user state
 			navigation.dispatch(
@@ -130,7 +126,6 @@ const SettingsScreen = ({ route, navigation }) => {
 			navigation.navigate('Home');
 			return true;
 		});
-
 
 	});
 
