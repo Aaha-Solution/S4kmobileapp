@@ -252,6 +252,8 @@ const VideoListScreen = ({ navigation, route }) => {
 				onCancel={handleCancelExit}
 			/>
 			
+			{/* 
+			 */}
 			{/* {!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
