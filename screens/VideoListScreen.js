@@ -240,7 +240,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				onCancel={handleCancelExit}
 			/>
 			
-			{!isPaid && (
+			{/* {!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
 						<Text style={styles.blurTitle}>Unlock All Videos</Text>
@@ -259,7 +259,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 					</View>
 				</View>
-			)} 
+			)}  */}
 		</LinearGradient>
 	);
 };

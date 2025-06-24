@@ -205,9 +205,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
             </View>
 
             {/* Bottom Graphics */}
-            <View style={styles.bottomGraphics}>
+            {/* <View style={styles.bottomGraphics}>
                 <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
-            </View>
+            </View> */}
 
             {/* Back to Login */}
             <View style={styles.backToLoginContainer}>
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     },
     backToLoginContainer: {
         position: 'absolute',
-        bottom: 33,
+        bottom: 50,
         left: 0,
         right: 0,
         alignItems: 'center',
