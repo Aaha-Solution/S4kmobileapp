@@ -240,26 +240,8 @@ const VideoListScreen = ({ navigation, route }) => {
 				onCancel={handleCancelExit}
 			/>
 			
-			{/* {!isPaid && (
-				<View style={styles.blurOverlay}>
-					<View style={styles.blurContent}>
-						<Text style={styles.blurTitle}>Unlock All Videos</Text>
-						<Text style={styles.blurDescription}>
-							Pay £45 to access fun & engaging kids videos
-						</Text>
-						<TouchableOpacity
-							onPress={() => {
-								dispatch(setPaidStatus(true));
-								navigation.navigate('PaymentSuccessScreen');
-							}}
-							style={styles.payNowButton}
-						>
-							<Text style={styles.payNowText}>Pay £45</Text>
-						</TouchableOpacity>
-
-					</View>
-				</View>
-			)}  */}
+			{/* 
+			 */}
 		</LinearGradient>
 	);
 };
