@@ -118,17 +118,21 @@ const ViewProfileScreen = ({ navigation }) => {
 		return () => backHandler.remove();
 	}, [navigation]);
 
-	const formatDate = (dateString) => {
+const formatDate = (dateString) => {
 	if (!dateString) return '';
-	const [year, month, day] = dateString.split('/');
-	const date = new Date(`${year}-${month}-${day}`);
-	if (isNaN(date.getTime())) return 'Invalid Date';
 
-	return date.toLocaleDateString('en-GB', {
-		year: 'numeric',
-		month: 'short',
-		day: '2-digit',
-	});
+	try {
+		const date = new Date(dateString);
+		if (isNaN(date.getTime())) return 'Invalid Date';
+
+		return date.toLocaleDateString('en-GB', {
+			year: 'numeric',
+			month: 'short',
+			day: '2-digit',
+		});
+	} catch (error) {
+		return 'Invalid Date';
+	}
 };
 
 

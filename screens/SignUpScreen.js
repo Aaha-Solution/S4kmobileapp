@@ -36,7 +36,7 @@ const SignupScreen = ({ navigation }) => {
     };
 
     const dispatch = useDispatch();
-    
+
     const handleSignUp = async () => {
         setemailError('');
         setusernameError('');
@@ -79,7 +79,7 @@ const SignupScreen = ({ navigation }) => {
         setLoading(true);
         try {
             console.log("Payload:", { email, email_id: email, password, confirmPassword });
-           
+
             const response = await fetch('http://192.168.0.209:3000/signup', {
                 method: 'POST',
                 headers: {
@@ -87,7 +87,7 @@ const SignupScreen = ({ navigation }) => {
                 },
                 body: JSON.stringify({ username, email_id: email, password, confirm_password: confirmPassword })
             });
-            
+
             console.log("response:", response);
 
             const text = await response.text();
@@ -132,11 +132,7 @@ const SignupScreen = ({ navigation }) => {
             </View>
 
             {/* Main Content - Scrollable */}
-            <ScrollView 
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.scrollView}>
                 <View style={styles.mainContent}>
                     <View style={styles.logoContainer}>
                         <View style={styles.logoCurve}>
@@ -217,8 +213,8 @@ const SignupScreen = ({ navigation }) => {
                         )}
                     </View>
                 </View>
-            </ScrollView>
 
+            </View>
             {/* Bottom Graphics */}
             <View style={styles.bottomGraphics}>
                 <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
@@ -232,13 +228,16 @@ const SignupScreen = ({ navigation }) => {
                     </Text>
                 </Pressable>
             </View>
+
+            
         </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1 
+    container: {
+        flex: 1,
+        alignContent: 'center',
     },
     topGraphics: {
         position: 'absolute',
@@ -265,7 +264,11 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     scrollView: {
-        flex: 1,
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 250,
+        marginBottom: 110,
     },
     scrollContent: {
         flexGrow: 1,
@@ -286,6 +289,7 @@ const styles = StyleSheet.create({
     logo: {
         width: 170,
         height: 140,
+        marginTop: 50,
     },
     signupTitle: {
         fontSize: 32,
@@ -334,8 +338,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 1,
     },
-    loadingIndicator: { 
-        paddingVertical: 18 
+    loadingIndicator: {
+        paddingVertical: 18
     },
     bottomGraphics: {
         position: 'absolute',

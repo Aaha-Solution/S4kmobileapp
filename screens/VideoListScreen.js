@@ -89,15 +89,16 @@ const VideoListScreen = ({ navigation, route }) => {
 	console.log("Sending preferences:", selectedAgeGroup, selectedLanguage);
 
 	const getFormattedLevel = (ageGroup) => {
-		if (!ageGroup) return 'Pre_Junior';
-		const lowerAgeGroup = ageGroup.toLowerCase();
-		if (lowerAgeGroup.includes('junior') && (lowerAgeGroup.includes('7') || lowerAgeGroup.includes('above'))) {
-			return 'Junior';
-		} else if (lowerAgeGroup.includes('Pre_Junior') || lowerAgeGroup.includes('4-6')) {
-			return 'Pre_Junior';
-		}
+	if (!ageGroup) return 'Pre_Junior';
+	const lower = ageGroup.toLowerCase();
+	if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
+		return 'Junior';
+	} else if (lower.includes('prejunior') || lower.includes('4-6')) {
 		return 'Pre_Junior';
-	};
+	}
+	return 'Pre_Junior';
+};
+
 
 	const fetchVideos = useCallback(async () => {
 		if (!selectedAgeGroup || !language) {
@@ -176,7 +177,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					{item.title || `Video ${index + 1}`}
 				</Text>
 				<Text style={styles.kidSubText}>
-					{item.duration ? `${item.duration} min` : 'Fun learning'}
+					{item.duration ? `${item.duration} min` : ''}
 				</Text>
 			</View>
 			<Icon name="chevron-forward" size={24} color="#fff" />

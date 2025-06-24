@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable } from 'react-native';
+import React, { useState,useEffect } from 'react';
+import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable,BackHandler } from 'react-native';
 import PressableButton from '../component/PressableButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
@@ -78,6 +78,14 @@ const ChangePasswordScreen = ({ navigation }) => {
 			Alert.alert('Error', 'Failed to change password. Please try again later.');
 		}
 	};
+
+	useEffect(() => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+				navigation.navigate('AccountScreen');
+				return true;
+			});
+	
+		});
 
 	const handleCancel = () => {
 		navigation.goBack();
@@ -207,7 +215,6 @@ const styles = StyleSheet.create({
 	},
 	saveButton: {
 		padding: 10,
-		width: '100%',
 		paddingVertical: 15,
 		borderRadius: 12,
 		alignItems: 'center',

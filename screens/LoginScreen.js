@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
                     setRememberMe(true);
                 }
 
-                
+
             } catch (error) {
                 console.error('Keychain error:', error);
             }
@@ -84,7 +84,7 @@ const LoginScreen = ({ navigation }) => {
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    
+
 
     const handleLogin = async () => {
         setEmailError('');
@@ -129,10 +129,17 @@ const LoginScreen = ({ navigation }) => {
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
 
+                const userLang = data.user.language;
+                const userAge = data.user.age;
+
+                setSelectedLanguage(userLang);
+                setSelectedAgeGroup(userAge);
+
                 await AsyncStorage.setItem('selectedPreferences', JSON.stringify({
-                    selectedAgeGroup,
-                    selectedLanguage,
+                    selectedAgeGroup: userAge,
+                    selectedLanguage: userLang,
                 }));
+
 
             } else {
                 await Keychain.resetGenericPassword();

@@ -8,6 +8,8 @@ import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAgeGroup } from '../Store/userSlice';
+import { useFocusEffect } from '@react-navigation/native';
+import { useRef } from 'react';
 import Toast from 'react-native-toast-message';
 const Tab = createBottomTabNavigator();
 const CustomTabBar = ({ state, descriptors, navigation }) => {
@@ -21,10 +23,21 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 	]);
 
+	const currentRouteRef = useRef(state.routes[state.index].name);
+
+	// Update dropdown value when redux changes
 	useEffect(() => {
-		setValue(selectedAgeGroup);
+		if (selectedAgeGroup) {
+			setValue(selectedAgeGroup);
+		}
 	}, [selectedAgeGroup]);
 
+	// Update route ref on focus change
+	useFocusEffect(() => {
+		currentRouteRef.current = state.routes[state.index].name;
+	});
+
+	// Handle dropdown age group selection
 	const handleAgeSelect = (selectedValue) => {
 		if (!selectedValue) return;
 
@@ -41,12 +54,17 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		}
 	};
 
+	// Close dropdown and optionally navigate to Home
 	const handleOutsidePress = () => {
 		if (open) {
 			setOpen(false);
+			if (currentRouteRef.current === 'Age') {
+				navigation.navigate('Home');
+			}
 		}
 	};
 
+	// Handle tab button press
 	const handleTabPress = (route) => {
 		if (!isPaid) {
 			Toast.show({
@@ -54,46 +72,52 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 				text1: ' ⚠ Please complete payment to proceed further',
 				position: 'bottom',
 				visibilityTime: 3000,
-			  });			  
+			});
 			return;
 		}
-	
+
 		handleOutsidePress();
-	
+
 		if (route.name === 'Age') {
-			setOpen(!open);
-			navigation.navigate('Age');
+			setOpen(prev => !prev);
+			// ✅ Don't navigate manually here
 		} else {
 			navigation.navigate(route.name);
 		}
 	};
-	
-	
+
+	// Android back handler logic
 	useEffect(() => {
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+		const backAction = () => {
 			if (open) {
 				setOpen(false);
 				return true;
 			}
-			if (state.routes[state.index].name === 'Age') {
+
+			if (currentRouteRef.current === 'Age') {
 				navigation.navigate('Home');
 				return true;
 			}
+
 			return false;
-		});
+		};
+
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
 		return () => backHandler.remove();
-	}, [open, navigation, state]);
-
+	}, [open]);
 
 	return (
 		<TouchableWithoutFeedback onPress={handleOutsidePress}>
-		
 			<View style={styles.tabBarContainer}>
 				{state.routes.map((route, index) => {
 					const { options } = descriptors[route.key];
 					const label = options.tabBarLabel ?? options.title ?? route.name;
-					const isFocused = state.index === index;
+					// 👇 Only "Age" is focused when dropdown is open
+					const isFocused = open
+						? route.name === 'Age'
+						: state.index === index;
+
 					const iconName = getIconName(route.name, isFocused);
 
 					if (route.name === 'Age') {
@@ -103,19 +127,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 									onPress={() => handleTabPress(route)}
 									style={styles.tabButton}
 								>
-									<Icon 
-										name={iconName} 
-										size={24} 
-										color={isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray'} 
-									/>
-									<Text 
-										style={[
-											styles.tabLabel, 
-											{ color: isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray' }
-										]}
-									>
-										{label}
-									</Text>
+									<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
+									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
 								</TouchableOpacity>
 								{open && (
 									<View style={styles.dropdownWrapper}>
@@ -127,15 +140,34 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 											setValue={setValue}
 											setItems={setItems}
 											placeholder="Select Age Group"
+											onChangeValue={(val) => handleAgeSelect(val)}
 											onSelectItem={(item) => handleAgeSelect(item.value)}
 											style={styles.dropdown}
 											dropDownContainerStyle={styles.dropdownContainer}
+											arrowIconStyle={{ tintColor: '#4CAF50' }}
+											textStyle={{ fontSize: 14, fontWeight: '500', color: '#333' }}
+											labelStyle={{ color: '#333' }}
+											listItemLabelStyle={{ color: '#333' }}
+											selectedItemContainerStyle={{
+												backgroundColor: '#E8F5E9',
+												borderLeftWidth: 4,
+												borderLeftColor: '#4CAF50',
+											}}
+											selectedItemLabelStyle={{
+												color: '#2E7D32',
+												fontWeight: 'bold',
+											}}
+											tickIconStyle={{
+												tintColor: '#4CAF50',
+												width: 20,
+												height: 20,
+											}}
 											zIndex={9999}
 											listMode="SCROLLVIEW"
 											scrollViewProps={{
 												nestedScrollEnabled: true,
 											}}
-											disabled={!isPaid} // <- disable until paid
+											disabled={!isPaid}
 										/>
 									</View>
 								)}
@@ -149,8 +181,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 							onPress={() => handleTabPress(route)}
 							style={styles.tabButton}
 						>
-							<Icon name={iconName} size={24} color={isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray'} />
-							<Text style={[styles.tabLabel, { color: isFocused ? 'rgba(76, 175, 80, 0.9)' : 'gray' }]}>{label}</Text>
+							<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
+							<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
 						</TouchableOpacity>
 					);
 				})}
@@ -158,6 +190,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		</TouchableWithoutFeedback>
 	);
 };
+
 
 const getIconName = (routeName, focused) => {
 	switch (routeName) {
@@ -175,7 +208,7 @@ const getIconName = (routeName, focused) => {
 };
 
 const BottomTabNavigator = () => {
-	
+
 	return (
 		<Tab.Navigator
 			initialRouteName="Home"
@@ -193,19 +226,20 @@ const BottomTabNavigator = () => {
 			<Tab.Screen
 				name="Setting"
 				component={SettingScreen}
-				options={{ title: 'Setting',
-				 }}
+				options={{
+					title: 'Setting',
+				}}
 			/>
 			<Tab.Screen
 				name="Home"
 				component={VideoListScreen}
 				options={{ title: 'Home' }}
 			/>
-			<Tab.Screen
+			{/* <Tab.Screen
 				name="Payment"
 				component={PaymentScreen}
 				options={{ title: 'Payment' }}
-			/>
+			/> */}
 			<Tab.Screen
 				name="Age"
 				component={VideoListScreen}
@@ -218,7 +252,7 @@ const BottomTabNavigator = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-	  },
+	},
 	tabBarContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-around',
@@ -245,7 +279,7 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		marginTop: 2,
 	},
-	dropdownWrapper: {   
+	dropdownWrapper: {
 		position: 'absolute',
 		top: -150,
 		width: 180,

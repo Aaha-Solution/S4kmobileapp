@@ -91,26 +91,13 @@ const App = () => (
 							)
 						})}
 					/>
-					<Stack.Screen
-						name="ForgotPasswordScreen"
-						component={ForgotPasswordScreen}
-						options={({ navigation }) => ({
-							headerShown: true,
-							headerTitle: 'Forgot Password',
-							headerTitleAlign: 'center',
-							headerTransparent: true,
-							headerStyle: { backgroundColor: '#87CEEB' },
-							headerLeft: () => (
-								<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('AccountScreen')} />
-							)
-						})}
-					/>
+					
 					<Stack.Screen
 						name="ChangePasswordScreen"
 						component={ChangePasswordScreen}
 						options={({ navigation }) => ({
 							headerShown: true,
-							headerTitle: 'Forgot Password',
+							headerTitle: 'Change Password',
 							headerTitleAlign: 'center',
 							headerTransparent: true,
 							headerStyle: { backgroundColor: '#87CEEB' },
