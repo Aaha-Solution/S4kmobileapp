@@ -14,15 +14,26 @@ import profile_avatar from '../assets/image/profile_avatar.png';
 
 const EditProfileScreen = ({ route, navigation }) => {
     const dispatch = useDispatch();
+    const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const username = profile?.username || '';
     const routeAvatar = route.params?.selectedAvatar;
     const BASE_URL = 'https://smile4kids-backend.onrender.com';
 
-    const [email, setemail] = useState(route.params?.email || '');
-    const [address, setAddress] = useState(route.params?.address || '');
-    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth || '');
-    const [phone, setPhone] = useState(route.params?.phone || '');
+    const [email, setemail] = useState('');
+    const [address, setAddress] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [phone, setPhone] = useState('');
+
+    useEffect(() => {
+        if (profile) {
+            setemail(profile.email || '');
+            setAddress(profile.address || '');
+            setDateOfBirth(profile.dateOfBirth || '');
+            setPhone(profile.phone || '');
+        }
+    }, [profile]);
+
     const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
     const [modalVisible, setModalVisible] = useState(false);
     const [phoneError, setPhoneError] = useState('');
@@ -53,26 +64,23 @@ const EditProfileScreen = ({ route, navigation }) => {
         };
         fetchAvatar();
     }, []);
-
-useEffect(() => {
-	const loadAvatar = async () => {
-		if (routeAvatar) {
-			setSelectedAvatar(routeAvatar);
-			dispatch(setProfile({ selectedAvatar: routeAvatar }));
-			await AsyncStorage.setItem('selectedAvatar', JSON.stringify(routeAvatar));
-		} else {
-			const storedAvatar = await AsyncStorage.getItem('selectedAvatar');
-			if (storedAvatar) {
-				const parsed = JSON.parse(storedAvatar);
-				setSelectedAvatar(parsed);
-				dispatch(setProfile({ selectedAvatar: parsed }));
-			}
-		}
-	};
-	loadAvatar();
-}, []);
-
-
+    useEffect(() => {
+        const loadAvatar = async () => {
+            if (routeAvatar) {
+                setSelectedAvatar(routeAvatar);
+                dispatch(setProfile({ ...currentProfile, selectedAvatar: routeAvatar }));
+                await AsyncStorage.setItem('selectedAvatar', JSON.stringify(routeAvatar));
+            } else {
+                const storedAvatar = await AsyncStorage.getItem('selectedAvatar');
+                if (storedAvatar) {
+                    const parsed = JSON.parse(storedAvatar);
+                    setSelectedAvatar(parsed);
+                    dispatch(setProfile({ ...currentProfile, selectedAvatar: parsed }));
+                }
+            }
+        };
+        loadAvatar();
+    }, []);
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             navigation.navigate('ViewProfile');
@@ -164,7 +172,7 @@ useEffect(() => {
                     avatar: selectedAvatar,
                 }),
             });
-            const text = await response.text(); 
+            const text = await response.text();
             let data;
             try {
                 data = JSON.parse(text);
@@ -189,8 +197,13 @@ useEffect(() => {
     };
 
     const handleSelectAvatar = async (avatarUrl) => {
+        const updatedProfile = {
+            ...currentProfile,
+            selectedAvatar: avatarUrl,
+        };
+
         setSelectedAvatar(avatarUrl);
-        dispatch(setProfile({ selectedAvatar: avatarUrl }));
+        dispatch(setProfile(updatedProfile));
         await AsyncStorage.setItem('selectedAvatar', JSON.stringify(avatarUrl));
         setModalVisible(false);
     };

@@ -33,7 +33,7 @@ const App = () => (
 					<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
 					<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
 					<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-					<Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} /> 
+					{/* <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />  */}
 					<Stack.Screen
 						name="LanguageSelectionScreen"
 						component={LanguageSelectionScreen}
@@ -42,9 +42,8 @@ const App = () => (
 							title: 'Language',
 							headerTitleAlign: 'center',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerStyle: { backgroundColor: '#87CEEB' },
-							headerTintColor: '#4B0082',
 							headerTitleStyle: { fontWeight: 'bold' },
 							headerLeft: () => null,
 						}}
@@ -57,9 +56,8 @@ const App = () => (
 							title: 'Age Group',
 							headerTitleAlign: 'center',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerStyle: { backgroundColor: '#87CEEB' },
-							headerTintColor: '#4B0082',
 							headerTitleStyle: { fontWeight: 'bold' },
 						}}
 					/>
@@ -73,7 +71,7 @@ const App = () => (
 							headerTitle: 'Profile',
 							headerTitleAlign: 'center',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerTransparent: true,
 							headerStyle: { backgroundColor: '#87CEEB' },
 							headerLeft: () => (
@@ -90,7 +88,7 @@ const App = () => (
 							headerTitleAlign: 'center',
 							headerTransparent: true,
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerTintColor: '#black',
 							headerTitleStyle: { fontWeight: 'bold' },
 							headerStyle: { backgroundColor: '#87CEEB' },
@@ -99,7 +97,7 @@ const App = () => (
 							)
 						})}
 					/>
-					
+
 					<Stack.Screen
 						name="ChangePasswordScreen"
 						component={ChangePasswordScreen}
@@ -107,7 +105,7 @@ const App = () => (
 							headerShown: true,
 							headerTitle: 'Change Password',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerTitleAlign: 'center',
 							headerTransparent: true,
 							headerStyle: { backgroundColor: '#87CEEB' },
@@ -123,7 +121,7 @@ const App = () => (
 							headerShown: true,
 							headerTitle: 'Edit Profile',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerTitleAlign: 'center',
 							headerTransparent: true,
 							headerStyle: { backgroundColor: '#87CEEB' },
@@ -140,7 +138,7 @@ const App = () => (
 							headerTitle: 'Signup',
 							headerTitleAlign: 'center',
 							headertextColor: 'black',
-							fontWeight:'bold',
+							fontWeight: 'bold',
 							headerTransparent: true,
 							headerStyle: { backgroundColor: '#87CEEB' },
 							headerLeft: () => (

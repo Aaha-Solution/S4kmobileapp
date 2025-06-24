@@ -36,7 +36,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 
-	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
+	const baseURL = 'https://smile4kids-backend.onrender.com/videos/upload';
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedAgeGroup);
@@ -101,31 +101,43 @@ const VideoListScreen = ({ navigation, route }) => {
 
 
 	const fetchVideos = useCallback(async () => {
-		if (!selectedAgeGroup || !language) {
-			setVideos([]);  
-			return;
-		}
-		setLoading(true);
-		setVideos([]);
+    if (!selectedAgeGroup || !language) {
+        setVideos([]);
+        return;
+    }
 
-		const formattedLevel = getFormattedLevel(selectedAgeGroup);
-		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
-		console.log("url", url)
-		try {
-			const response = await axios.get(url);
-			if (response.status === 200 && Array.isArray(response.data)) {
-				setVideos(response.data);
-			} else {
-				setVideos([]);
-			}
-			console.log('response', response)
-		} catch (error) {
-			console.error('API fetch error:', error);
-			setVideos([]);
-		} finally {
-			setLoading(false);
-		}
-	}, [language, selectedAgeGroup]);
+    setLoading(true);
+    setVideos([]);
+
+    const formattedLevel = getFormattedLevel(selectedAgeGroup);
+    const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
+    console.log("url", url);
+
+    try {
+        const token = await AsyncStorage.getItem('token');
+
+        const response = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.status === 200 && Array.isArray(response.data)) {
+            setVideos(response.data);
+        } else {
+            setVideos([]);
+        }
+
+        console.log('response', response);
+    } catch (error) {
+        console.error('API fetch error:', error);
+        setVideos([]);
+    } finally {
+        setLoading(false);
+    }
+}, [language, selectedAgeGroup]);
+
 
 	useEffect(() => {
 		fetchVideos();
@@ -260,6 +272,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					</View>
 				</View>
 			)}  */}
+			
 		</LinearGradient>
 	);
 };
