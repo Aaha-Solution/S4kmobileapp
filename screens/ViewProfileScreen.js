@@ -1,140 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Pressable, SafeAreaView, Image, ScrollView, Modal, TouchableOpacity, Alert, BackHandler } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Icon from 'react-native-vector-icons/Ionicons';
-import PressableButton from '../component/PressableButton';
-import profile_avatar from '../assets/image/profile_avatar.png';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+	View, StyleSheet, Text, SafeAreaView, Image,
+	ScrollView, BackHandler
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import profile_avatar from '../assets/image/profile_avatar.png';
+import PressableButton from '../component/PressableButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector, useDispatch } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import { updateProfile } from '../Store/userSlice';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
+
 const ViewProfileScreen = ({ navigation }) => {
 	const profile = useSelector(state => state.user.user);
-	console.log('DOB from Redux:', profile.dateOfBirth);
-	console.log("Profile Data:", profile);
-
-	const updateProfileData = useSelector(state => state.user.updateProfile);
-
-	const email = useSelector((state) => state.user.email) || '';
-	const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
-	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
-	const [modalVisible, setModalVisible] = useState(false);
-
+	const email = useSelector(state => state.user.email) || '';
+	const selectedAvatar = useSelector(state => state.user.user.selectedAvatar);
 	const dispatch = useDispatch();
 
-	const avatars = [
-		require('../assets/image/profile_avatar.png'),
-		require('../assets/image/avatar1.png'),
-		require('../assets/image/avatar2.png'),
-		require('../assets/image/avatar3.png'),
-		require('../assets/image/avatar4.png'),
-		require('../assets/image/avatar5.png'),
-	];
+	const [avatarSource, setAvatarSource] = useState(profile_avatar);
 
-	useEffect(() => {
-		loadSelectedAvatar();
-	}, []);
-
-	const loadSelectedAvatar = async () => {
-		try {
-			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-			if (savedAvatar) {
-				const parsedAvatar = JSON.parse(savedAvatar);
-				setSelectedAvatar(parsedAvatar);
-				setTempSelectedAvatar(parsedAvatar);
-			}
-		}
-		catch (error) {
-			console.log('Error loading avatar:', error);
-		}
-	};
-
-	const handleAvatarSelect = (avatar) => {
-		setTempSelectedAvatar(avatar);
-		setModalVisible(false);
-	};
+	useFocusEffect(
+		useCallback(() => {
+			const loadSelectedAvatar = async () => {
+				try {
+					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+					if (savedAvatar) {
+						setAvatarSource({ uri: JSON.parse(savedAvatar) });
+					} else if (typeof selectedAvatar === 'string') {
+						setAvatarSource({ uri: selectedAvatar });
+					} else {
+						setAvatarSource(profile_avatar);
+					}
+				} catch (error) {
+					console.log('Error loading avatar:', error);
+				}
+			};
+			loadSelectedAvatar();
+		}, [selectedAvatar])
+	);
 
 	useEffect(() => {
 		const fetchProfileUpdate = async () => {
 			try {
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`https://smile4kids-mobilebackend.onrender.com/signup/profile?email_id=${email}&users_id=${profile.users_id}`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				console.log("Raw response:", response);
-
+					`https://smile4kids-backend.onrender.com/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				console.log("Profile data:", response);
 				const data = await response.json();
-				console.log("Parsed JSON:", data);
-
-				if (data && data.users_id) {
-					console.log("Profile data received:", data);
-
-					// Optional: update profile state with data.profile or similar
+				console.log("Profile data:", data);
+				if (data?.users_id) {
 					dispatch(updateProfile({
 						email: data.email_id,
 						username: data.username,
 						address: data.address,
 						dateOfBirth: data.dob,
 						phone: data.ph_no,
-						avatar: data.avatar,
-					}))
-				} else {
-					console.log("Profile fetch failed:", data.message || data);
+						selectedAvatar: data.avatar,
+					}));
 				}
-
 			} catch (error) {
-				console.log("run Error", error);
+				console.log("Error fetching profile:", error);
 			}
 		};
 
 		fetchProfileUpdate();
 	}, []);
 
-	console.log("Update Profile Data:", updateProfileData);
-
-	const handleEditPress = () => {
-		navigation.navigate('EditProfileScreen', {
-			email: email,
-			address: profile.address,
-			dateOfBirth: profile.dateOfBirth,
-			username: profile.username,
-			phone: profile.phone,
-		});
-	};
-
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('AccountScreen');
 			return true;
 		});
-
 		return () => backHandler.remove();
 	}, [navigation]);
 
-const formatDate = (dateString) => {
-	if (!dateString) return '';
-
-	try {
-		const date = new Date(dateString);
-		if (isNaN(date.getTime())) return 'Invalid Date';
-
-		return date.toLocaleDateString('en-GB', {
-			year: 'numeric',
-			month: 'short',
-			day: '2-digit',
+	const handleEditPress = () => {
+		navigation.navigate('EditProfileScreen', {
+			email,
+			address: profile.address,
+			dateOfBirth: profile.dateOfBirth,
+			username: profile.username,
+			phone: profile.phone,
+			selectedAvatar: profile.selectedAvatar,
 		});
-	} catch (error) {
-		return 'Invalid Date';
-	}
-};
+	};
 
+	const formatDate = (dateString) => {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return isNaN(date) ? 'Invalid Date' :
+			date.toLocaleDateString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit',
+			});
+	};
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -144,91 +112,36 @@ const formatDate = (dateString) => {
 						<View style={styles.header}>
 							<View style={styles.profileContainer}>
 								<Image
-									source={tempSelectedAvatar}
+									source={avatarSource}
 									style={styles.avatar}
 									resizeMode="cover"
 								/>
 							</View>
 						</View>
 
-						<Modal
-							animationType="slide"
-							transparent={true}
-							visible={modalVisible}
-							onRequestClose={() => setModalVisible(false)}
-						>
-							<TouchableOpacity
-								style={styles.modalOverlay}
-								activeOpacity={1}
-								onPress={() => setModalVisible(false)}
-							>
-								<View style={styles.modalContent}>
-									<View style={styles.modalHeader}>
-										<Text style={styles.modalTitle}>Choose Avatar</Text>
-										<TouchableOpacity
-											onPress={() => setModalVisible(false)}
-											style={styles.closeButton}
-										>
-											<Ionicons name="close" size={24} color="black" />
-										</TouchableOpacity>
-									</View>
-									<View style={styles.avatarGrid}>
-										{avatars.map((avatar, index) => (
-											<TouchableOpacity
-												key={index}
-												style={styles.avatarOption}
-												onPress={() => handleAvatarSelect(avatar)}
-											>
-												<Image
-													source={avatar}
-													style={[
-														styles.avatarThumbnail,
-														tempSelectedAvatar === avatar && styles.selectedAvatar
-													]}
-													resizeMode="cover"
-												/>
-											</TouchableOpacity>
-										))}
-									</View>
-								</View>
-							</TouchableOpacity>
-						</Modal>
-
-
 						<Text style={styles.name}>{profile.username}</Text>
 
 						<View style={styles.formContainer}>
-							<View style={styles.inputGroup}>
-								<Text style={styles.label}>UserName</Text>
-								<Text style={styles.readonlyText}>{profile.username}</Text>
-							</View>
-
-							<View style={styles.inputGroup}>
-								<Text style={styles.label}>E-Mail</Text>
-								<Text style={styles.readonlyText}>{email}</Text>
-							</View>
-
-							<View style={styles.inputGroup}>
-								<Text style={styles.label}>Date of Birth</Text>
-								<Text style={styles.readonlyText}>{formatDate(profile.dateOfBirth)}</Text>
-							</View>
-
-							<View style={styles.inputGroup}>
-								<Text style={styles.label}>Phone Number</Text>
-								<Text style={styles.readonlyText}>{profile.phone}</Text>
-							</View>
-
-							<View style={styles.inputGroup}>
-								<Text style={styles.label}>Address</Text>
-								<Text style={[styles.readonlyText, { minHeight: 80 }]}>{profile.address}</Text>
-							</View>
+							{[
+								{ label: 'UserName', value: profile.username },
+								{ label: 'E-Mail', value: email },
+								{ label: 'Date of Birth', value: formatDate(profile.dateOfBirth) },
+								{ label: 'Phone Number', value: profile.phone },
+								{ label: 'Address', value: profile.address, multiline: true },
+							].map((item, idx) => (
+								<View style={styles.inputGroup} key={idx}>
+									<Text style={styles.label}>{item.label}</Text>
+									<Text style={[styles.readonlyText, item.multiline && { minHeight: 80 }]}>
+										{item.value}
+									</Text>
+								</View>
+							))}
 
 							<PressableButton
 								style={styles.saveButton}
 								title="Edit"
 								onPress={handleEditPress}
 							/>
-						
 						</View>
 					</ScrollView>
 				</SafeAreaView>
@@ -240,7 +153,6 @@ const formatDate = (dateString) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-
 	},
 	header: {
 		alignItems: 'center',
@@ -258,22 +170,12 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 		borderColor: 'white',
 	},
-	editButton: {
-		position: 'absolute',
-		bottom: 0,
-		right: 0,
-		backgroundColor: '#8A2BE2',
-		padding: 8,
-		borderRadius: 20,
-	},
 	name: {
 		fontSize: 24,
 		fontWeight: 'bold',
 		color: '#FF8C00',
-		marginBottom: 10,
-		justifyContent: 'center',
-		alignItems: 'center',
 		textAlign: 'center',
+		marginBottom: 3,
 	},
 	formContainer: {
 		padding: 20,
@@ -293,63 +195,6 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: '#ddd',
 		color: '#333',
-	},
-	modalOverlay: {
-		flex: 1,
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	modalContent: {
-		backgroundColor: 'white',
-		borderRadius: 20,
-		padding: 20,
-		width: '90%',
-		maxHeight: '80%',
-		elevation: 5,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-	},
-	modalHeader: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginBottom: 20,
-	},
-	modalTitle: {
-		fontSize: 20,
-		fontWeight: 'bold',
-		color: 'purple',
-	},
-	closeButton: {
-		padding: 5,
-	},
-	avatarGrid: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'space-around',
-	},
-	avatarOption: {
-		width: '30%',
-		aspectRatio: 1,
-		marginBottom: 15,
-	},
-	selectedAvatar: {
-		borderWidth: 3,
-		borderColor: '#8A2BE2',
-		transform: [{ scale: 1.1 }],
-	},
-	avatarThumbnail: {
-		width: '100%',
-		height: '100%',
-		borderRadius: 50,
-		borderWidth: 2,
-		borderColor: '#8A2BE2',
 	},
 	saveButton: {
 		padding: 10,

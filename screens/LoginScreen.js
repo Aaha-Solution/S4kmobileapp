@@ -112,7 +112,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kids-mobilebackend.onrender.com/login', {
+            const response = await fetch('https://smile4kids-backend.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
@@ -152,6 +152,7 @@ const LoginScreen = ({ navigation }) => {
 
             // Dispatch user data to Redux store to update application state
             dispatch(login(data.user));
+            
             dispatch(setLanguage(data.user.language));
             dispatch(setAgeGroup(data.user.age));
             dispatch(setProfile({
@@ -173,7 +174,7 @@ const LoginScreen = ({ navigation }) => {
 
 
         } catch (error) {
-            Alert.alert('Error', 'Network issue. Try again.');
+            Alert.alert('Error', 'Login Credentials not found! Try again.');
         } finally {
             setLoading(false);
         }

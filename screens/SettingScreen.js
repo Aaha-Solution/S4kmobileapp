@@ -1,63 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, Alert, Platform, BackHandler } from 'react-native';
+import {
+	View,
+	Text,
+	StyleSheet,
+	Pressable,
+	ScrollView,
+	Image,
+	SafeAreaView,
+	Alert,
+	Platform,
+	BackHandler
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomAlert from '../component/CustomAlertMessage';
 import profile_avatar from '../assets/image/profile_avatar.png';
-import avatar1 from '../assets/image/avatar1.png';
-import avatar2 from '../assets/image/avatar2.png';
-import avatar3 from '../assets/image/avatar3.png';
-import avatar4 from '../assets/image/avatar4.png';
-import avatar5 from '../assets/image/avatar5.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const avatarMap = {
-	1: avatar1,
-	2: avatar2,
-	3: avatar3,
-	4: avatar4,
-	5: avatar5
-};
-
-const menuItems = [
-	{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
-	{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
-];
 const SettingsScreen = ({ route, navigation }) => {
-	const { selectedAvatar } = route.params || {};
+	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const email = useSelector((state) => state.user.email) || '';
 	const username = useSelector((state) => state.user.user.username) || 'Guest User';
 	const dispatch = useDispatch();
-	const user = useSelector((state) => state.user.user);
-	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(avatar4);
+	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [showAlert, setShowAlert] = useState(false);
 
-	useEffect(() => {
-		loadAvatar();
-	}, []);
-
-	useEffect(() => {
-		if (selectedAvatar) {
-			setTempSelectedAvatar(selectedAvatar);
-			console.log('Saving selectedAvatar to AsyncStorage:', selectedAvatar);
-			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
-		}
-	}, [selectedAvatar]);
-
+	// ✅ Load avatar from AsyncStorage
 	const loadAvatar = async () => {
 		try {
-			// await AsyncStorage.removeItem('selectedAvatar');
-			// console.log('User data removed');
 			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
 			if (savedAvatar) {
-				const parsedAvatar = JSON.parse(savedAvatar);
-				setTempSelectedAvatar(parsedAvatar);
-				console.log("savedAvatar", savedAvatar)
+				const parsed = JSON.parse(savedAvatar);
+				setTempSelectedAvatar(typeof parsed === 'string' ? { uri: parsed } : parsed);
 			} else {
-				console.log('No saved avatar found, using default:', profile_avatar);
 				setTempSelectedAvatar(profile_avatar);
 			}
 		} catch (error) {
@@ -66,42 +44,38 @@ const SettingsScreen = ({ route, navigation }) => {
 		}
 	};
 
-	// Add focus listener to reload avatar when screen comes into focus
 	useEffect(() => {
-		const unsubscribe = navigation.addListener('focus', () => {
-			loadAvatar();
-		});
+		loadAvatar();
+	}, []);
 
+	useEffect(() => {
+		if (selectedAvatar) {
+			setTempSelectedAvatar(selectedAvatar);
+			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
+		}
+	}, [selectedAvatar]);
+
+	// ✅ Reload avatar when screen comes into focus
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('focus', loadAvatar);
 		return unsubscribe;
 	}, [navigation]);
 
+	// ✅ Confirm logout and reset state/storage
 	const handleConfirmLogout = async () => {
-		console.log("handleConfirmLogout called");
-		const token = await AsyncStorage.getItem('token');
-		const savedEmail = await AsyncStorage.getItem('savedEmail');
-		const savedPassword = await AsyncStorage.getItem('savedPassword');
-		const rememberMe = await AsyncStorage.getItem('rememberMe');
-
 		try {
+			await AsyncStorage.multiRemove([
+				'token',
+				'savedEmail',
+				'savedPassword',
+				'user',
+				'userProfile',
+				'selectedAvatar',
+				'selectedPreferences',
+			]);
+			await AsyncStorage.setItem('rememberMe', 'false');
 
-			await AsyncStorage.removeItem('token');
-			await AsyncStorage.removeItem('savedEmail'); // if you saved email	
-			await AsyncStorage.removeItem('savedPassword'); // if you saved password
-			await AsyncStorage.setItem('rememberMe', 'false'); // reset remember me
-			await AsyncStorage.removeItem('selectedAvatar'); // remove selected avatar
-			await AsyncStorage.removeItem('user'); // remove user data
-			await AsyncStorage.removeItem('userProfile');
-			await AsyncStorage.removeItem('selectedPreferences');
-
-			console.log("token:", token);
-			console.log("savedEmail:", savedEmail);
-			console.log("savedPassword:", savedPassword);
-			console.log("rememberMe:", rememberMe);
-
-			const tokenAfterRemoval = await AsyncStorage.getItem('token');
-			console.log("token AFTER removal:", tokenAfterRemoval); // This should now be null
-
-			dispatch(logout()); // clear Redux user state
+			dispatch(logout());
 			navigation.dispatch(
 				CommonActions.reset({
 					index: 0,
@@ -116,7 +90,8 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	const handleLogout = () => {
 		setShowAlert(true);
-	}
+	};
+
 	const handleCancelLogout = () => {
 		setShowAlert(false);
 	};
@@ -126,69 +101,71 @@ const SettingsScreen = ({ route, navigation }) => {
 			navigation.navigate('Home');
 			return true;
 		});
+		return () => backHandler.remove();
+	}, [navigation]);
 
-	});
-
-
-	const handleCancelExit = () => {
-		setShowAlert(false);
-	};
+	const menuItems = [
+		{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
+		{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
+	];
 
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-			<SafeAreaView style={[styles.safeArea, { flex: 1 }]}> 
-				<View style={styles.header}>
-					<View style={styles.profileContainer}>
-						<Image
-							source={tempSelectedAvatar}
-							style={styles.avatar}
-							resizeMode="cover"
-							onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
-						/>
-						<View>
-							<Text style={styles.name}>{username}</Text>
-							<Text style={styles.email}>{email}</Text>
+				<SafeAreaView style={styles.safeArea}>
+					<View style={styles.header}>
+						<View style={styles.profileContainer}>
+							<Image
+								source={
+									typeof selectedAvatar === 'string'
+										? { uri: selectedAvatar }
+										: selectedAvatar || profile_avatar
+								}
+								style={styles.avatar}
+								resizeMode="cover"
+								onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
+							/>
+
+							<View>
+								<Text style={styles.name}>{username}</Text>
+								<Text style={styles.email}>{email}</Text>
+							</View>
 						</View>
 					</View>
-				</View>
-				<ScrollView style={styles.menuContainer}>
-					{menuItems.map((item, index) => (
-						<Pressable
-							key={index}
-							style={({ pressed }) => [
-								styles.menuItem,
-								pressed && styles.menuItemPressed
-							]}
-							onPress={() => {
-								if (item.label === 'Log out') {
-									handleLogout();
-								} else {
-									navigation.navigate(item.screen);
+
+					<ScrollView style={styles.menuContainer}>
+						{menuItems.map((item, index) => (
+							<Pressable
+								key={index}
+								style={({ pressed }) => [
+									styles.menuItem,
+									pressed && styles.menuItemPressed
+								]}
+								onPress={() =>
+									item.label === 'Log out'
+										? handleLogout()
+										: navigation.navigate(item.screen)
 								}
-							}}
-						>
-							<View style={styles.iconLabel}>
-								<Icon name={item.icon} size={22} color="black" />
-								<Text style={styles.label}>{item.label}</Text>
-							</View>
-							<Icon name="chevron-forward" size={20} color="black" />
-						</Pressable>
-					))}
-				</ScrollView>
+							>
+								<View style={styles.iconLabel}>
+									<Icon name={item.icon} size={22} color="black" />
+									<Text style={styles.label}>{item.label}</Text>
+								</View>
+								<Icon name="chevron-forward" size={20} color="black" />
+							</Pressable>
+						))}
+					</ScrollView>
 
-				<CustomAlert
-					visible={showAlert}
-					title="Logout"
-					message="Are you sure you want to Logout?"
-					onConfirm={handleConfirmLogout}
-					onCancel={handleCancelLogout}
-				/>
-
-			</SafeAreaView>
+					<CustomAlert
+						visible={showAlert}
+						title="Logout"
+						message="Are you sure you want to logout?"
+						onConfirm={handleConfirmLogout}
+						onCancel={handleCancelLogout}
+					/>
+				</SafeAreaView>
 			</LinearGradient>
 		</View>
-		
 	);
 };
 
@@ -203,8 +180,6 @@ const styles = StyleSheet.create({
 		marginTop: -20,
 		paddingVertical: 30,
 		paddingHorizontal: 20,
-		borderBottomLeftRadius: 20,
-		borderBottomRightRadius: 20,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
@@ -213,9 +188,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginTop: 15,
-		paddingLeft: 10,
-		borderRadius: 18,
 		padding: 18,
+		borderRadius: 18,
 		width: '100%',
 	},
 	avatar: {
@@ -225,16 +199,16 @@ const styles = StyleSheet.create({
 		marginRight: 15,
 		borderColor: 'white',
 		borderWidth: 2,
-
 	},
 	name: {
-		color: '#654321',
-		fontSize: 18,
+		color: '#FF8C00',
+		fontSize: 20,
 		fontWeight: 'bold',
 	},
 	email: {
-		color: '#654321',
+		color: 'Black',
 		fontSize: 14,
+		fontWeight:'bold',
 	},
 	menuContainer: {
 		marginTop: 5,
@@ -248,14 +222,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		elevation: 2,
 		shadowColor: '#804FB3',
-		shadowOffset: {
-			width: 0,
-			height: 1,
-		},
+		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.13,
 		shadowRadius: 4,
-		elevation: 2,
 	},
 	menuItemPressed: {
 		transform: [{ scale: 0.98 }],
@@ -269,12 +240,6 @@ const styles = StyleSheet.create({
 		marginLeft: 15,
 		fontSize: 16,
 		color: 'black',
-	},
-	glow: {
-		position: 'absolute',
-		borderRadius: 100,
-		zIndex: 0,
-		filter: Platform.OS === 'web' ? 'blur(40px)' : undefined,
 	},
 });
 

@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 	}
 
 		try{
-			const response = await fetch ("https://smile4kids-mobilebackend.onrender.com/forgot/reset-password",{
+			const response = await fetch ("https://smile4kids-backend.onrender.com/forgot/reset-password",{
 				method:"POST",
 				headers:{
 					"Content-type":"application/json"
@@ -60,7 +60,7 @@ const ResetPasswordScreen = ({ route }) => {
 			}else{
 				console.log("error",data.message)
 				setAlertTitle("Error")
-				setAlertMessage("Error Occurred during process")
+				setAlertMessage(data.message)
 				setShowAlert(true)
 			}
 		}catch(error){
