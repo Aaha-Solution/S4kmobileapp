@@ -31,7 +31,7 @@ const userSlice = createSlice({
 				dateOfBirth: action.payload.dateOfBirth || '',
 				address: action.payload.address || '',
 				phone: action.payload.phone || '',
-				selectedAvatar: action.payload.selectedAvatar || null,
+				selectedAvatar: action.payload.selectedAvatar || action.payload.avatar|| null,
 				users_id: action.payload.users_id || null,
 			};
 			state.isLoggedIn = true;

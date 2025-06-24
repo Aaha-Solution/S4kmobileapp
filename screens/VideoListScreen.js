@@ -36,7 +36,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const isHomeScreen = route.name === 'Home';
 
-	const baseURL = 'http://smile4kids-mobilebackend.onrender.com/videos/by-category';
+	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedAgeGroup);

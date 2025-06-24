@@ -216,6 +216,7 @@ const BottomTabNavigator = () => {
 			screenOptions={{
 				headerShown: true,
 				headerTitleAlign: 'center',
+				headertextColor: 'black',
 				headerStyle: { backgroundColor: '#87CEEB' },
 				headerTintColor: '#fff',
 				headerTitleStyle: { fontWeight: 'bold' },
@@ -228,12 +229,30 @@ const BottomTabNavigator = () => {
 				component={SettingScreen}
 				options={{
 					title: 'Setting',
+					headertextColor: 'black',
+					headerTitleStyle: {
+						color: 'black',          // ✅ this changes the header title text color
+						fontWeight: 'bold',
+						fontFamily: 'Times New Roman',
+					},
 				}}
 			/>
 			<Tab.Screen
 				name="Home"
 				component={VideoListScreen}
-				options={{ title: 'Home' }}
+				options={{
+					title: 'Home',
+					headertextColor: 'black',
+					headerStyle: { backgroundColor: '#87CEEB' },
+					headerTintColor: '#fff',
+					headerTitleStyle: { fontWeight: 'bold' },
+					headerTitleStyle: {
+						color: 'black',          // ✅ this changes the header title text color
+						fontWeight: 'bold',
+						fontFamily: 'Times New Roman',
+					},
+
+				}}
 			/>
 			{/* <Tab.Screen
 				name="Payment"
@@ -243,7 +262,10 @@ const BottomTabNavigator = () => {
 			<Tab.Screen
 				name="Age"
 				component={VideoListScreen}
-				options={{ title: 'Age' }}
+				options={{
+					title: 'Age',
+					headertextColor: 'black',
+				}}
 			/>
 		</Tab.Navigator>
 	);
