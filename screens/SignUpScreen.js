@@ -1,393 +1,372 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    View,
-    StyleSheet,
-    Text,
-    Pressable,
-    Image,
-    Alert,
-    ActivityIndicator,
-    Dimensions,
-    ScrollView
+  View,
+  StyleSheet,
+  Text,
+  Pressable,
+  Image,
+  Alert,
+  ActivityIndicator,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
 const SignupScreen = ({ navigation }) => {
-    const [username, setusername] = useState('');
-    const [email, setEmail] = useState('');
-    const [usernameError, setusernameError] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [emailError, setemailError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [confirmPasswordError, setConfirmPasswordError] = useState('');
-    const [loading, setLoading] = useState(false);
+  const [username, setusername] = useState('');
+  const [email, setEmail] = useState('');
+  const [usernameError, setusernameError] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [emailError, setemailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
     };
+  }, []);
 
-    const dispatch = useDispatch();
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const handleSignUp = async () => {
-        setemailError('');
-        setusernameError('');
-        setPasswordError('');
-        setConfirmPasswordError('');
-        let hasError = false;
+  const handleSignUp = async () => {
+    setemailError('');
+    setusernameError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+    let hasError = false;
 
-        // Basic validation
-        if (!username.trim()) {
-            setusernameError('Username is required');
-            hasError = true;
+    if (!username.trim()) {
+      setusernameError('Username is required');
+      hasError = true;
+    }
+
+    if (!email.trim()) {
+      setemailError('Email is required');
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setemailError('Please enter a valid email');
+      hasError = true;
+    }
+
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      hasError = true;
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError('Please confirm your password');
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.0.209:3000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email_id: email, password, confirm_password: confirmPassword }),
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        Alert.alert('Error', 'Invalid response from server');
+        return;
+      }
+
+      if (data.message === 'User created successfully') {
+        Alert.alert('Success', 'Account created successfully!', [
+          { text: 'OK', onPress: () => navigation.navigate('Login') }
+        ]);
+      } else {
+        if (data.errors) {
+          if (data.errors.email) setemailError(data.errors.email);
+          if (data.errors.username) setusernameError(data.errors.username);
+          if (data.errors.password) setPasswordError(data.errors.password);
+        } else {
+          Alert.alert('Sign Up Failed', data.message || 'Something went wrong');
         }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network issue. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!email.trim()) {
-            setemailError('Email is required');
-            hasError = true;
-        } else if (!validateEmail(email)) {
-            setemailError('Please enter a valid email');
-            hasError = true;
-        }
-
-        if (!password) {
-            setPasswordError('Password is required');
-            hasError = true;
-        } else if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters');
-            hasError = true;
-        }
-
-        if (!confirmPassword) {
-            setConfirmPasswordError('Please confirm your password');
-            hasError = true;
-        } else if (password !== confirmPassword) {
-            setConfirmPasswordError('Passwords do not match');
-            hasError = true;
-        }
-
-        if (hasError) return;
-
-        setLoading(true);
-        try {
-            console.log("Payload:", { email, email_id: email, password, confirmPassword });
-
-            const response = await fetch('http://192.168.0.209:3000/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, email_id: email, password, confirm_password: confirmPassword })
-            });
-
-            console.log("response:", response);
-
-            const text = await response.text();
-            console.log("Raw Response:", text);
-
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error("Failed to parse JSON:", e.message);
-                Alert.alert('Error', 'Invalid response from server');
-                return;
-            }
-            console.log("Parsed Data:", data);
-
-            if (data.message === 'User created successfully') {
-                Alert.alert('Success', 'Account created successfully!', [
-                    { text: 'OK', onPress: () => navigation.navigate('Login') }
-                ]);
-            } else {
-                if (data.errors) {
-                    if (data.errors.email) setemailError(data.errors.email);
-                    if (data.errors.username) setusernameError(data.errors.username);
-                    if (data.errors.password) setPasswordError(data.errors.password);
-                } else {
-                    Alert.alert('Sign Up Failed', data.message || 'Something went wrong');
-                }
-            }
-        } catch (error) {
-            Alert.alert('Error', 'Network issue. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-            {/* Top Graphics */}
-            <View style={styles.topGraphics}>
-                <Image source={require('../assets/image/sun.png')} style={styles.sun} />
-                <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
+          
+          {/* Top Graphics */}
+          <View style={styles.topGraphics}>
+            <Image source={require('../assets/image/sun.png')} style={styles.sun} />
+            <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
+          </View>
+
+          {/* Main Content */}
+          <View style={styles.mainContent}>
+            {/* Logo Section */}
+            <View style={styles.logoContainer}>
+              <Image source={require('../assets/image/splash.png')} style={styles.logo} resizeMode="contain" />
+              <Text style={styles.signupTitle}>
+                <Text style={{ color: '#D2042D' }}>S</Text>
+                <Text style={{ color: '#E97451' }}>I</Text>
+                <Text style={{ color: '#FDDA0D' }}>G</Text>
+                <Text style={{ color: '#50C878' }}>N</Text>
+                <Text style={{ color: '#4169E1' }}> </Text>
+                <Text style={{ color: '#9370DB' }}>U</Text>
+                <Text style={{ color: '#FF1493' }}>P</Text>
+              </Text>
             </View>
 
-            {/* Main Content - Scrollable */}
-            <View style={styles.scrollView}>
-                <View style={styles.mainContent}>
-                    <View style={styles.logoContainer}>
-                        <View style={styles.logoCurve}>
-                            <Image
-                                source={require('../assets/image/splash.png')}
-                                style={styles.logo}
-                                resizeMode="contain"
-                            />
-                        </View>
-                    </View>
+            {/* Input Fields */}
+            <View style={styles.inputContainer}>
+              <CustomTextInput
+                value={username}
+                onChangeText={(text) => {
+                  setusername(text);
+                  if (usernameError) setusernameError('');
+                }}
+                placeholder="Username"
+              />
+              {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
-                    <Text style={styles.signupTitle}>
-                        <Text style={{ color: '#D2042D' }}>S</Text>
-                        <Text style={{ color: '#E97451' }}>I</Text>
-                        <Text style={{ color: '#FDDA0D' }}>G</Text>
-                        <Text style={{ color: '#50C878' }}>N</Text>
-                        <Text style={{ color: '#4169E1' }}> </Text>
-                        <Text style={{ color: '#9370DB' }}>U</Text>
-                        <Text style={{ color: '#FF1493' }}>P</Text>
-                    </Text>
+              <CustomTextInput
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (emailError) setemailError('');
+                }}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-                    <View style={styles.inputContainer}>
-                        <CustomTextInput
-                            value={username}
-                            onChangeText={(text) => {
-                                setusername(text);
-                                if (usernameError) setusernameError('');
-                            }}
-                            placeholder="Username"
-                        />
-                        {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+              <CustomTextInput
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError('');
+                }}
+                placeholder="Password"
+                secureTextEntry
+              />
+              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
-                        <CustomTextInput
-                            value={email}
-                            onChangeText={(text) => {
-                                setEmail(text);
-                                if (emailError) setemailError('');
-                            }}
-                            placeholder="Email"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-
-                        <CustomTextInput
-                            value={password}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                if (passwordError) setPasswordError('');
-                            }}
-                            placeholder="Password"
-                            secureTextEntry={true}
-                        />
-                        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-
-                        <CustomTextInput
-                            value={confirmPassword}
-                            onChangeText={(text) => {
-                                setConfirmPassword(text);
-                                if (confirmPasswordError) setConfirmPasswordError('');
-                            }}
-                            placeholder="Confirm Password"
-                            secureTextEntry={true}
-                        />
-                        {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
-                    </View>
-
-                    <View style={styles.buttonContainer}>
-                        {loading ? (
-                            <ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
-                        ) : (
-                            <PressableButton
-                                title="SIGN UP"
-                                onPress={handleSignUp}
-                                style={styles.signupButton}
-                                textStyle={styles.signupButtonText}
-                            />
-                        )}
-                    </View>
-                </View>
-
+              <CustomTextInput
+                value={confirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  if (confirmPasswordError) setConfirmPasswordError('');
+                }}
+                placeholder="Confirm Password"
+                secureTextEntry
+              />
+              {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
             </View>
-            {/* Bottom Graphics */}
-            <View style={styles.bottomGraphics}>
+
+            {/* Sign Up Button */}
+            <View style={styles.buttonContainer}>
+              {loading ? (
+                <ActivityIndicator size="large" color="#FF8C00" />
+              ) : (
+                <PressableButton
+                  title="SIGN UP"
+                  onPress={handleSignUp}
+                  style={styles.signupButton}
+                  textStyle={styles.signupButtonText}
+                />
+              )}
+            </View>
+          </View>
+
+          {/* Bottom Elements */}
+          {!keyboardVisible && (
+            <>
+              <View style={styles.bottomGraphics}>
                 <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
-            </View>
+              </View>
 
-            {/* Login Link */}
-            <View style={styles.loginContainer}>
+              <View style={styles.loginContainer}>
                 <Pressable style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-                    <Text style={styles.loginText}>
-                        Already have an account? <Text style={styles.loginLink}>Login</Text>
-                    </Text>
+                  <Text style={styles.loginText}>
+                    Already have an account? <Text style={styles.loginLink}>Login</Text>
+                  </Text>
                 </Pressable>
-            </View>
-
-            
+              </View>
+            </>
+          )}
         </LinearGradient>
-    );
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignContent: 'center',
-    },
-    topGraphics: {
-        position: 'absolute',
-        top: height * 0.05,
-        left: 0,
-        right: 0,
-        height: 80,
-        zIndex: 1,
-    },
-    sun: {
-        position: 'absolute',
-        left: 20,
-        top: 0,
-        width: 50,
-        height: 50,
-        resizeMode: 'contain',
-    },
-    cloud: {
-        position: 'absolute',
-        right: 20,
-        top: -10,
-        width: 70,
-        height: 70,
-        resizeMode: 'contain',
-    },
-    scrollView: {
-        alignContent: 'center',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 250,
-        marginBottom: 110,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingBottom: height * 0.35, // Space for bottom graphics and login button
-    },
-    mainContent: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        marginTop: height * 0.12,
-        minHeight: height * 0.65,
-    },
-    logoContainer: {
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    logo: {
-        width: 170,
-        height: 140,
-        marginTop: 50,
-    },
-    signupTitle: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#4A90E2',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
-        marginBottom: 30,
-        letterSpacing: 1,
-        shadowColor: '#000',
-    },
-    inputContainer: {
-        width: '100%',
-        maxWidth: 350,
-    },
-    errorText: {
-        color: '#FF4444',
-        fontSize: 12,
-        marginTop: -10,
-        marginBottom: 10,
-        marginLeft: 15,
-        fontWeight: '500',
-    },
-    buttonContainer: {
-        width: '100%',
-        maxWidth: 350,
-        alignItems: 'center',
-        marginTop: 20,
-        marginBottom: 20,
-    },
-    signupButton: {
-        backgroundColor: '#FF8C00',
-        width: '65%',
-        paddingVertical: 12,
-        borderRadius: 30,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    signupButtonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-        letterSpacing: 1,
-    },
-    loadingIndicator: {
-        paddingVertical: 18
-    },
-    bottomGraphics: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: height * 0.25,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    kidsImage: {
-        position: 'absolute',
-        bottom: 85,
-        width: width * 0.45,
-        height: height * 0.18,
-        resizeMode: 'contain',
-        zIndex: 2,
-    },
-    loginContainer: {
-        position: 'absolute',
-        bottom: 33,
-        left: 0,
-        right: 0,
-        alignItems: 'center',
-        zIndex: 3,
-    },
-    loginButton: {
-        backgroundColor: 'rgba(76, 175, 80, 0.9)',
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        borderRadius: 25,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    loginText: {
-        color: '#fff',
-        fontSize: 16,
-        textAlign: 'center',
-        fontWeight: '600',
-    },
-    loginLink: {
-        textDecorationLine: 'underline',
-        fontWeight: 'bold',
-        color: '#FFE082',
-    },
+  container: { 
+    flex: 1 
+  },
+  topGraphics: {
+    position: 'absolute',
+    top: height * 0.05,
+    left: 0,
+    right: 0,
+    height: 80,
+    zIndex: 1,
+  },
+  sun: {
+    position: 'absolute',
+    left: 20,
+    top: 0,
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+  },
+  cloud: {
+    position: 'absolute',
+    right: 20,
+    top: -10,
+    width: 70,
+    height: 70,
+    resizeMode: 'contain',
+  },
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 20,
+    paddingTop: height * 0.12,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 35,
+  },
+  logo: {
+    width: 140,
+    height: 110,
+    marginBottom: 12,
+  },
+  signupTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#4A90E2',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    letterSpacing: 1,
+    shadowColor: '#000',
+  },
+  inputContainer: {
+    width: '100%',
+    maxWidth: 350,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#FF4444',
+    fontSize: 13,
+    marginTop: -8,
+    marginBottom: 8,
+    marginLeft: 15,
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    width: '100%',
+    maxWidth: 350,
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  signupButton: {
+    backgroundColor: '#FF8C00',
+    paddingVertical: 10,
+    borderRadius: 25,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  signupButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  bottomGraphics: {
+    position: 'absolute',
+    bottom: 85,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    height: height * 0.2,
+    justifyContent: 'center',
+  },
+  kidsImage: {
+    width: width * 0.45,
+    height: height * 0.16,
+    resizeMode: 'contain',
+  },
+  loginContainer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  loginButton: {
+    backgroundColor: 'rgba(76, 175, 80, 0.9)',
+    paddingVertical: 16,
+    paddingHorizontal: 45,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loginText: {
+    color: '#fff',
+    fontSize: 15,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  loginLink: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+    color: '#FFE082',
+  },
 });
 
 export default SignupScreen;

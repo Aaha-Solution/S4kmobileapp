@@ -8,7 +8,11 @@ import {
     Alert,
     ActivityIndicator,
     Dimensions,
-    TouchableOpacity
+    TouchableOpacity,
+    KeyboardAvoidingView,
+    Platform,
+    TouchableWithoutFeedback,
+    Keyboard,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
@@ -176,13 +180,18 @@ const LoginScreen = ({ navigation }) => {
     };
 
     return (
-        <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+        <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+            
             {/* Top Graphics */}
             <View style={styles.topGraphics}>
-                <Image source={require('../assets/image/sun.png')} style={styles.sun} />
-                <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
+              <Image source={require('../assets/image/sun.png')} style={styles.sun} />
+              <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
             </View>
-
             {/* Main Content */}
             <View style={styles.mainContent}>
                 <View style={styles.logoContainer}>
@@ -259,26 +268,29 @@ const LoginScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            {/* Bottom Graphics */}
-            <View style={styles.bottomGraphics}>
-                <View style={styles.grassContainer}>
-                    <View style={styles.grassLayer1} />
-                    <View style={styles.grassLayer2} />
-                    <View style={styles.grassLayer3} />
-                </View>
-                <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
-            </View>
+             {/* Bottom Graphics */}
+        <View style={styles.bottomGraphics}>
+          <View style={styles.grassContainer}>
+            <View style={styles.grassLayer1} />
+            <View style={styles.grassLayer2} />
+            <View style={styles.grassLayer3} />
+          </View>
+          <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
+        </View>
 
-            {/* Sign Up */}
-            <View style={styles.signUpContainer}>
-                <Pressable style={styles.signUpButton} onPress={() => navigation.navigate('SignupScreen')}>
-                    <Text style={styles.signUpText}>
-                        Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
-                    </Text>
-                </Pressable>
-            </View>
-        </LinearGradient>
-    );
+        {/* Sign Up */}
+        <View style={styles.signUpContainer}>
+          <Pressable style={styles.signUpButton} onPress={() => navigation.navigate('SignupScreen')}>
+            <Text style={styles.signUpText}>
+              Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
+            </Text>
+          </Pressable>
+        </View>
+
+      </LinearGradient>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -368,7 +380,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 1,
     },
-    loadingIndicator: { paddingVertical: 18 },
+    loadingIndicator: { 
+        paddingVertical: 18 
+    },
     optionsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',

@@ -69,8 +69,6 @@ const ResetPasswordScreen = ({ route }) => {
 
 	};
 
-	
-	
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.header}>
@@ -115,7 +113,6 @@ const ResetPasswordScreen = ({ route }) => {
 						onPress={handleResetPassword}
 						style={styles.resetButton}
 					/>
-					
 				</View>
 	
 				<CustomAlert
@@ -141,19 +138,8 @@ const ResetPasswordScreen = ({ route }) => {
 			alignSelf: 'flex-start',
 		},
 		backButton: {
-			//backgroundColor: 'rgba(255, 255, 255, 0.7)',
 			borderRadius: 25,
 			padding: 12,
-			// shadowColor: '#32CD32',
-			// shadowOffset: {
-			// 	width: 0,
-			// 	height: 4,
-			// },
-			// shadowOpacity: 0.4,
-			// shadowRadius: 6,
-			// elevation: 8,
-			// borderWidth: 3,
-			// borderColor: '#90EE90',
 		},
 		content: {
 			flex: 1,
@@ -162,21 +148,10 @@ const ResetPasswordScreen = ({ route }) => {
 			marginTop: -120,
 		},
 		titleCard: {
-			//backgroundColor: 'rgba(255, 255, 255, 0.5)',
 			borderRadius: 35,
 			padding: 30,
 			marginBottom: 40,
 			alignItems: 'center',
-			// shadowColor: '#32CD32',
-			// shadowOffset: {
-			// 	width: 0,
-			// 	height: 8,
-			// },
-			// shadowOpacity: 0.3,
-			// shadowRadius: 12,
-			// elevation: 10,
-			// borderWidth: 4,
-			// borderColor: '#90EE90',
 		},
 		title: {
 			fontSize: 32,
@@ -231,7 +206,6 @@ const ResetPasswordScreen = ({ route }) => {
 			elevation: 12,
 		},
 		resetButton: {
-			//backgroundColor: '#32CD32',
 			borderRadius: 30,
 			paddingVertical: 18,
 			paddingHorizontal: 40,

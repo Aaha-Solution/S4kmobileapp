@@ -239,6 +239,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
+			
 			{!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
@@ -258,7 +259,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 					</View>
 				</View>
-			)}
+			)} 
 		</LinearGradient>
 	);
 };
