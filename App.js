@@ -33,7 +33,7 @@ const App = () => (
 					<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
 					<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
 					<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-					{/* <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />  */}
+					 <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />  
 					<Stack.Screen
 						name="LanguageSelectionScreen"
 						component={LanguageSelectionScreen}

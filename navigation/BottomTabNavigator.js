@@ -66,15 +66,15 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	// Handle tab button press
 	const handleTabPress = (route) => {
-		// if (!isPaid) {
-		// 	Toast.show({
-		// 		type: 'error',
-		// 		text1: ' ⚠ Please complete payment to proceed further',
-		// 		position: 'bottom',
-		// 		visibilityTime: 3000,
-		// 	});
-		// 	return;
-		// }
+		 if (!isPaid) {
+		 	Toast.show({
+		 		type: 'error',
+				text1: ' ⚠ Please complete payment to proceed further',
+		 		position: 'bottom',
+				visibilityTime: 3000,
+		 	});
+		 	return;
+		 }
 
 		handleOutsidePress();
 

@@ -15,7 +15,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { BlurView } from '@react-native-community/blur';
 import { setPaidStatus, setProfile } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Language short labels
@@ -251,7 +250,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
-			{/* {!isPaid && (
+			 {!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
 						<Text style={styles.blurTitle}>Unlock All Videos</Text>
@@ -270,7 +269,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 					</View>
 				</View>
-			)}  */}
+			)}  
 			
 		</LinearGradient>
 	);
