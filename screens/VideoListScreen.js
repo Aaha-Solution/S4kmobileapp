@@ -16,6 +16,8 @@ import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { setPaidStatus, setProfile } from '../Store/userSlice';
+import { useStripe } from '@stripe/stripe-react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Language short labels
 const languageLabels = {
@@ -33,9 +35,11 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const { initPaymentSheet, presentPaymentSheet } = useStripe(); 
+
 	const isHomeScreen = route.name === 'Home';
 
-	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
+	const baseURL = 'https://smile4kidsbackend-production.up.railway.app/videos/by-category';
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedAgeGroup);
@@ -47,15 +51,6 @@ const VideoListScreen = ({ navigation, route }) => {
 		console.log('🟡 isPaid from Redux:', isPaid);
 	}, [isPaid]);
 	// Back button handler
-	const handleError = (error) => {
-		console.error("🔴 Video playback error:", error); // Log the error details
-		if (error && error.target) {
-			console.error("📌 Error target:", error.target);
-		}
-		setLoading(false);
-		setError(true);
-		alert("An error occurred during video playback. Please try again later.");
-	};
 	useEffect(() => {
 		if (!isHomeScreen) return;
 		const backAction = () => {
@@ -87,55 +82,60 @@ const VideoListScreen = ({ navigation, route }) => {
 	};
 	console.log("Sending preferences:", selectedAgeGroup, selectedLanguage);
 
-	const getFormattedLevel = (ageGroup) => {
-	if (!ageGroup) return 'Pre_Junior';
-	const lower = ageGroup.toLowerCase();
-	if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
-		return 'Junior';
-	} else if (lower.includes('prejunior') || lower.includes('4-6')) {
-		return 'Pre_Junior';
-	}
-	return 'Pre_Junior';
-};
+	const getFormattedLevel = (ageGroup, lang) => {
+		if (!ageGroup) return 'Pre_Junior';
+
+		const lower = ageGroup.toLowerCase();
+
+		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
+			return 'Junior';
+		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
+			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
+		}
+
+		return 'Pre_Junior';  // fallback
+	};
+
+
 
 
 	const fetchVideos = useCallback(async () => {
-    if (!selectedAgeGroup || !language) {
-        setVideos([]);
-        return;
-    }
+		if (!selectedAgeGroup || !language) {
+			setVideos([]);
+			return;
+		}
 
-    setLoading(true);
-    setVideos([]);
+		setLoading(true);
+		setVideos([]);
+		const formattedLevel = getFormattedLevel(selectedAgeGroup);
+		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
+		console.log("url", url);
 
-    const formattedLevel = getFormattedLevel(selectedAgeGroup);
-    const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
-    console.log("url", url);
+		try {
+			const token = await AsyncStorage.getItem('token');
 
-    try {
-        const token = await AsyncStorage.getItem('token');
+			const response = await axios.get(url, {
 
-        const response = await axios.get(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+			});
+			console.log("API Response:", response.data);
+			if (response.status === 200 && Array.isArray(response.data)) {
+				setVideos(response.data);
+			} else {
+				setVideos([]);
+			}
 
-        if (response.status === 200 && Array.isArray(response.data)) {
-            setVideos(response.data);
-        } else {
-            setVideos([]);
-        }
 
-        console.log('response', response);
-    } catch (error) {
-        console.error('API fetch error:', error);
-        setVideos([]);
-    } finally {
-        setLoading(false);
-    }
-}, [language, selectedAgeGroup]);
+		} catch (error) {
+			console.error('API fetch error:', error);
+			setVideos([]);
+		} finally {
+			setLoading(false);
+		}
+	}, [language, selectedAgeGroup]);
 
 
 	useEffect(() => {
@@ -196,6 +196,68 @@ const VideoListScreen = ({ navigation, route }) => {
 	);
 	const screenWidth = Dimensions.get('window').width;
 	const imageWidth = screenWidth * 0.25;
+
+	const HandlePay = async () => {
+		try {
+			const paymentType = `${language}-${getFormattedLevel(selectedAgeGroup, language)}`;
+			console.log("🟠 Payment Type:", paymentType);
+
+			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					type: paymentType, // ✅ FIXED
+					currency: 'gbp'
+				}),
+			});
+
+			const rawText = await response.text();
+			console.log("🟠 Raw Response Text:", rawText);
+
+			let data;
+			try {
+				data = JSON.parse(rawText);
+			} catch (error) {
+				console.error("❌ Failed to parse JSON:", error);
+				Alert.alert("Server Error", "Invalid response from payment server.");
+				return;
+			}
+
+			const clientSecret = data.clientSecret;
+			console.log("🟠 Client Secret:", clientSecret);
+
+			if (!clientSecret) {
+				Alert.alert("Payment Error", data.message || "No client secret received.");
+				return;
+			}
+
+			const { error: initError } = await initPaymentSheet({
+				paymentIntentClientSecret: clientSecret,
+				merchantDisplayName: 'Smile4Kids',
+			});
+
+			if (initError) {
+				Alert.alert("Payment Error", initError.message);
+				return;
+			}
+
+			const { error: presentError } = await presentPaymentSheet();
+
+			if (presentError) {
+				Alert.alert("Payment Failed", presentError.message);
+			} else {
+				Alert.alert("Success", "Your payment was successful!");
+				dispatch(setPaidStatus(true));
+			}
+		} catch (err) {
+			console.error("PaymentSheet Error:", err);
+			Alert.alert("Unexpected Error", "Something went wrong during payment.");
+		}
+	};
+
+
+
+
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
@@ -250,27 +312,24 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
-			 {!isPaid && (
+			{!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
 						<Text style={styles.blurTitle}>Unlock All Videos</Text>
 						<Text style={styles.blurDescription}>
 							Pay £45 to access fun & engaging kids videos
 						</Text>
+
 						<TouchableOpacity
-							onPress={() => {
-								dispatch(setPaidStatus(true));
-								navigation.navigate('PaymentSuccessScreen');
-							}}
+							onPress={HandlePay}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>
 						</TouchableOpacity>
-
 					</View>
 				</View>
-			)}  
-			
+			)}
+
 		</LinearGradient>
 	);
 };

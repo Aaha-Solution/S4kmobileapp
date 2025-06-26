@@ -1,43 +1,43 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet,BackHandler } from 'react-native';
+import { View, Text, StyleSheet, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+
 
 const PaymentSuccessScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-  let navigated = false;
+    let navigated = false;
 
-  const timer = setTimeout(() => {
-    navigated = true;
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'MainTabs' }],
-    });
-  }, 2000);
-
-  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-    if (!navigated) {
+    const timer = setTimeout(() => {
       navigated = true;
       navigation.reset({
         index: 0,
-        routes: [{ name: 'MainTabs', state: { routes: [{ name: 'Home' }] } }],
+        routes: [{ name: 'MainTabs' }],
       });
-    }
-    return true;
-  });
+    }, 2000);
 
-  return () => {
-    clearTimeout(timer);
-    backHandler.remove();
-  };
-}, [navigation]);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!navigated) {
+        navigated = true;
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainTabs', state: { routes: [{ name: 'Home' }] } }],
+        });
+      }
+      return true;
+    });
+
+    return () => {
+      clearTimeout(timer);
+      backHandler.remove();
+    };
+  }, [navigation]);
 
 
   return (
     <View style={styles.container}>
-      <FastImage
+      <Image
         source={require('../assets/image/success.gif')}
         style={styles.image}
         resizeMode={FastImage.resizeMode.contain}

@@ -66,15 +66,15 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	// Handle tab button press
 	const handleTabPress = (route) => {
-		 if (!isPaid) {
-		 	Toast.show({
-		 		type: 'error',
+		if (!isPaid) {
+			Toast.show({
+				type: 'error',
 				text1: ' ⚠ Please complete payment to proceed further',
-		 		position: 'bottom',
+				position: 'bottom',
 				visibilityTime: 3000,
-		 	});
-		 	return;
-		 }
+			});
+			return;
+		}
 
 		handleOutsidePress();
 
@@ -254,11 +254,22 @@ const BottomTabNavigator = () => {
 
 				}}
 			/>
-			{/* <Tab.Screen
+			<Tab.Screen
 				name="Payment"
 				component={PaymentScreen}
-				options={{ title: 'Payment' }}
-			/> */}
+				options={{
+					title: 'Payment',
+					headertextColor: 'black',
+					headerStyle: { backgroundColor: '#87CEEB' },
+					headerTintColor: '#fff',
+					headerTitleStyle: { fontWeight: 'bold' },
+					headerTitleStyle: {
+						color: 'black',          // ✅ this changes the header title text color
+						fontWeight: 'bold',
+						fontFamily: 'Times New Roman',
+					},
+				}}
+			/>
 			<Tab.Screen
 				name="Age"
 				component={VideoListScreen}
