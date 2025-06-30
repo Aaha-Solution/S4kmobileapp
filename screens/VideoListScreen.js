@@ -39,7 +39,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
-	const isPaid = useSelector(state => state.user.isPaid);
+
     const [lastPaidCombination, setLastPaidCombination] = useState(null);
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
