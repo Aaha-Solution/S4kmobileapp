@@ -212,18 +212,37 @@ const VideoListScreen = ({ navigation, route }) => {
 		})();
 	}, []);
 
+	
+	const getFormattedLevel = (level, lang) => {
+		if (!level) return 'Pre_Junior';
+
+		const lower = level.toLowerCase();
+
+		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
+			return 'Junior';
+		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
+			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
+		}
+		return 'Pre_Junior';  // fallback
+	};
+	
 
 	const HandlePay = async () => {
 		try {
-			const paymentType = `${language}-${getFormattedLevel(selectedAgeGroup, language)}`;
+			const cleanLevel = getFormattedLevel(selectedLevel) // Removes everything after space
+			const paymentType = `${language}-${selectedLevel}`;
 			console.log("🟠 Payment Type:", paymentType);
 
-			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					type: paymentType, // ✅ FIXED
-					currency: 'gbp'
+					type: paymentType,
+					currency: 'gbp',
+					user_id: users_id,
+					language,
+					level: cleanLevel,
+					courseType: paymentType
 				}),
 			});
 
@@ -240,8 +259,6 @@ const VideoListScreen = ({ navigation, route }) => {
 			}
 
 			const clientSecret = data.clientSecret;
-			console.log("🟠 Client Secret:", clientSecret);
-
 			if (!clientSecret) {
 				Alert.alert("Payment Error", data.message || "No client secret received.");
 				return;
@@ -251,32 +268,24 @@ const VideoListScreen = ({ navigation, route }) => {
 				paymentIntentClientSecret: clientSecret,
 				merchantDisplayName: 'Smile4Kids',
 			});
-
 			if (initError) {
 				Alert.alert("Payment Error", initError.message);
 				return;
 			}
 
 			const { error: presentError } = await presentPaymentSheet();
-
 			if (presentError) {
 				Alert.alert("Payment Failed", presentError.message);
 			} else {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
-				dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup }));
+				dispatch(addPaidAccess({ language, level: selectedLevel }));
+
+
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);
 			Alert.alert("Unexpected Error", "Something went wrong during payment.");
-		}
-		if (presentError) {
-			Alert.alert("Payment Failed", presentError.message);
-		} else {
-			Alert.alert("Success", "Your payment was successful!");
-			dispatch(setPaidStatus(true)); // ✅ Sets global paid flag
-			dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup })); // ✅ Sets combination-specific flag
-			setLastPaidCombination({ language, ageGroup: selectedAgeGroup });
 		}
 	};
 	return (

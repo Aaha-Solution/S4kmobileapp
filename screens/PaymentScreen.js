@@ -154,13 +154,13 @@ const PaymentScreen = () => {
 };
 
 
-	const handleToggle = (language, ageGroup) => {
+	const handleToggle = (language, level) => {
 		setSelectedItems(prev => {
 			const current = prev[language] || [];
-			const isSelected = current.includes(ageGroup);
+			const isSelected = current.includes(level);
 			const updated = isSelected
-				? current.filter(item => item !== ageGroup)
-				: [...current, ageGroup];
+				? current.filter(item => item !== level)
+				: [...current, level];
 			return { ...prev, [language]: updated };
 		});
 	};
