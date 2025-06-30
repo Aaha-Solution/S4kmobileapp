@@ -11,10 +11,10 @@ const initialState = {
 		phone: '',
 		selectedAvatar: null,
 		users_id: null,
+		paid_categories: null
 	},
 	selectedLanguage: null,
 	selectedAgeGroup: null,
-
 	email: null,
 	videos: [],
 };
@@ -31,17 +31,26 @@ const userSlice = createSlice({
 				dateOfBirth: action.payload.dateOfBirth || '',
 				address: action.payload.address || '',
 				phone: action.payload.phone || '',
-				selectedAvatar: action.payload.selectedAvatar || action.payload.avatar|| null,
+				selectedAvatar: action.payload.selectedAvatar || action.payload.avatar || null,
 				users_id: action.payload.users_id || null,
 			};
 			state.isLoggedIn = true;
 			state.user = normalizedUser;
 			state.email = normalizedUser.email;
-      state.isPaid = action.payload.isPaid || false; // ✅ Add this line
+
+			const hasValidPaidCategory =
+				Array.isArray(action.payload.paid_categories) &&
+				action.payload.paid_categories.some(item => item.language && item.level);
+
+			state.isPaid = hasValidPaidCategory;
+			
 
 			// ✅ Set selectedLanguage and selectedAgeGroup from API
 			state.selectedLanguage = action.payload.language || null;
 			state.selectedAgeGroup = action.payload.age || null;
+			// Optional: Load paid access if returned from backend
+			state.paidAccess = action.payload.paidAccess || [];
+			state.paid_categories = action.payload.paid_categories || null;
 		},
 
 		logout: (state) => {
@@ -51,6 +60,7 @@ const userSlice = createSlice({
 			state.selectedAgeGroup = null;
 			state.email = null;
 			state.videos = [];
+			state.paidAccess = [];
 		},
 		setLanguage: (state, action) => {
 			state.selectedLanguage = action.payload;
@@ -76,6 +86,16 @@ const userSlice = createSlice({
 		setPaidStatus: (state, action) => {
 			state.isPaid = action.payload;
 		},
+		// ✅ NEW: Add paid combination
+		addPaidAccess: (state, action) => {
+			const { language, ageGroup } = action.payload;
+			const exists = state.paidAccess.some(
+				item => item.language === language && item.ageGroup === ageGroup
+			);
+			if (!exists) {
+				state.paidAccess.push({ language, ageGroup });
+			}
+		},
 	},
 });
 
@@ -89,6 +109,7 @@ export const {
 	updateProfile,
 	setVideos,
 	addVideo,
-	setPaidStatus
+	setPaidStatus,
+	addPaidAccess, // ✅ export this
 } = userSlice.actions;
 export default userSlice.reducer;
