@@ -40,6 +40,8 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
+    const [lastPaidCombination, setLastPaidCombination] = useState(null);
+
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
@@ -134,24 +136,83 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleVideoPress = useCallback((videoItem) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
-
 	const handleLanguageSelect = useCallback((langKey) => {
-		setLanguage(langKey);
-	}, []);
+		const isPaidCombo = paidAccess.some(
+			item => item.language === langKey && item.level === selectedLevel
+		);
+	
+		if (isPaidCombo) {
+			setLanguage(langKey);
+		} else {
+			const currentAttempt = `${langKey} - ${selectedLevel}`;
+			const lastPaid = lastPaidCombination
+				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
+				: 'previous paid selection';
+	
+			Alert.alert(
+				"Locked Videos",
+				`Videos for  ${currentAttempt}are currently locked. 🔒\n\nPlease complete the payment to unlock them.\n\nShowing ${lastPaid} instead.`,
+				[
+					{
+						text: "OK",
+						onPress: () => {
+							if (lastPaidCombination) {
+								setLanguage(lastPaidCombination.language);
+							}
+						}
+					}
+				]
+			);
+		}
+	}, [paidAccess, selectedLevel, lastPaidCombination]);
+	
+
+	const renderItem = ({ item, index }) => (
+		<TouchableOpacity
+			style={styles.kidCard}
+			onPress={() => handleVideoPress(item)}
+			activeOpacity={0.9}
+		>
+			<Image
+				source={
+					item.thumbnailUrl
+						? { uri: item.thumbnailUrl }
+						: require('../assets/image/splash.png')
+				}
+				style={{
+					width: imageWidth,
+					height: imageWidth * 0.7,
+					borderRadius: 12,
+					backgroundColor: '#E6E6FA',
+				}}
+				resizeMode="contain"
+			/>
+			<View style={styles.kidTextContainer}>
+				<Text style={styles.kidTitle} numberOfLines={2}>
+					{item.title || `Video ${index + 1}`}
+				</Text>
+				<Text style={styles.kidSubText}>
+					{item.duration ? `${item.duration} min` : ''}
+				</Text>
+			</View>
+			<Icon name="chevron-forward" size={24} color="#fff" />
+		</TouchableOpacity>
+	);
+	const screenWidth = Dimensions.get('window').width;
+	const imageWidth = screenWidth * 0.25;
 
 	useEffect(() => {
-	(async () => {
-		const hasVisited = await AsyncStorage.getItem('hasVisitedVideoScreen');
-		if (hasVisited) {
-			setInitialVisitCompleted(true);
-		} else {
-			await AsyncStorage.setItem('hasVisitedVideoScreen', 'true');
-			setInitialVisitCompleted(true); // ✅ add this
-		}
-	})();
-}, []);
+		(async () => {
+			const hasVisited = await AsyncStorage.getItem('hasVisitedVideoScreen');
+			if (hasVisited) {
+				setInitialVisitCompleted(true);
+			} else {
+				await AsyncStorage.setItem('hasVisitedVideoScreen', 'true');
+			}
+		})();
+	}, []);
 
-
+	
 	const getFormattedLevel = (level, lang) => {
 		if (!level) return 'Pre_Junior';
 
@@ -168,8 +229,8 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const HandlePay = async () => {
 		try {
-			const cleanLevel = getFormattedLevel(selectedLevel); // Removes everything after space
-			const paymentType = `${language}-${cleanLevel}`;
+			const cleanLevel = getFormattedLevel(selectedLevel) // Removes everything after space
+			const paymentType = `${language}-${selectedLevel}`;
 			console.log("🟠 Payment Type:", paymentType);
 
 			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
@@ -228,42 +289,6 @@ const VideoListScreen = ({ navigation, route }) => {
 			Alert.alert("Unexpected Error", "Something went wrong during payment.");
 		}
 	};
-
-	const screenWidth = Dimensions.get('window').width;
-	const imageWidth = screenWidth * 0.25;
-
-	const renderItem = ({ item, index }) => (
-		<TouchableOpacity
-			style={styles.kidCard}
-			onPress={() => handleVideoPress(item)}
-			activeOpacity={0.9}
-		>
-			<Image
-				source={
-					item.thumbnailUrl
-						? { uri: item.thumbnailUrl }
-						: require('../assets/image/splash.png')
-				}
-				style={{
-					width: imageWidth,
-					height: imageWidth * 0.7,
-					borderRadius: 12,
-					backgroundColor: '#E6E6FA',
-				}}
-				resizeMode="contain"
-			/>
-			<View style={styles.kidTextContainer}>
-				<Text style={styles.kidTitle} numberOfLines={2}>
-					{item.title || `Video ${index + 1}`}
-				</Text>
-				<Text style={styles.kidSubText}>
-					{item.duration ? `${item.duration} min` : ''}
-				</Text>
-			</View>
-			<Icon name="chevron-forward" size={24} color="#fff" />
-		</TouchableOpacity>
-	);
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
