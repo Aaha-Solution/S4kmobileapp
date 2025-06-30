@@ -13,6 +13,7 @@ import CustomTextInput from '../component/CustomTextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+import { getBackendLevel } from '../utils/levelUtils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -114,7 +115,7 @@ const LoginScreen = ({ navigation }) => {
 
             const firstPaid = data.user.paid_categories?.[0];
             const userLang = firstPaid?.language || 'English';
-            const userLevel = firstPaid?.level || 'Pre_Junior';
+            const userLevel = getBackendLevel(firstPaid?.level || 'PreJunior (4-6 years)');
 
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
@@ -148,12 +149,12 @@ const LoginScreen = ({ navigation }) => {
             // ✅ Format and save all paid combos into Redux
             if (Array.isArray(paid_categories)) {
                 const formatted = paid_categories.map(item => ({
-                    language: item.language,
-                    level: item.level, // ✅ Correct
+                   language: item.language,
+                    level: getBackendLevel(item.level),
                 }));
                 dispatch({ type: 'user/setAllPaidAccess', payload: formatted });
-
             }
+
 
 
             if (hasValidPaidCategory) {

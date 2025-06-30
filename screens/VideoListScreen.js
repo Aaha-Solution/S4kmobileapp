@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { setPaidStatus, addPaidAccess } from '../Store/userSlice';
 import { useStripe } from '@stripe/stripe-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 
 const languageLabels = {
 	Gujarati: 'Gujarati',
@@ -49,6 +50,14 @@ const VideoListScreen = ({ navigation, route }) => {
 	const isCurrentCombinationPaid = paidAccess.some(
 		item => item.language === language && item.level === selectedLevel
 	);
+
+	const getPrettyLabel = (level) => {
+	if (!level) return 'PreJunior (4-6 years)';
+	const lower = level.toLowerCase();
+	if (lower.includes('junior') && lower.includes('7')) return 'Junior (7 & above years)';
+	if (lower.includes('pre') || lower.includes('4')) return 'PreJunior (4-6 years)';
+	return level;
+};
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
@@ -229,7 +238,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const HandlePay = async () => {
 		try {
-			const cleanLevel = getFormattedLevel(selectedLevel) // Removes everything after space
+			const cleanLevel = getBackendLevel(selectedLevel) // Removes everything after space
 			const paymentType = `${language}-${selectedLevel}`;
 			console.log("🟠 Payment Type:", paymentType);
 
@@ -305,9 +314,10 @@ const VideoListScreen = ({ navigation, route }) => {
 					</TouchableOpacity>
 				))}
 			</View>
+			{/*Selected Age Header*/}
 
 			<View style={styles.languageHeader}>
-				<Text style={styles.ageGroupText}>{selectedLevel || 'Select Age Group'}</Text>
+				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
 
 			{loading && (

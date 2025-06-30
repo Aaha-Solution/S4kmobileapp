@@ -11,6 +11,9 @@ import {  setLevel } from '../Store/userSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRef } from 'react';
 import Toast from 'react-native-toast-message';
+import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
+
+
 const Tab = createBottomTabNavigator();
 const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
@@ -32,7 +35,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	// Update dropdown value when redux changes
 	useEffect(() => {
 		if (selectedLevel ) {
-			setValue(selectedLevel );		
+			setValue(getDisplayLevel(selectedLevel));		
 		}
 	}, [selectedLevel ]);
 
@@ -43,20 +46,21 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	// Handle dropdown age group selection
 	const handleAgeSelect = (selectedValue) => {
-		if (!selectedValue) return;
+  if (!selectedValue) return;
 
-		try {
-			dispatch( setLevel(selectedValue));
-			setValue(selectedValue);
-			setOpen(false);
+  try {
+    const backendLevel = getBackendLevel(selectedValue); // convert for Redux + backend
+    dispatch(setLevel(backendLevel));                    // ✅ Store backend value
+    setValue(selectedValue);                             // dropdown shows UI label
+    setOpen(false);
 
-			setTimeout(() => {
-				navigation.navigate('Home');
-			}, 100);
-		} catch (error) {
-			console.error('Error in handleAgeSelect:', error);
-		}
-	};
+    setTimeout(() => {
+      navigation.navigate('Home');
+    }, 100);
+  } catch (error) {
+    console.error('Error in handleAgeSelect:', error);
+  }
+};
 
 	// Close dropdown and optionally navigate to Home
 	const handleOutsidePress = () => {
