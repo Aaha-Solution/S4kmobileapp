@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
-import { login, setProfile, setLanguage, setAgeGroup, setPaidStatus } from '../Store/userSlice';
+import { login, setProfile, setLanguage, setLevel, setPaidStatus } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
@@ -23,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
-    const [selectedAgeGroup, setSelectedAgeGroup] = useState('');
+    const [selectedLevel, setselectedLevel] = useState('');
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
@@ -67,12 +67,20 @@ const LoginScreen = ({ navigation }) => {
         };
     }, [navigation]);
 
+    const getLevelFromAge = (age) => {
+        if (age <= 5) return 'Pre_Junior';
+        if (age <= 8) return 'Junior';
+        return 'Senior';
+    };
+
+
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     const handleLogin = async () => {
         setEmailError('');
         setPasswordError('');
         let hasError = false;
+
         if (!email) {
             setEmailError('Email is required');
             hasError = true;
@@ -93,43 +101,64 @@ const LoginScreen = ({ navigation }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
             });
+
             const data = await response.json();
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
             if (!response.ok) {
                 Alert.alert('Login Failed', data.message || 'Invalid credentials');
                 return;
             }
+
             await AsyncStorage.setItem('token', data.token);
+
+            const firstPaid = data.user.paid_categories?.[0];
+            const userLang = firstPaid?.language || 'English';
+            const userLevel = firstPaid?.level || 'Pre_Junior';
+
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
-                const userLang = data.user.language;
-                const userAge = data.user.age;
 
                 setSelectedLanguage(userLang);
-                setSelectedAgeGroup(userAge);
+                setselectedLevel(userLevel);
 
-                await AsyncStorage.setItem('selectedPreferences', JSON.stringify({
-                    selectedAgeGroup: userAge,
-                    selectedLanguage: userLang,
-                }));
+                await AsyncStorage.setItem(
+                    'selectedPreferences',
+                    JSON.stringify({
+                        selectedLevel: userLevel,
+                        selectedLanguage: userLang,
+                    })
+                );
             } else {
                 await Keychain.resetGenericPassword();
                 await AsyncStorage.removeItem('selectedPreferences');
             }
+
             dispatch(login(data.user));
-            dispatch(setLanguage(data.user.language));
-            dispatch(setAgeGroup(data.user.age));
+            dispatch(setLanguage(userLang));
+            dispatch(setLevel(userLevel));
+
             const { paid_categories } = data.user;
+            const hasValidPaidCategory =
+                Array.isArray(paid_categories) &&
+                paid_categories.some((item) => item.language && item.level);
 
-            const hasValidPaidCategory = Array.isArray(paid_categories) &&
-                paid_categories.some(item => item.language && item.level);
-
-            // ✅ Fix: Pass object to setProfile
             dispatch(setProfile({ paid_categories }));
+
+            // ✅ Format and save all paid combos into Redux
+            if (Array.isArray(paid_categories)) {
+                const formatted = paid_categories.map(item => ({
+                    language: item.language,
+                    level: item.level, // ✅ Correct
+                }));
+                dispatch({ type: 'user/setAllPaidAccess', payload: formatted });
+
+            }
+
 
             if (hasValidPaidCategory) {
                 dispatch(setPaidStatus(true));
-                console.log("isPaid dispatched");
+                console.log("✅ isPaid dispatched");
 
                 navigation.reset({
                     index: 0,
@@ -149,16 +178,13 @@ const LoginScreen = ({ navigation }) => {
                     routes: [{ name: 'LanguageSelectionScreen' }],
                 });
             }
-
-
-
-
         } catch (error) {
             Alert.alert('Error', 'Login Credentials not found! Try again.');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

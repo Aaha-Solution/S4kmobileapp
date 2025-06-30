@@ -14,7 +14,7 @@ const initialState = {
 		paid_categories: null
 	},
 	selectedLanguage: null,
-	selectedAgeGroup: null,
+	selectedLevel: null,
 	email: null,
 	videos: [],
 	paidAccess: [],
@@ -45,11 +45,11 @@ const userSlice = createSlice({
 				action.payload.paid_categories.some(item => item.language && item.level);
 
 			state.isPaid = hasValidPaidCategory;
-			
 
-			// ✅ Set selectedLanguage and selectedAgeGroup from API
+
+			// ✅ Set selectedLanguage and selectedLevel from API
 			state.selectedLanguage = action.payload.language || null;
-			state.selectedAgeGroup = action.payload.age || null;
+			state.selectedLevel = action.payload.level || null;
 			// Optional: Load paid access if returned from backend
 			state.paidAccess = action.payload.paidAccess || [];
 			state.paid_categories = action.payload.paid_categories || null;
@@ -59,7 +59,7 @@ const userSlice = createSlice({
 			state.isLoggedIn = false;
 			state.user = initialState.user;
 			state.selectedLanguage = null;
-			state.selectedAgeGroup = null;
+			state.selectedLevel = null;
 			state.email = null;
 			state.videos = [];
 			state.paidAccess = [];
@@ -67,8 +67,8 @@ const userSlice = createSlice({
 		setLanguage: (state, action) => {
 			state.selectedLanguage = action.payload;
 		},
-		setAgeGroup: (state, action) => {
-			state.selectedAgeGroup = action.payload;
+		setLevel: (state, action) => {
+			state.selectedLevel = action.payload;
 		},
 		setEmail: (state, action) => {
 			state.email = action.payload;
@@ -88,17 +88,21 @@ const userSlice = createSlice({
 		setPaidStatus: (state, action) => {
 			state.isPaid = action.payload;
 		},
+		setAllPaidAccess: (state, action) => {
+			state.paidAccess = action.payload;
+		},
 		// ✅ NEW: Add paid combination
 		addPaidAccess: (state, action) => {
-			const { language, ageGroup } = action.payload;
+			const { language, level } = action.payload;
 			const exists = state.paidAccess.some(
-				item => item.language === language && item.ageGroup === ageGroup
+				item => item.language === language && item.level === level
 			);
 			if (!exists) {
-				state.paidAccess.push({ language, ageGroup });
+				state.paidAccess.push({ language, level }); // ✅ store correctly
 			}
 			state.lastPaidSelection = { language, ageGroup }; // ✅ Save last paid combo
-		},		
+		}
+		
 	},
 });
 
@@ -106,14 +110,13 @@ export const {
 	login,
 	logout,
 	setLanguage,
-	setAgeGroup,
+	setLevel,
 	setEmail,
 	setProfile,
 	updateProfile,
 	setVideos,
 	addVideo,
 	setPaidStatus,
-	addPaidAccess, 
-	setLastPaidSelection
+	addPaidAccess, // ✅ export this
 } = userSlice.actions;
 export default userSlice.reducer;

@@ -7,7 +7,7 @@ import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAgeGroup } from '../Store/userSlice';
+import {  setLevel } from '../Store/userSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRef } from 'react';
 import Toast from 'react-native-toast-message';
@@ -15,9 +15,9 @@ const Tab = createBottomTabNavigator();
 const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
-	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const selectedLevel = useSelector(state => state.user.selectedLevel );
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(selectedAgeGroup);
+	const [value, setValue] = useState(selectedLevel );
 	const [items, setItems] = useState([
 		{ label: 'PreJunior (4-6 years)', value: 'PreJunior (4-6 years)' },
 		{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
@@ -27,10 +27,10 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	// Update dropdown value when redux changes
 	useEffect(() => {
-		if (selectedAgeGroup) {
-			setValue(selectedAgeGroup);
+		if (selectedLevel ) {
+			setValue(selectedLevel );
 		}
-	}, [selectedAgeGroup]);
+	}, [selectedLevel ]);
 
 	// Update route ref on focus change
 	useFocusEffect(() => {
@@ -42,7 +42,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		if (!selectedValue) return;
 
 		try {
-			dispatch(setAgeGroup(selectedValue));
+			dispatch( setLevel(selectedValue));
 			setValue(selectedValue);
 			setOpen(false);
 

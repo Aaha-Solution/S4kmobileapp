@@ -9,7 +9,7 @@ import {
 	Image,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setAgeGroup } from '../Store/userSlice';
+import {  setLevel } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
@@ -21,7 +21,7 @@ const ageGroups = [
 
 const AgeSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
-	const selectedAgeGroup = useSelector((state) => state.user.selectedAgeGroup);
+	const selectedLevel = useSelector((state) => state.user.selectedLevel );
 	const [showAlert, setShowAlert] = useState(false);
 
 	const [animations, setAnimations] = useState(
@@ -49,11 +49,11 @@ const AgeSelectionScreen = ({ navigation }) => {
 
 	const handleAgeSelect = (group) => {
 		animateSelection(group.id);
-		dispatch(setAgeGroup(group.name));
+		dispatch( setLevel(group.name));
 	};
 
 	const handleNext = () => {
-		if (selectedAgeGroup) {
+		if (selectedLevel ) {
 			navigation.reset({
 				index: 0,
 				routes: [{ name: 'MainTabs' }],
@@ -68,7 +68,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 	};
 
 	const renderItem = ({ item }) => {
-		const isSelected = selectedAgeGroup === item.name;
+		const isSelected = selectedLevel === item.name;
 		return (
 			<TouchableOpacity
 				onPress={() => handleAgeSelect(item)}

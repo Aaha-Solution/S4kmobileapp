@@ -7,7 +7,8 @@ import {
 	StyleSheet,
 	Image,
 	Dimensions,
-	BackHandler
+	BackHandler,
+	Alert
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -15,13 +16,10 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { setPaidStatus, setProfile, addPaidAccess } from '../Store/userSlice';
+import { setPaidStatus, addPaidAccess } from '../Store/userSlice';
 import { useStripe } from '@stripe/stripe-react-native';
-import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-// Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
 	Panjabi: 'Panjabi',
@@ -31,57 +29,51 @@ const languageLabels = {
 const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
 	const paidAccess = useSelector(state => state.user.paidAccess);
-	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+	const users_id = useSelector(state => state.user.user.users_id);
+	const isPaid = useSelector(state => state.user.isPaid);
+
 	const [videos, setVideos] = useState([]);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
-	// ✅ Check if this language + ageGroup is already paid
-	const isCurrentCombinationPaid = paidAccess.some(
-		item => item.language === language && item.ageGroup === selectedAgeGroup
-	);
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 	const isPaid = useSelector(state => state.user.isPaid);
     const [lastPaidCombination, setLastPaidCombination] = useState(null);
 
+	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
-
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
-	useEffect(() => {
-		console.log('Redux Selected Age Group:', selectedAgeGroup);
-		console.log('Redux Selected Language:', selectedLanguage);
-	}, [selectedAgeGroup, selectedLanguage]);
+	const isCurrentCombinationPaid = paidAccess.some(
+		item => item.language === language && item.level === selectedLevel
+	);
 
-	// Debug the Redux value
 	useEffect(() => {
+		console.log('Redux Selected Age Group:', selectedLevel);
+		console.log('Redux Selected Language:', selectedLanguage);
 		console.log('🟡 isPaid from Redux:', isPaid);
-	}, [isPaid]);
-	// Back button handler
+		console.log("✅ paidAccess:", paidAccess);
+		console.log("✅ current combo:", { language, selectedLevel });
+		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
+	}, [paidAccess, language, selectedLevel, isPaid]);
+
 	useEffect(() => {
 		if (!isHomeScreen) return;
-		const backAction = () => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			setShowAlert(true);
 			return true;
-		};
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		});
 		return () => backHandler.remove();
 	}, [isHomeScreen]);
-	useEffect(() => {
-		console.log("✅ paidAccess:", paidAccess);
-		console.log("✅ current combo:", { language, selectedAgeGroup });
-		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
-	}, [paidAccess, language, selectedAgeGroup]);
 
 	useFocusEffect(
 		useCallback(() => {
-			const backAction = () => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 				setShowAlert(true);
 				return true;
-			};
-			const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+			});
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
@@ -90,41 +82,23 @@ const VideoListScreen = ({ navigation, route }) => {
 		setShowAlert(false);
 		BackHandler.exitApp();
 	};
+	const handleCancelExit = () => setShowAlert(false);
 
-	const handleCancelExit = () => {
-		setShowAlert(false);
-	};
-	console.log("Sending preferences:", selectedAgeGroup, selectedLanguage);
-
-	const getFormattedLevel = (ageGroup, lang) => {
-		if (!ageGroup) return 'Pre_Junior';
-
-		const lower = ageGroup.toLowerCase();
-
-		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
-			return 'Junior';
-		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
-			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
-		}
-		return 'Pre_Junior';  // fallback
-	};
 	const fetchVideos = useCallback(async () => {
-		if (!selectedAgeGroup || !language) {
+		if (!selectedLevel || !language) {
 			setVideos([]);
 			return;
 		}
 		setLoading(true);
 		setVideos([]);
-		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
+		const url = `${baseURL}?language=${language}&level=${selectedLevel}`;
 		console.log("url", url);
 
 		try {
 			const token = await AsyncStorage.getItem('token');
-
 			const response = await axios.get(url, {
-
 				headers: {
-					'Authorization': `Bearer ${token}`,
+					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
 				},
 			});
@@ -140,12 +114,11 @@ const VideoListScreen = ({ navigation, route }) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [language, selectedAgeGroup]);
-
+	}, [language, selectedLevel]);
 
 	useEffect(() => {
 		fetchVideos();
-	}, [selectedAgeGroup, language, fetchVideos]);
+	}, [selectedLevel, language]);
 
 	useEffect(() => {
 		if (selectedLanguage) {
@@ -324,7 +297,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			</View>
 
 			<View style={styles.languageHeader}>
-				<Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
+				<Text style={styles.ageGroupText}>{selectedLevel || 'Select Age Group'}</Text>
 			</View>
 
 			{loading && (
@@ -343,14 +316,13 @@ const VideoListScreen = ({ navigation, route }) => {
 						<Text style={styles.emptyText}>
 							{loading
 								? 'Loading videos...'
-								: selectedAgeGroup
+								: selectedLevel
 									? 'No videos available for this selection'
-									: 'Please select an age group'
-							}
+									: 'Please select an age group'}
 						</Text>
 					</View>
 				)}
-				extraData={[selectedAgeGroup, language, loading]}
+				extraData={[selectedLevel, language, loading]}
 			/>
 
 			<CustomAlert
@@ -360,19 +332,16 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
+
 			{!isCurrentCombinationPaid && initialVisitCompleted && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
-						<Text style={styles.blurTitle}>Unlock  Videos</Text>
+						<Text style={styles.blurTitle}>Unlock Videos</Text>
 						<Text style={styles.blurDescription}>
 							Pay £45 to access fun & engaging kids videos
 						</Text>
-
 						<TouchableOpacity
-							onPress={() => {
-								dispatch(setPaidStatus(true));
-								dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup }));
-							  }}							  
+							onPress={HandlePay}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>
@@ -380,7 +349,6 @@ const VideoListScreen = ({ navigation, route }) => {
 					</View>
 				</View>
 			)}
-
 		</LinearGradient>
 	);
 };

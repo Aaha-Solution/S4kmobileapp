@@ -18,7 +18,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const profile = useSelector(state => state.user.user);
     const username = profile?.username || '';
     const routeAvatar = route.params?.selectedAvatar;
-    const BASE_URL = 'https://smile4kidsbackend-production.up.railway.app';
+    const BASE_URL = 'https://smile4kids-backend.onrender.com';
 
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
