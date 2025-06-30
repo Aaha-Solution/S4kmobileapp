@@ -7,7 +7,8 @@ import {
 	StyleSheet,
 	Image,
 	Dimensions,
-	BackHandler
+	BackHandler,
+	Alert
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -15,13 +16,10 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { setPaidStatus, setProfile, addPaidAccess } from '../Store/userSlice';
+import { setPaidStatus, addPaidAccess } from '../Store/userSlice';
 import { useStripe } from '@stripe/stripe-react-native';
-import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-// Language short labels
 const languageLabels = {
 	Gujarati: 'Gujarati',
 	Panjabi: 'Panjabi',
@@ -31,57 +29,49 @@ const languageLabels = {
 const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
 	const paidAccess = useSelector(state => state.user.paidAccess);
-	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
-	const [videos, setVideos] = useState([]);
-	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
-	// ✅ Check if this language + ageGroup is already paid
-	const isCurrentCombinationPaid = paidAccess.some(
-		item => item.language === language && item.ageGroup === selectedAgeGroup
-	);
-	const [showAlert, setShowAlert] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const { initPaymentSheet, presentPaymentSheet } = useStripe();
-	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 	const isPaid = useSelector(state => state.user.isPaid);
 
-	const isHomeScreen = route.name === 'Home';
+	const [videos, setVideos] = useState([]);
+	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
+	const [showAlert, setShowAlert] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
+	const { initPaymentSheet, presentPaymentSheet } = useStripe();
+	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
-	useEffect(() => {
-		console.log('Redux Selected Age Group:', selectedAgeGroup);
-		console.log('Redux Selected Language:', selectedLanguage);
-	}, [selectedAgeGroup, selectedLanguage]);
+	const isCurrentCombinationPaid = paidAccess.some(
+		item => item.language === language && item.level === selectedLevel
+	);
 
-	// Debug the Redux value
 	useEffect(() => {
+		console.log('Redux Selected Age Group:', selectedLevel);
+		console.log('Redux Selected Language:', selectedLanguage);
 		console.log('🟡 isPaid from Redux:', isPaid);
-	}, [isPaid]);
-	// Back button handler
+		console.log("✅ paidAccess:", paidAccess);
+		console.log("✅ current combo:", { language, selectedLevel });
+		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
+	}, [paidAccess, language, selectedLevel, isPaid]);
+
 	useEffect(() => {
 		if (!isHomeScreen) return;
-		const backAction = () => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			setShowAlert(true);
 			return true;
-		};
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		});
 		return () => backHandler.remove();
 	}, [isHomeScreen]);
-	useEffect(() => {
-		console.log("✅ paidAccess:", paidAccess);
-		console.log("✅ current combo:", { language, selectedAgeGroup });
-		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
-	}, [paidAccess, language, selectedAgeGroup]);
 
 	useFocusEffect(
 		useCallback(() => {
-			const backAction = () => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 				setShowAlert(true);
 				return true;
-			};
-			const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+			});
 			return () => backHandler.remove();
 		}, [isHomeScreen])
 	);
@@ -90,42 +80,23 @@ const VideoListScreen = ({ navigation, route }) => {
 		setShowAlert(false);
 		BackHandler.exitApp();
 	};
+	const handleCancelExit = () => setShowAlert(false);
 
-	const handleCancelExit = () => {
-		setShowAlert(false);
-	};
-	console.log("Sending preferences:", selectedAgeGroup, selectedLanguage);
-
-	const getFormattedLevel = (ageGroup, lang) => {
-		if (!ageGroup) return 'Pre_Junior';
-
-		const lower = ageGroup.toLowerCase();
-
-		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
-			return 'Junior';
-		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
-			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
-		}
-		return 'Pre_Junior';  // fallback
-	};
 	const fetchVideos = useCallback(async () => {
-		if (!selectedAgeGroup || !language) {
+		if (!selectedLevel || !language) {
 			setVideos([]);
 			return;
 		}
 		setLoading(true);
 		setVideos([]);
-		const formattedLevel = getFormattedLevel(selectedAgeGroup);
-		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
+		const url = `${baseURL}?language=${language}&level=${selectedLevel}`;
 		console.log("url", url);
 
 		try {
 			const token = await AsyncStorage.getItem('token');
-
 			const response = await axios.get(url, {
-
 				headers: {
-					'Authorization': `Bearer ${token}`,
+					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
 				},
 			});
@@ -141,12 +112,11 @@ const VideoListScreen = ({ navigation, route }) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [language, selectedAgeGroup]);
-
+	}, [language, selectedLevel]);
 
 	useEffect(() => {
 		fetchVideos();
-	}, [selectedAgeGroup, language, fetchVideos]);
+	}, [selectedLevel, language]);
 
 	useEffect(() => {
 		if (selectedLanguage) {
@@ -168,6 +138,98 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleLanguageSelect = useCallback((langKey) => {
 		setLanguage(langKey);
 	}, []);
+
+	useEffect(() => {
+	(async () => {
+		const hasVisited = await AsyncStorage.getItem('hasVisitedVideoScreen');
+		if (hasVisited) {
+			setInitialVisitCompleted(true);
+		} else {
+			await AsyncStorage.setItem('hasVisitedVideoScreen', 'true');
+			setInitialVisitCompleted(true); // ✅ add this
+		}
+	})();
+}, []);
+
+
+	const getFormattedLevel = (level, lang) => {
+		if (!level) return 'Pre_Junior';
+
+		const lower = ageGroup.toLowerCase();
+
+		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
+			return 'Junior';
+		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
+			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
+		}
+		return 'Pre_Junior';  // fallback
+	};
+	
+
+	const HandlePay = async () => {
+		try {
+			const cleanLevel = selectedLevel?.split(' ')[0]; // Removes everything after space
+			const paymentType = `${language}-${selectedLevel}`;
+			console.log("🟠 Payment Type:", paymentType);
+
+			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					type: paymentType,
+					currency: 'gbp',
+					user_id: users_id,
+					language,
+					level: cleanLevel,
+					courseType: paymentType
+				}),
+			});
+
+			const rawText = await response.text();
+			console.log("🟠 Raw Response Text:", rawText);
+
+			let data;
+			try {
+				data = JSON.parse(rawText);
+			} catch (error) {
+				console.error("❌ Failed to parse JSON:", error);
+				Alert.alert("Server Error", "Invalid response from payment server.");
+				return;
+			}
+
+			const clientSecret = data.clientSecret;
+			if (!clientSecret) {
+				Alert.alert("Payment Error", data.message || "No client secret received.");
+				return;
+			}
+
+			const { error: initError } = await initPaymentSheet({
+				paymentIntentClientSecret: clientSecret,
+				merchantDisplayName: 'Smile4Kids',
+			});
+			if (initError) {
+				Alert.alert("Payment Error", initError.message);
+				return;
+			}
+
+			const { error: presentError } = await presentPaymentSheet();
+			if (presentError) {
+				Alert.alert("Payment Failed", presentError.message);
+			} else {
+				Alert.alert("Success", "Your payment was successful!");
+				dispatch(setPaidStatus(true));
+				dispatch(addPaidAccess({ language, level: selectedLevel }));
+
+
+			}
+		} catch (err) {
+			console.error("PaymentSheet Error:", err);
+			Alert.alert("Unexpected Error", "Something went wrong during payment.");
+		}
+	};
+
+	const screenWidth = Dimensions.get('window').width;
+	const imageWidth = screenWidth * 0.25;
 
 	const renderItem = ({ item, index }) => (
 		<TouchableOpacity
@@ -200,91 +262,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			<Icon name="chevron-forward" size={24} color="#fff" />
 		</TouchableOpacity>
 	);
-	const screenWidth = Dimensions.get('window').width;
-	const imageWidth = screenWidth * 0.25;
 
-	useEffect(() => {
-		(async () => {
-			const hasVisited = await AsyncStorage.getItem('hasVisitedVideoScreen');
-			if (hasVisited) {
-				setInitialVisitCompleted(true);
-			} else {
-				await AsyncStorage.setItem('hasVisitedVideoScreen', 'true');
-			}
-		})();
-	}, []);
-
-
-	const HandlePay = async () => {
-		try {
-			const paymentType = `${language}-${getFormattedLevel(selectedAgeGroup, language)}`;
-			console.log("🟠 Payment Type:", paymentType);
-
-			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					type: paymentType, // ✅ FIXED
-					currency: 'gbp',
-					user_id: users_id,    
-					language: language,
-					level: selectedAgeGroup,
-					courseType: paymentType
-				}),
-			});
-
-			const rawText = await response.text();
-			console.log("🟠 Raw Response Text:", rawText);
-
-			let data;
-			try {
-				data = JSON.parse(rawText);
-			} catch (error) {
-				console.error("❌ Failed to parse JSON:", error);
-				Alert.alert("Server Error", "Invalid response from payment server.");
-				return;
-			}
-
-			const clientSecret = data.clientSecret;
-			console.log("🟠 Client Secret:", clientSecret);
-
-			if (!clientSecret) {
-				Alert.alert("Payment Error", data.message || "No client secret received.");
-				return;
-			}
-
-			const { error: initError } = await initPaymentSheet({
-				paymentIntentClientSecret: clientSecret,
-				merchantDisplayName: 'Smile4Kids',
-			});
-
-			if (initError) {
-				Alert.alert("Payment Error", initError.message);
-				return;
-			}
-
-			const { error: presentError } = await presentPaymentSheet();
-
-			if (presentError) {
-				Alert.alert("Payment Failed", presentError.message);
-			} else {
-				Alert.alert("Success", "Your payment was successful!");
-				dispatch(setPaidStatus(true));
-				dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup }));
-			}
-		} catch (err) {
-			console.error("PaymentSheet Error:", err);
-			Alert.alert("Unexpected Error", "Something went wrong during payment.");
-		}
-		if (presentError) {
-			Alert.alert("Payment Failed", presentError.message);
-		} else {
-			Alert.alert("Success", "Your payment was successful!");
-			dispatch(setPaidStatus(true)); // ✅ Sets global paid flag
-			dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup })); // ✅ Sets combination-specific flag
-		}
-
-	};
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
@@ -303,7 +281,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			</View>
 
 			<View style={styles.languageHeader}>
-				<Text style={styles.ageGroupText}>{selectedAgeGroup || 'Select Age Group'}</Text>
+				<Text style={styles.ageGroupText}>{selectedLevel || 'Select Age Group'}</Text>
 			</View>
 
 			{loading && (
@@ -322,14 +300,13 @@ const VideoListScreen = ({ navigation, route }) => {
 						<Text style={styles.emptyText}>
 							{loading
 								? 'Loading videos...'
-								: selectedAgeGroup
+								: selectedLevel
 									? 'No videos available for this selection'
-									: 'Please select an age group'
-							}
+									: 'Please select an age group'}
 						</Text>
 					</View>
 				)}
-				extraData={[selectedAgeGroup, language, loading]}
+				extraData={[selectedLevel, language, loading]}
 			/>
 
 			<CustomAlert
@@ -339,20 +316,16 @@ const VideoListScreen = ({ navigation, route }) => {
 				onConfirm={handleConfirmExit}
 				onCancel={handleCancelExit}
 			/>
+
 			{!isCurrentCombinationPaid && initialVisitCompleted && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
-						<Text style={styles.blurTitle}>Unlock  Videos</Text>
+						<Text style={styles.blurTitle}>Unlock Videos</Text>
 						<Text style={styles.blurDescription}>
 							Pay £45 to access fun & engaging kids videos
 						</Text>
-
 						<TouchableOpacity
-							onPress={()=>dispatch(setPaidStatus(true))}
-							//onPress={() => {
-								dispatch(setPaidStatus(true));
-								dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup }));
-							  }}							  
+							onPress={HandlePay}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>
@@ -360,7 +333,6 @@ const VideoListScreen = ({ navigation, route }) => {
 					</View>
 				</View>
 			)}
-
 		</LinearGradient>
 	);
 };

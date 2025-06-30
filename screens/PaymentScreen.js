@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPaidStatus } from '../Store/userSlice';
 
 const PaymentScreen = () => {
-	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const selectedLevel = useSelector(state => state.user.selectedLevel );
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
 	const [selectedItems, setSelectedItems] = useState({});
