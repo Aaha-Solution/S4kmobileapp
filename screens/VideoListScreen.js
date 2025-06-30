@@ -138,15 +138,15 @@ const VideoListScreen = ({ navigation, route }) => {
 	}, [navigation]);
 	const handleLanguageSelect = useCallback((langKey) => {
 		const isPaidCombo = paidAccess.some(
-			item => item.language === langKey && item.ageGroup === selectedAgeGroup
+			item => item.language === langKey && item.level === selectedLevel
 		);
 	
 		if (isPaidCombo) {
 			setLanguage(langKey);
 		} else {
-			const currentAttempt = `${langKey} - ${selectedAgeGroup}`;
+			const currentAttempt = `${langKey} - ${selectedLevel}`;
 			const lastPaid = lastPaidCombination
-				? `${lastPaidCombination.language} - ${lastPaidCombination.ageGroup}`
+				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
 				: 'previous paid selection';
 	
 			Alert.alert(
@@ -164,7 +164,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				]
 			);
 		}
-	}, [paidAccess, selectedAgeGroup, lastPaidCombination]);
+	}, [paidAccess, selectedLevel, lastPaidCombination]);
 	
 
 	const renderItem = ({ item, index }) => (
