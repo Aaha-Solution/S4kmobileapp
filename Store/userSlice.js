@@ -17,6 +17,8 @@ const initialState = {
 	selectedLevel: null,
 	email: null,
 	videos: [],
+	paidAccess: [],
+	lastPaidSelection: null,
 };
 
 const userSlice = createSlice({
@@ -89,6 +91,9 @@ const userSlice = createSlice({
 		setAllPaidAccess: (state, action) => {
 			state.paidAccess = action.payload;
 		},
+		setPaidStatus: (state, action) => {
+			state.isPaid = action.payload;
+		},
 		// ✅ NEW: Add paid combination
 		addPaidAccess: (state, action) => {
 			const { language, level } = action.payload;
@@ -98,8 +103,9 @@ const userSlice = createSlice({
 			if (!exists) {
 				state.paidAccess.push({ language, level }); // ✅ store correctly
 			}
+			state.lastPaidSelection = { language, level }; // ✅ Save last paid combo
 		}
-
+		
 	},
 });
 
@@ -114,7 +120,7 @@ export const {
 	setVideos,
 	addVideo,
 	setPaidStatus,
-	addPaidAccess,
+	addPaidAccess, 
 	setAllPaidAccess,
 } = userSlice.actions;
 export default userSlice.reducer;
