@@ -31,11 +31,12 @@ const VideoListScreen = ({ navigation, route }) => {
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+	const users_id = useSelector(state => state.user.user.users_id);
 	const [videos, setVideos] = useState([]);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const { initPaymentSheet, presentPaymentSheet } = useStripe(); 
+	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
 	const isHomeScreen = route.name === 'Home';
 
@@ -202,12 +203,16 @@ const VideoListScreen = ({ navigation, route }) => {
 			const paymentType = `${language}-${getFormattedLevel(selectedAgeGroup, language)}`;
 			console.log("🟠 Payment Type:", paymentType);
 
-			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					type: paymentType, // ✅ FIXED
-					currency: 'gbp'
+					currency: 'gbp',
+					user_id: users_id,    
+					language: language,
+					level: selectedAgeGroup,
+					courseType: paymentType
 				}),
 			});
 
@@ -315,13 +320,14 @@ const VideoListScreen = ({ navigation, route }) => {
 			{!isPaid && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
-						<Text style={styles.blurTitle}>Unlock All Videos</Text>
-						<Text style={styles.blurDescription}>
+						<Text style={styles.blurTitle}>Unlock Videos</Text>
+						<Text style={styles.blurDescription}>   
 							Pay £45 to access fun & engaging kids videos
 						</Text>
 
 						<TouchableOpacity
-							onPress={HandlePay}
+							onPress={()=>dispatch(setPaidStatus(true))}
+							//onPress={HandlePay}
 							style={styles.payNowButton}
 						>
 							<Text style={styles.payNowText}>Pay £45</Text>

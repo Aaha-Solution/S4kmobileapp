@@ -15,8 +15,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPaidStatus } from '../Store/userSlice';
 
 const PaymentScreen = () => {
+	const selectedAgeGroup = useSelector(state => state.user.selectedAgeGroup);
+	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+	const users_id = useSelector(state => state.user.user.users_id);
 	const [selectedItems, setSelectedItems] = useState({});
 	const [loading, setLoading] = useState(false);
+	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
+	
+
+
 
 	const dispatch = useDispatch();
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -39,82 +46,113 @@ const PaymentScreen = () => {
 		return count * 45;
 	};
 
+	const getFormattedLevel = (ageGroup) => {
+	if (!ageGroup) return 'Pre_Junior';
+
+	const lower = ageGroup.toLowerCase();
+
+	if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
+		return 'Junior';
+	} else if (lower.includes('prejunior') || lower.includes('4-6')) {
+		return 'Pre_Junior';
+	}
+
+	return 'Pre_Junior'; // fallback
+};
+
 	const HandlePay = async () => {
-		try {
-			setLoading(true);
+	try {
+		setLoading(true);
 
-			// ✅ Extract one selected item for now (can extend later)
-			let selectedType;
-			for (const lang in selectedItems) {
-				if (selectedItems[lang]?.length > 0) {
-					selectedType = formatCourseType(lang, selectedItems[lang][0]);
-					break;
-				}
+		let selectedLang = null;
+		let selectedAge = null;
+
+		for (const lang in selectedItems) {
+			if (selectedItems[lang]?.length > 0) {
+				selectedLang = lang;
+				selectedAge = selectedItems[lang][0]; // 'PreJunior (4–6 years)' or 'Junior (7 & above years)'
+				break;
 			}
-
-			if (!selectedType) {
-				Alert.alert("Selection Required", "Please select at least one course.");
-				setLoading(false);
-				return;
-			}
-
-			console.log("🟠 Payment Type:", selectedType);
-
-			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					type: selectedType,
-					currency: 'gbp',
-				}),
-			});
-
-			const rawText = await response.text();
-			console.log("🟠 Raw Response Text:", rawText);
-
-			let data;
-			try {
-				data = JSON.parse(rawText);
-			} catch (error) {
-				console.error("❌ Failed to parse JSON:", error);
-				Alert.alert("Server Error", "Invalid response from payment server.");
-				setLoading(false);
-				return;
-			}
-
-			const clientSecret = data.clientSecret;
-			if (!clientSecret) {
-				Alert.alert("Payment Error", data.message || "No client secret received.");
-				setLoading(false);
-				return;
-			}
-
-			const { error: initError } = await initPaymentSheet({
-				paymentIntentClientSecret: clientSecret,
-				merchantDisplayName: 'Smile4Kids',
-			});
-
-			if (initError) {
-				Alert.alert("Payment Error", initError.message);
-				setLoading(false);
-				return;
-			}
-
-			const { error: presentError } = await presentPaymentSheet();
-
-			if (presentError) {
-				Alert.alert("Payment Failed", presentError.message);
-			} else {
-				Alert.alert("Success", "Your payment was successful!");
-				dispatch(setPaidStatus(true));
-			}
-		} catch (err) {
-			console.error("PaymentSheet Error:", err);
-			Alert.alert("Unexpected Error", "Something went wrong during payment.");
-		} finally {
-			setLoading(false);
 		}
-	};
+
+		if (!selectedLang || !selectedAge) {
+			Alert.alert("Selection Required", "Please select at least one course.");
+			setLoading(false);
+			return;
+		}
+
+		const level = getFormattedLevel(selectedAge); // 'Junior' or 'Pre_Junior'
+		const selectedType = `${selectedLang}-${level}`;
+
+		console.log("🟠 Payment Type:", selectedType);
+
+		const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				type: selectedType,
+				currency: 'gbp',
+				user_id: users_id,
+				language: selectedLang,
+				level: level,
+				courseType: selectedType
+			}),
+		});
+
+		console.log("🧾 Sending payment data:", {
+			user_id: users_id,
+			language: selectedLang,
+			level: level,
+			courseType: selectedType
+		});
+
+		const rawText = await response.text();
+		console.log("🟠 Raw Response Text:", rawText);
+
+		let data;
+		try {
+			data = JSON.parse(rawText);
+		} catch (error) {
+			console.error("❌ Failed to parse JSON:", error);
+			Alert.alert("Server Error", "Invalid response from payment server.");
+			setLoading(false);
+			return;
+		}
+
+		const clientSecret = data.clientSecret;
+		if (!clientSecret) {
+			Alert.alert("Payment Error", data.message || "No client secret received.");
+			setLoading(false);
+			return;
+		}
+
+		const { error: initError } = await initPaymentSheet({
+			paymentIntentClientSecret: clientSecret,
+			merchantDisplayName: 'Smile4Kids',
+		});
+
+		if (initError) {
+			Alert.alert("Payment Error", initError.message);
+			setLoading(false);
+			return;
+		}
+
+		const { error: presentError } = await presentPaymentSheet();
+
+		if (presentError) {
+			Alert.alert("Payment Failed", presentError.message);
+		} else {
+			Alert.alert("Success", "Your payment was successful!");
+			dispatch(setPaidStatus(true));
+		}
+	} catch (err) {
+		console.error("PaymentSheet Error:", err);
+		Alert.alert("Unexpected Error", "Something went wrong during payment.");
+	} finally {
+		setLoading(false);
+	}
+};
+
 
 	const handleToggle = (language, ageGroup) => {
 		setSelectedItems(prev => {
