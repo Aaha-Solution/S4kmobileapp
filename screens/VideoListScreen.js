@@ -44,6 +44,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 	const isPaid = useSelector(state => state.user.isPaid);
+    const [lastPaidCombination, setLastPaidCombination] = useState(null);
 
 	const isHomeScreen = route.name === 'Home';
 
@@ -114,7 +115,6 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 		setLoading(true);
 		setVideos([]);
-		const formattedLevel = getFormattedLevel(selectedAgeGroup);
 		const url = `${baseURL}?language=${language}&level=${formattedLevel}`;
 		console.log("url", url);
 
@@ -163,10 +163,36 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleVideoPress = useCallback((videoItem) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
-
 	const handleLanguageSelect = useCallback((langKey) => {
-		setLanguage(langKey);
-	}, []);
+		const isPaidCombo = paidAccess.some(
+			item => item.language === langKey && item.ageGroup === selectedAgeGroup
+		);
+	
+		if (isPaidCombo) {
+			setLanguage(langKey);
+		} else {
+			const currentAttempt = `${langKey} - ${selectedAgeGroup}`;
+			const lastPaid = lastPaidCombination
+				? `${lastPaidCombination.language} - ${lastPaidCombination.ageGroup}`
+				: 'previous paid selection';
+	
+			Alert.alert(
+				"Locked Videos",
+				`Videos for  ${currentAttempt}are currently locked. 🔒\n\nPlease complete the payment to unlock them.\n\nShowing ${lastPaid} instead.`,
+				[
+					{
+						text: "OK",
+						onPress: () => {
+							if (lastPaidCombination) {
+								setLanguage(lastPaidCombination.language);
+							}
+						}
+					}
+				]
+			);
+		}
+	}, [paidAccess, selectedAgeGroup, lastPaidCombination]);
+	
 
 	const renderItem = ({ item, index }) => (
 		<TouchableOpacity
@@ -277,8 +303,8 @@ const VideoListScreen = ({ navigation, route }) => {
 			Alert.alert("Success", "Your payment was successful!");
 			dispatch(setPaidStatus(true)); // ✅ Sets global paid flag
 			dispatch(addPaidAccess({ language, ageGroup: selectedAgeGroup })); // ✅ Sets combination-specific flag
+			setLastPaidCombination({ language, ageGroup: selectedAgeGroup });
 		}
-
 	};
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>

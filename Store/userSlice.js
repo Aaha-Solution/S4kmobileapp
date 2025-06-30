@@ -17,6 +17,8 @@ const initialState = {
 	selectedAgeGroup: null,
 	email: null,
 	videos: [],
+	paidAccess: [],
+	lastPaidSelection: null,
 };
 
 const userSlice = createSlice({
@@ -95,7 +97,8 @@ const userSlice = createSlice({
 			if (!exists) {
 				state.paidAccess.push({ language, ageGroup });
 			}
-		},
+			state.lastPaidSelection = { language, ageGroup }; // ✅ Save last paid combo
+		},		
 	},
 });
 
@@ -110,6 +113,7 @@ export const {
 	setVideos,
 	addVideo,
 	setPaidStatus,
-	addPaidAccess, // ✅ export this
+	addPaidAccess, 
+	setLastPaidSelection
 } = userSlice.actions;
 export default userSlice.reducer;
