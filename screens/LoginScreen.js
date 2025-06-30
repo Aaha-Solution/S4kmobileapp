@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
-import { login, setProfile, setLanguage, setAgeGroup } from '../Store/userSlice';
+import { login, setProfile, setLanguage, setAgeGroup, setPaidStatus } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
@@ -88,7 +88,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kidsbackend-production.up.railway.app/login', {
+            const response = await fetch('https://smile4kids-backend.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email_id: email, password }),
@@ -119,14 +119,40 @@ const LoginScreen = ({ navigation }) => {
             dispatch(login(data.user));
             dispatch(setLanguage(data.user.language));
             dispatch(setAgeGroup(data.user.age));
-            dispatch(setProfile({
-                selectedLanguage: data.user.language,
-                selectedAgeGroup: data.user.age,
-            }));
-            navigation.reset({
-                index: 0,
-                routes: [{ name: data.user.language && data.user.age ? 'MainTabs' : 'LanguageSelectionScreen' }],
-            });
+            const { paid_categories } = data.user;
+
+            const hasValidPaidCategory = Array.isArray(paid_categories) &&
+                paid_categories.some(item => item.language && item.level);
+
+            // ✅ Fix: Pass object to setProfile
+            dispatch(setProfile({ paid_categories }));
+
+            if (hasValidPaidCategory) {
+                dispatch(setPaidStatus(true));
+                console.log("isPaid dispatched");
+
+                navigation.reset({
+                    index: 0,
+                    routes: [
+                        {
+                            name: 'MainTabs',
+                            state: {
+                                index: 0,
+                                routes: [{ name: 'Home' }],
+                            },
+                        },
+                    ],
+                });
+            } else {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'LanguageSelectionScreen' }],
+                });
+            }
+
+
+
+
         } catch (error) {
             Alert.alert('Error', 'Login Credentials not found! Try again.');
         } finally {
@@ -312,7 +338,7 @@ const styles = StyleSheet.create({
     },
     signUpText: {
         color: '#fff',
-        fontSize: RFValue(16),
+        fontSize: RFValue(13),
         textAlign: 'center',
     },
     signUpLink: {
