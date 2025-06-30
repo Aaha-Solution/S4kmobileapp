@@ -155,7 +155,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const getFormattedLevel = (level, lang) => {
 		if (!level) return 'Pre_Junior';
 
-		const lower = ageGroup.toLowerCase();
+		const lower = level.toLowerCase();
 
 		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
 			return 'Junior';
@@ -168,8 +168,8 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const HandlePay = async () => {
 		try {
-			const cleanLevel = selectedLevel?.split(' ')[0]; // Removes everything after space
-			const paymentType = `${language}-${selectedLevel}`;
+			const cleanLevel = getFormattedLevel(selectedLevel); // Removes everything after space
+			const paymentType = `${language}-${cleanLevel}`;
 			console.log("🟠 Payment Type:", paymentType);
 
 			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
