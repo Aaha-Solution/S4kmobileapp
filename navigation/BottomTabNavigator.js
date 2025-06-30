@@ -23,12 +23,16 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 		{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 	]);
 
+	useEffect(()=>{
+		console.log("age",selectedLevel)
+	},[selectedLevel])
+
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
 	// Update dropdown value when redux changes
 	useEffect(() => {
 		if (selectedLevel ) {
-			setValue(selectedLevel );
+			setValue(selectedLevel );		
 		}
 	}, [selectedLevel ]);
 
@@ -58,7 +62,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const handleOutsidePress = () => {
 		if (open) {
 			setOpen(false);
-			if (currentRouteRef.current === 'Age') {
+			if (currentRouteRef.current === 'level') {
 				navigation.navigate('Home');
 			}
 		}
@@ -78,7 +82,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 		handleOutsidePress();
 
-		if (route.name === 'Age') {
+		if (route.name === 'level') {
 			setOpen(prev => !prev);
 			// ✅ Don't navigate manually here
 		} else {
@@ -94,7 +98,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 				return true;
 			}
 
-			if (currentRouteRef.current === 'Age') {
+			if (currentRouteRef.current === 'level') {
 				navigation.navigate('Home');
 				return true;
 			}
@@ -115,12 +119,12 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 					const label = options.tabBarLabel ?? options.title ?? route.name;
 					// 👇 Only "Age" is focused when dropdown is open
 					const isFocused = open
-						? route.name === 'Age'
+						? route.name === 'level'
 						: state.index === index;
 
 					const iconName = getIconName(route.name, isFocused);
 
-					if (route.name === 'Age') {
+					if (route.name === 'level') {
 						return (
 							<View key={route.key} style={styles.ageTabContainer}>
 								<TouchableOpacity
@@ -200,7 +204,7 @@ const getIconName = (routeName, focused) => {
 			return focused ? 'settings' : 'settings-outline';
 		case 'Payment':
 			return focused ? 'wallet' : 'wallet-outline';
-		case 'Age':
+		case 'level':
 			return focused ? 'people' : 'people-outline';
 		default:
 			return 'ellipse';
@@ -271,7 +275,7 @@ const BottomTabNavigator = () => {
 				}}
 			/>
 			<Tab.Screen
-				name="Age"
+				name="level"
 				component={VideoListScreen}
 				options={{
 					title: 'Age',

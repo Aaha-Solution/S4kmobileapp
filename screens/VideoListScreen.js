@@ -181,7 +181,8 @@ const VideoListScreen = ({ navigation, route }) => {
 					user_id: users_id,
 					language,
 					level: cleanLevel,
-					courseType: paymentType
+					courseType: paymentType,
+					 
 				}),
 			});
 
