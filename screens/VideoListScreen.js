@@ -47,9 +47,29 @@ const VideoListScreen = ({ navigation, route }) => {
 	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
-	const isCurrentCombinationPaid = paidAccess.some(
-		item => item.language === language && item.level === selectedLevel
+	const backendLevel = getBackendLevel(selectedLevel);
+	const normalize = (str) => str?.toLowerCase().replace(/[_–—\s]/g, '');
+
+	const isCurrentCombinationPaid = paidAccess.some((item) => {
+		const match =
+			normalize(item.language) === normalize(selectedLanguage) &&
+			normalize(item.level) === normalize(selectedLevel);
+
+		console.log("🔍 Checking combo:", item, "Match:", match);
+		return match;
+	});
+
+	const isUnlocked = paidAccess.some(
+		item => item.language === selectedLanguage && item.level === selectedLevel
 	);
+
+	useEffect(() => {
+		if (isUnlocked) {
+			fetchVideos();
+		} else {
+			setVideos([]); // ensure blank list if no access
+		}
+	}, [selectedLanguage, selectedLevel, paidAccess]);
 
 
 	useEffect(() => {
@@ -93,7 +113,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 		setLoading(true);
 		setVideos([]);
-		const url = `${baseURL}?language=${language}&level=${selectedLevel}`;
+		const url = `${baseURL}?language=${language}&level=${backendLevel}`;
 		console.log("url", url);
 
 		try {
@@ -138,15 +158,16 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleVideoPress = useCallback((videoItem) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
+
 	const handleLanguageSelect = useCallback((langKey) => {
 		const isPaidCombo = paidAccess.some(
-			item => item.language === langKey && item.level === selectedLevel
+			item => item.language === langKey && item.level === backendLevel
 		);
 
 		if (isPaidCombo) {
 			setLanguage(langKey);
 		} else {
-			const currentAttempt = `${langKey} - ${selectedLevel}`;
+			const currentAttempt = `${langKey} - ${backendLevel}`;
 			const lastPaid = lastPaidCombination
 				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
 				: 'previous paid selection';
@@ -232,8 +253,9 @@ const VideoListScreen = ({ navigation, route }) => {
 	const HandlePay = async () => {
 		try {
 			const token = await AsyncStorage.getItem('token'); // ✅
-			const cleanLevel = getBackendLevel(selectedLevel) // Removes everything after space
-			const paymentType = `${language}-${selectedLevel}`;
+			const cleanLevel = getBackendLevel(selectedLevel); // returns "Pre_Junior"
+			const paymentType = `${language}-${cleanLevel}`;   // returns "Gujarati-Pre_Junior"
+
 			console.log("🟠 Payment Type:", paymentType);
 			const selections = [{
 				language: language,
@@ -291,7 +313,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			} else {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
-				dispatch(addPaidAccess({ language, level: selectedLevel }));
+				dispatch(addPaidAccess({ language, level: cleanLevel }));
 
 
 			}
@@ -328,25 +350,35 @@ const VideoListScreen = ({ navigation, route }) => {
 				</View>
 			)}
 
-			<FlatList
-				data={videos}
-				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
-				contentContainerStyle={styles.listContainer}
-				renderItem={renderItem}
-				ListEmptyComponent={() => (
-					<View style={styles.emptyContainer}>
-						<Text style={styles.emptyText}>
-							{loading
-								? 'Loading videos...'
-								: selectedLevel
-									? 'No videos available for this selection'
-									: 'Please select an age group'}
-						</Text>
-					</View>
-				)}
-				extraData={[selectedLevel, language, loading]}
-			/>
-
+			{!isUnlocked ? (
+				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+					<Text style={{ fontSize: 18, color: 'gray', marginBottom: 16, textAlign: 'center' }}>
+						Videos for {selectedLanguage} - {getDisplayLevel(selectedLevel)} are locked.
+					</Text>
+					<TouchableOpacity onPress={HandlePay} style={styles.payNowButton}>
+						<Text style={styles.payNowText}>Unlock for £45</Text>
+					</TouchableOpacity>
+				</View>
+			) : (
+				<FlatList
+					data={videos}
+					keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
+					contentContainerStyle={styles.listContainer}
+					renderItem={renderItem}
+					ListEmptyComponent={() => (
+						<View style={styles.emptyContainer}>
+							<Text style={styles.emptyText}>
+								{loading
+									? 'Loading videos...'
+									: selectedLevel
+										? 'No videos available for this selection'
+										: 'Please select an age group'}
+							</Text>
+						</View>
+					)}
+					extraData={[selectedLevel, language, loading]}
+				/>
+			)}
 			<CustomAlert
 				visible={showAlert}
 				title="Exit App"

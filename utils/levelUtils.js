@@ -14,8 +14,14 @@ export const displayLevelMap = {
 
 // Converts display level to backend level (e.g., for payment API, Redux)
 export const getBackendLevel = (displayLevel) => {
-  return levelMap[displayLevel] || displayLevel;
+  if (!displayLevel) return 'Pre_Junior';
+
+  // Normalize all dash-like characters to regular hyphen (-)
+  const normalized = displayLevel.replace(/[–—]/g, '-');
+
+  return levelMap[normalized] || levelMap[displayLevel] || displayLevel;
 };
+
 
 // Converts backend level to display level (e.g., for UI labels)
 export const getDisplayLevel = (backendLevel) => {

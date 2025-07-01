@@ -43,10 +43,6 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	useFocusEffect(() => {
 		currentRouteRef.current = state.routes[state.index].name;
 	});
-	const paidData = [
-		{ language: 'Hindi', level: 'Pre_Junior' },
-		{ language: 'Gujarati', level: 'Junior' },
-	];
 	// Handle dropdown age group selection
 	const handleAgeSelect = (selectedValue) => {
 		if (!selectedValue) return;
@@ -55,7 +51,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 			const backendLevel = getBackendLevel(selectedValue); // convert for Redux + backend
 			dispatch(setLevel(backendLevel)); // ✅ Store backend value
 			setValue(selectedValue);
-			dispatch(setAllPaidAccess(paidData))                  // dropdown shows UI label
+			                 // dropdown shows UI label
 			setOpen(false);
 
 			setTimeout(() => {
