@@ -13,7 +13,7 @@ import {  setLevel } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
-
+import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 const ageGroups = [
 	{ id: '1', name: 'PreJunior (4–6 years)' },
 	{ id: '2', name: 'Junior (7 & above years)' },
@@ -50,6 +50,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 	const handleAgeSelect = (group) => {
 		animateSelection(group.id);
 		dispatch( setLevel(group.name));
+		console.log("age",group.name)
 	};
 
 	const handleNext = () => {

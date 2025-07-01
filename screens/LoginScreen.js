@@ -112,7 +112,7 @@ const LoginScreen = ({ navigation }) => {
 
             const firstPaid = data.user.paid_categories?.[0];
             const userLang = firstPaid?.language || 'English';
-            const userLevel = getBackendLevel(firstPaid?.level || 'PreJunior (4-6 years)');
+            const userLevel = getBackendLevel(firstPaid?.level );
 
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);

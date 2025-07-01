@@ -23,7 +23,7 @@ const PaymentScreen = () => {
 	const [selectedItems, setSelectedItems] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
-
+	const [totalAmount, setTotalAmount] = useState(45);
 	const paidAccess = useSelector(state => state.user.paidAccess || []);
 	const paidSet = new Set(
 		paidAccess.map(({ language, level }) => `${language}-${level}`)
@@ -39,22 +39,66 @@ const PaymentScreen = () => {
 
 
 	// 🧮 Total cost in £
-	const calculateTotal = () => {
-		let count = 0;
+	const calculateTotalFromBackend = async () => {
+		const token = await AsyncStorage.getItem('token');
+
+		const selections = [];
 
 		for (const lang in selectedItems) {
 			const levels = selectedItems[lang] || [];
 			for (const level of levels) {
-				const backendLevel = getFormattedLevel(level);
+				const backendLevel = getFormattedLevel(level); // e.g. 'Junior'
 				const key = `${lang}-${backendLevel}`;
 				if (!paidSet.has(key)) {
-					count += 1;
+					selections.push({ language: lang, level: backendLevel });
+
 				}
 			}
 		}
 
-		return count * 45;
+		if (selections.length === 0) {
+			setTotalAmount(0);
+			return;
+		}
+
+		try {
+			const response = await fetch('https://smile4kids-backend.onrender.com/payment/calculate-amount', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ selections }), // 👈 send array of {language, level}
+			});
+
+			// const data = await response.json();
+			// console.log("data", data)
+			// console.log("selections", selections.length)
+
+			// Calculation total amount For UI 
+			const Amount = 45
+			console.log("Amount", Amount);
+			const res = Amount * selections.length;
+			setTotalAmount(res)
+			console.log("res", res)
+
+			
+			// if (response.ok && typeof data.amount === 'number') {
+			// 	setTotalAmount(data.amount); // 👈 Set total from backend
+			// } else {
+			// 	console.warn("❌ Unexpected response:", data);
+			// 	setTotalAmount(0);
+			// }
+		} catch (err) {
+			console.error("❌ Failed to calculate total from backend:", err);
+			setTotalAmount(0);
+		}
 	};
+
+	useEffect(() => {
+		calculateTotalFromBackend();
+	}, [selectedItems]);
+
 
 	const fetchPaidCourses = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -266,12 +310,12 @@ const PaymentScreen = () => {
 
 				<View style={styles.totalContainer}>
 					<Text style={styles.totalLabel}>Total</Text>
-					<Text style={styles.totalValue}>£{calculateTotal()}</Text>
+					<Text style={styles.totalValue}>£{totalAmount}</Text>
 				</View>
 
 				<PressableButton
 					title={loading ? "Processing..." : "Pay Now"}
-					disabled={loading || calculateTotal() === 0}
+					disabled={loading || totalAmount === 0}
 					onPress={HandlePay}
 					style={styles.payButton}
 				/>

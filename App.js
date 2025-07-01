@@ -20,7 +20,6 @@ import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SignupScreen from './screens/SignUpScreen.js';
-import PaymentSuccessScreen from './screens/PaymentSuccessScreen.js';
 import Toast from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
@@ -35,7 +34,6 @@ const App = () => (
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-            <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />
             <Stack.Screen
               name="LanguageSelectionScreen"
               component={LanguageSelectionScreen}

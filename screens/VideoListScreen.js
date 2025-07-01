@@ -49,11 +49,11 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const backendLevel = getBackendLevel(selectedLevel);
 	const normalize = (str) => str?.toLowerCase().replace(/[_–—\s]/g, '');
-
+	const currentLevel = getBackendLevel(selectedLevel);
 	const isCurrentCombinationPaid = paidAccess.some((item) => {
 		const match =
 			normalize(item.language) === normalize(selectedLanguage) &&
-			normalize(item.level) === normalize(selectedLevel);
+			normalize(item.level) === normalize(currentLevel);
 
 		console.log("🔍 Checking combo:", item, "Match:", match);
 		return match;
@@ -343,23 +343,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			<View style={styles.languageHeader}>
 				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
-
-			{loading && (
-				<View style={styles.loadingContainer}>
-					<Text style={styles.loadingText}>Loading videos...</Text>
-				</View>
-			)}
-
-			{!isUnlocked ? (
-				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-					<Text style={{ fontSize: 18, color: 'gray', marginBottom: 16, textAlign: 'center' }}>
-						Videos for {selectedLanguage} - {getDisplayLevel(selectedLevel)} are locked.
-					</Text>
-					<TouchableOpacity onPress={HandlePay} style={styles.payNowButton}>
-						<Text style={styles.payNowText}>Unlock for £45</Text>
-					</TouchableOpacity>
-				</View>
-			) : (
+			
 				<FlatList
 					data={videos}
 					keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
@@ -378,7 +362,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					)}
 					extraData={[selectedLevel, language, loading]}
 				/>
-			)}
+		
 			<CustomAlert
 				visible={showAlert}
 				title="Exit App"
