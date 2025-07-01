@@ -91,9 +91,6 @@ const userSlice = createSlice({
 		setAllPaidAccess: (state, action) => {
 			state.paidAccess = action.payload;
 		},
-		setPaidStatus: (state, action) => {
-			state.isPaid = action.payload;
-		},
 		// ✅ NEW: Add paid combination
 		addPaidAccess: (state, action) => {
 			const { language, level } = action.payload;

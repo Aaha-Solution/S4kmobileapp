@@ -68,13 +68,6 @@ const LoginScreen = ({ navigation }) => {
         };
     }, [navigation]);
 
-    const getLevelFromAge = (age) => {
-        if (age <= 5) return 'Pre_Junior';
-        if (age <= 8) return 'Junior';
-        return 'Senior';
-    };
-
-
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     const handleLogin = async () => {
@@ -99,9 +92,13 @@ const LoginScreen = ({ navigation }) => {
         try {
             const response = await fetch('https://smile4kids-backend.onrender.com/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                
+                },
                 body: JSON.stringify({ email_id: email, password }),
             });
+            console.log("response",response)
 
             const data = await response.json();
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
@@ -149,7 +146,7 @@ const LoginScreen = ({ navigation }) => {
             // ✅ Format and save all paid combos into Redux
             if (Array.isArray(paid_categories)) {
                 const formatted = paid_categories.map(item => ({
-                   language: item.language,
+                    language: item.language,
                     level: getBackendLevel(item.level),
                 }));
                 dispatch({ type: 'user/setAllPaidAccess', payload: formatted });

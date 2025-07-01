@@ -41,7 +41,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
-    const [lastPaidCombination, setLastPaidCombination] = useState(null);
+	const [lastPaidCombination, setLastPaidCombination] = useState(null);
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
@@ -51,13 +51,6 @@ const VideoListScreen = ({ navigation, route }) => {
 		item => item.language === language && item.level === selectedLevel
 	);
 
-	const getPrettyLabel = (level) => {
-	if (!level) return 'PreJunior (4-6 years)';
-	const lower = level.toLowerCase();
-	if (lower.includes('junior') && lower.includes('7')) return 'Junior (7 & above years)';
-	if (lower.includes('pre') || lower.includes('4')) return 'PreJunior (4-6 years)';
-	return level;
-};
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
@@ -149,7 +142,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		const isPaidCombo = paidAccess.some(
 			item => item.language === langKey && item.level === selectedLevel
 		);
-	
+
 		if (isPaidCombo) {
 			setLanguage(langKey);
 		} else {
@@ -157,7 +150,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			const lastPaid = lastPaidCombination
 				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
 				: 'previous paid selection';
-	
+
 			Alert.alert(
 				"Locked Videos",
 				`Videos for  ${currentAttempt}are currently locked. 🔒\n\nPlease complete the payment to unlock them.\n\nShowing ${lastPaid} instead.`,
@@ -174,7 +167,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			);
 		}
 	}, [paidAccess, selectedLevel, lastPaidCombination]);
-	
+
 
 	const renderItem = ({ item, index }) => (
 		<TouchableOpacity
@@ -221,7 +214,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		})();
 	}, []);
 
-	
+
 	const getFormattedLevel = (level, lang) => {
 		if (!level) return 'Pre_Junior';
 
@@ -234,17 +227,25 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 		return 'Pre_Junior';  // fallback
 	};
-	
+
 
 	const HandlePay = async () => {
 		try {
+			const token = await AsyncStorage.getItem('token'); // ✅
 			const cleanLevel = getBackendLevel(selectedLevel) // Removes everything after space
 			const paymentType = `${language}-${selectedLevel}`;
 			console.log("🟠 Payment Type:", paymentType);
+			const selections = [{
+				language: language,
+				level: cleanLevel
+			}];
 
 			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
 				body: JSON.stringify({
 					type: paymentType,
 					currency: 'gbp',
@@ -252,7 +253,8 @@ const VideoListScreen = ({ navigation, route }) => {
 					language,
 					level: cleanLevel,
 					courseType: paymentType,
-					 
+					selections: selections,
+
 				}),
 			});
 

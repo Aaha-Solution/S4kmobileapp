@@ -7,7 +7,7 @@ import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import {  setLevel } from '../Store/userSlice';
+import { setAllPaidAccess, setLevel } from '../Store/userSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRef } from 'react';
 import Toast from 'react-native-toast-message';
@@ -18,49 +18,53 @@ const Tab = createBottomTabNavigator();
 const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
-	const selectedLevel = useSelector(state => state.user.selectedLevel );
+	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(selectedLevel );
+	const [value, setValue] = useState(selectedLevel);
 	const [items, setItems] = useState([
 		{ label: 'PreJunior (4-6 years)', value: 'PreJunior (4-6 years)' },
 		{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 	]);
 
-	useEffect(()=>{
-		console.log("age",selectedLevel)
-	},[selectedLevel])
+	useEffect(() => {
+		console.log("age", selectedLevel)
+	}, [selectedLevel])
 
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
 	// Update dropdown value when redux changes
 	useEffect(() => {
-		if (selectedLevel ) {
-			setValue(getDisplayLevel(selectedLevel));		
+		if (selectedLevel) {
+			setValue(getDisplayLevel(selectedLevel));
 		}
-	}, [selectedLevel ]);
+	}, [selectedLevel]);
 
 	// Update route ref on focus change
 	useFocusEffect(() => {
 		currentRouteRef.current = state.routes[state.index].name;
 	});
-
+	const paidData = [
+		{ language: 'Hindi', level: 'Pre_Junior' },
+		{ language: 'Gujarati', level: 'Junior' },
+	];
 	// Handle dropdown age group selection
 	const handleAgeSelect = (selectedValue) => {
-  if (!selectedValue) return;
+		if (!selectedValue) return;
 
-  try {
-    const backendLevel = getBackendLevel(selectedValue); // convert for Redux + backend
-    dispatch(setLevel(backendLevel));                    // ✅ Store backend value
-    setValue(selectedValue);                             // dropdown shows UI label
-    setOpen(false);
+		try {
+			const backendLevel = getBackendLevel(selectedValue); // convert for Redux + backend
+			dispatch(setLevel(backendLevel)); // ✅ Store backend value
+			setValue(selectedValue);
+			dispatch(setAllPaidAccess(paidData))                  // dropdown shows UI label
+			setOpen(false);
 
-    setTimeout(() => {
-      navigation.navigate('Home');
-    }, 100);
-  } catch (error) {
-    console.error('Error in handleAgeSelect:', error);
-  }
-};
+			setTimeout(() => {
+				navigation.navigate('Home');
+			}, 100);
+		} catch (error) {
+			console.error('Error in handleAgeSelect:', error);
+		}
+	};
 
 	// Close dropdown and optionally navigate to Home
 	const handleOutsidePress = () => {
