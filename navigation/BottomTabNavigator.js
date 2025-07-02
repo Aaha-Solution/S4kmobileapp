@@ -215,7 +215,7 @@ const BottomTabNavigator = () => {
 			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Setting' }} />
 			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
 			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
-			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} />
+			{/* <Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} /> */}
 		</Tab.Navigator>
 	);
 };
