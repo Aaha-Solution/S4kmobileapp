@@ -43,21 +43,18 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const [lastPaidCombination, setLastPaidCombination] = useState(null);
 
+	const backendLevel = getBackendLevel(selectedLevel);
+
+	const isCurrentCombinationPaid = paidAccess.some(
+		item => item.language === language && item.level === backendLevel
+	);
+	console.log("🧪 selectedLevel (UI):", selectedLevel);
+	console.log("🧪 backendLevel:", backendLevel);
+	console.log("🧪 isCurrentCombinationPaid:", isCurrentCombinationPaid);
+
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
-
-	const backendLevel = getBackendLevel(selectedLevel);
-	const normalize = (str) => str?.toLowerCase().replace(/[_–—\s]/g, '');
-	const currentLevel = getBackendLevel(selectedLevel);
-	const isCurrentCombinationPaid = paidAccess.some((item) => {
-		const match =
-			normalize(item.language) === normalize(selectedLanguage) &&
-			normalize(item.level) === normalize(currentLevel);
-
-		console.log("🔍 Checking combo:", item, "Match:", match);
-		return match;
-	});
 
 	const isUnlocked = paidAccess.some(
 		item => item.language === selectedLanguage && item.level === selectedLevel
@@ -81,17 +78,9 @@ const VideoListScreen = ({ navigation, route }) => {
 		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
 	}, [paidAccess, language, selectedLevel, isPaid]);
 
-	useEffect(() => {
-		if (!isHomeScreen) return;
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-			setShowAlert(true);
-			return true;
-		});
-		return () => backHandler.remove();
-	}, [isHomeScreen]);
-
 	useFocusEffect(
 		useCallback(() => {
+			if (!isHomeScreen) return;
 			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 				setShowAlert(true);
 				return true;
@@ -232,23 +221,9 @@ const VideoListScreen = ({ navigation, route }) => {
 			} else {
 				await AsyncStorage.setItem('hasVisitedVideoScreen', 'true');
 			}
+			setInitialVisitCompleted(true);
 		})();
 	}, []);
-
-
-	const getFormattedLevel = (level, lang) => {
-		if (!level) return 'Pre_Junior';
-
-		const lower = level.toLowerCase();
-
-		if (lower.includes('junior') && (lower.includes('7') || lower.includes('above'))) {
-			return 'Junior';
-		} else if (lower.includes('prejunior') || lower.includes('4-6')) {
-			return 'Pre_Junior';  // ✅ Capital J for all, matches backend
-		}
-		return 'Pre_Junior';  // fallback
-	};
-
 
 	const HandlePay = async () => {
 		try {
@@ -279,10 +254,8 @@ const VideoListScreen = ({ navigation, route }) => {
 
 				}),
 			});
-
 			const rawText = await response.text();
 			console.log("🟠 Raw Response Text:", rawText);
-
 			let data;
 			try {
 				data = JSON.parse(rawText);
@@ -314,8 +287,6 @@ const VideoListScreen = ({ navigation, route }) => {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
 				dispatch(addPaidAccess({ language, level: cleanLevel }));
-
-
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);
@@ -343,26 +314,26 @@ const VideoListScreen = ({ navigation, route }) => {
 			<View style={styles.languageHeader}>
 				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
-			
-				<FlatList
-					data={videos}
-					keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
-					contentContainerStyle={styles.listContainer}
-					renderItem={renderItem}
-					ListEmptyComponent={() => (
-						<View style={styles.emptyContainer}>
-							<Text style={styles.emptyText}>
-								{loading
-									? 'Loading videos...'
-									: selectedLevel
-										? 'No videos available for this selection'
-										: 'Please select an age group'}
-							</Text>
-						</View>
-					)}
-					extraData={[selectedLevel, language, loading]}
-				/>
-		
+
+			<FlatList
+				data={videos}
+				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
+				contentContainerStyle={styles.listContainer}
+				renderItem={renderItem}
+				ListEmptyComponent={() => (
+					<View style={styles.emptyContainer}>
+						<Text style={styles.emptyText}>
+							{loading
+								? 'Loading videos...'
+								: selectedLevel
+									? 'No videos available for this selection'
+									: 'Please select an age group'}
+						</Text>
+					</View>
+				)}
+				extraData={[selectedLevel, language, loading]}
+			/>
+
 			<CustomAlert
 				visible={showAlert}
 				title="Exit App"

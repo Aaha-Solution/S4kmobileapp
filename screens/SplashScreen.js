@@ -13,7 +13,7 @@ const SplashScreen = ({ navigation }) => {
       try {
         const token = await AsyncStorage.getItem('token');
         const userData = await AsyncStorage.getItem('user');
-
+        console.log("userdata",userData)
         if (token && userData) {
           dispatch(login(JSON.parse(userData))); // Restore to Redux
           navigation.replace('MainTabs'); // Navigate to Home
