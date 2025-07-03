@@ -17,7 +17,7 @@ import { setPaidStatus } from '../Store/userSlice';
 import { setAllPaidAccess } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
-const PaymentScreen = () => {
+const PaymentScreen = ({navigation}) => {
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
@@ -241,6 +241,10 @@ const PaymentScreen = () => {
 
 				// ✅ Refresh paid course access
 				await fetchPaidCourses();
+				//navigate to home
+				navigation.navigate('MainTabs', {
+				screen: 'Home',
+			});
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);

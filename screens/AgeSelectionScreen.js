@@ -8,6 +8,7 @@ import {
 	FlatList,
 	Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLevel } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
@@ -23,7 +24,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
-
+	const navigation = useNavigation();
 	const [animations, setAnimations] = useState(
 		ageGroups.reduce((acc, group) => {
 			acc[group.id] = new Animated.Value(1);
