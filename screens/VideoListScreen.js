@@ -41,33 +41,26 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
-	const [lastPaidCombination, setLastPaidCombination] = useState(null);
-
 	const backendLevel = getBackendLevel(selectedLevel);
 
+	// Fixed: Check if current combination is paid using the current state values
 	const isCurrentCombinationPaid = paidAccess.some(
 		item => item.language === language && item.level === backendLevel
 	);
+
 	console.log("🧪 selectedLevel (UI):", selectedLevel);
 	console.log("🧪 backendLevel:", backendLevel);
+	console.log("🧪 language:", language);
 	console.log("🧪 isCurrentCombinationPaid:", isCurrentCombinationPaid);
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
-	const isUnlocked = paidAccess.some(
-		item => item.language === selectedLanguage && item.level === selectedLevel
-	);
-
+	// Fixed: Always fetch videos when component mounts or dependencies change
 	useEffect(() => {
-		if (isUnlocked) {
-			fetchVideos();
-		} else {
-			setVideos([]); // ensure blank list if no access
-		}
-	}, [selectedLanguage, selectedLevel, paidAccess]);
-
+		fetchVideos();
+	}, [language, selectedLevel, paidAccess]);
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
@@ -125,11 +118,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [language, selectedLevel]);
-
-	useEffect(() => {
-		fetchVideos();
-	}, [selectedLevel, language]);
+	}, [language, selectedLevel, backendLevel]);
 
 	useEffect(() => {
 		if (selectedLanguage) {
@@ -148,41 +137,33 @@ const VideoListScreen = ({ navigation, route }) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
 
+	// Fixed: Simplified language selection - just change the language
 	const handleLanguageSelect = useCallback((langKey) => {
-		const isPaidCombo = paidAccess.some(
-			item => item.language === langKey && item.level === backendLevel
-		);
-
-		if (isPaidCombo) {
-			setLanguage(langKey);
-		} else {
-			const currentAttempt = `${langKey} - ${backendLevel}`;
-			const lastPaid = lastPaidCombination
-				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
-				: 'previous paid selection';
-
-			Alert.alert(
-				"Locked Videos",
-				`Videos for  ${currentAttempt}are currently locked. 🔒\n\nPlease complete the payment to unlock them.\n\nShowing ${lastPaid} instead.`,
-				[
-					{
-						text: "OK",
-						onPress: () => {
-							if (lastPaidCombination) {
-								setLanguage(lastPaidCombination.language);
-							}
-						}
-					}
-				]
-			);
-		}
-	}, [paidAccess, selectedLevel, lastPaidCombination]);
-
+		setLanguage(langKey);
+	}, []);
 
 	const renderItem = ({ item, index }) => (
 		<TouchableOpacity
-			style={styles.kidCard}
-			onPress={() => handleVideoPress(item)}
+			style={[
+				styles.kidCard,
+				!isCurrentCombinationPaid && styles.kidCardLocked
+			]}
+			onPress={() => {
+				if (isCurrentCombinationPaid) {
+					handleVideoPress(item);
+				} else {
+					// Show payment popup when clicking locked video
+					// You can add payment logic here or show a message
+					Alert.alert(
+						"Locked Content",
+						`Pay £45 to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
+						[
+							{ text: "Cancel", style: "cancel" },
+							{ text: "Pay Now", onPress: HandlePay }
+						]
+					);
+				}
+			}}
 			activeOpacity={0.9}
 		>
 			<Image
@@ -196,20 +177,32 @@ const VideoListScreen = ({ navigation, route }) => {
 					height: imageWidth * 0.7,
 					borderRadius: 12,
 					backgroundColor: '#E6E6FA',
+					opacity: isCurrentCombinationPaid ? 1 : 0.5,
 				}}
 				resizeMode="contain"
 			/>
 			<View style={styles.kidTextContainer}>
-				<Text style={styles.kidTitle} numberOfLines={2}>
+				<Text style={[
+					styles.kidTitle,
+					!isCurrentCombinationPaid && styles.kidTitleLocked
+				]} numberOfLines={2}>
 					{item.title || `Video ${index + 1}`}
 				</Text>
-				<Text style={styles.kidSubText}>
+				<Text style={[
+					styles.kidSubText,
+					!isCurrentCombinationPaid && styles.kidSubTextLocked
+				]}>
 					{item.duration ? `${item.duration} min` : ''}
 				</Text>
 			</View>
-			<Icon name="chevron-forward" size={24} color="#fff" />
+			{isCurrentCombinationPaid ? (
+				<Icon name="chevron-forward" size={24} color="#fff" />
+			) : (
+				<Icon name="lock-closed" size={24} color="#ccc" />
+			)}
 		</TouchableOpacity>
 	);
+
 	const screenWidth = Dimensions.get('window').width;
 	const imageWidth = screenWidth * 0.25;
 
@@ -227,9 +220,9 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const HandlePay = async () => {
 		try {
-			const token = await AsyncStorage.getItem('token'); // ✅
-			const cleanLevel = getBackendLevel(selectedLevel); // returns "Pre_Junior"
-			const paymentType = `${language}-${cleanLevel}`;   // returns "Gujarati-Pre_Junior"
+			const token = await AsyncStorage.getItem('token');
+			const cleanLevel = getBackendLevel(selectedLevel);
+			const paymentType = `${language}-${cleanLevel}`;
 
 			console.log("🟠 Payment Type:", paymentType);
 			const selections = [{
@@ -251,9 +244,9 @@ const VideoListScreen = ({ navigation, route }) => {
 					level: cleanLevel,
 					courseType: paymentType,
 					selections: selections,
-
 				}),
 			});
+			
 			const rawText = await response.text();
 			console.log("🟠 Raw Response Text:", rawText);
 			let data;
@@ -287,12 +280,14 @@ const VideoListScreen = ({ navigation, route }) => {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
 				dispatch(addPaidAccess({ language, level: cleanLevel }));
+				await fetchVideos();
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);
 			Alert.alert("Unexpected Error", "Something went wrong during payment.");
 		}
 	};
+
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<View style={styles.languageRow}>
@@ -305,16 +300,18 @@ const VideoListScreen = ({ navigation, route }) => {
 						]}
 						onPress={() => handleLanguageSelect(langKey)}
 					>
-						<Text style={styles.languageButtonText}>{languageLabels[langKey]}</Text>
+						<Text style={styles.languageButtonText}>
+							{languageLabels[langKey]}
+						</Text>
 					</TouchableOpacity>
 				))}
 			</View>
-			{/*Selected Age Header*/}
 
 			<View style={styles.languageHeader}>
 				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
 
+			{/* Always show videos, but with lock icons if not paid */}
 			<FlatList
 				data={videos}
 				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
@@ -325,13 +322,12 @@ const VideoListScreen = ({ navigation, route }) => {
 						<Text style={styles.emptyText}>
 							{loading
 								? 'Loading videos...'
-								: selectedLevel
-									? 'No videos available for this selection'
-									: 'Please select an age group'}
+								: 'No videos available for this selection'
+							}
 						</Text>
 					</View>
 				)}
-				extraData={[selectedLevel, language, loading]}
+				extraData={[selectedLevel, language, loading, isCurrentCombinationPaid]}
 			/>
 
 			<CustomAlert
@@ -342,12 +338,25 @@ const VideoListScreen = ({ navigation, route }) => {
 				onCancel={handleCancelExit}
 			/>
 
-			{!isCurrentCombinationPaid && initialVisitCompleted && (
+			{/* Show payment overlay only for first-time users who haven't paid anything yet */}
+			{!isCurrentCombinationPaid && initialVisitCompleted && paidAccess.length === 0 && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
+						<TouchableOpacity 
+							style={styles.closeButton}
+							onPress={() => {
+								// Find the first paid combination and switch to it
+								const firstPaidCombo = paidAccess[0];
+								if (firstPaidCombo) {
+									setLanguage(firstPaidCombo.language);
+								}
+							}}
+						>
+							<Text style={styles.closeButtonText}>✕</Text>
+						</TouchableOpacity>
 						<Text style={styles.blurTitle}>Unlock Videos</Text>
 						<Text style={styles.blurDescription}>
-							Pay £45 to access fun & engaging kids videos
+							Pay £45 to access {languageLabels[language]} videos for {getDisplayLevel(selectedLevel)}
 						</Text>
 						<TouchableOpacity
 							onPress={HandlePay}
@@ -380,14 +389,19 @@ const styles = StyleSheet.create({
 		marginHorizontal: 5,
 		alignItems: 'center',
 	},
-
 	languageButtonActive: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
+	},
+	languageButtonLocked: {
+		backgroundColor: '#ccc',
 	},
 	languageButtonText: {
 		color: 'white',
 		fontWeight: 'bold',
 		fontSize: 16,
+	},
+	languageButtonTextLocked: {
+		color: '#666',
 	},
 	languageHeader: {
 		paddingVertical: 10,
@@ -469,6 +483,10 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		elevation: 4,
 	},
+	kidCardLocked: {
+		backgroundColor: '#f5f5f5',
+		opacity: 0.8,
+	},
 	kidTextContainer: {
 		flex: 1,
 		marginLeft: 12,
@@ -478,10 +496,16 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#4B0082',
 	},
+	kidTitleLocked: {
+		color: '#999',
+	},
 	kidSubText: {
 		fontSize: 13,
 		color: '#6A5ACD',
 		marginTop: 4,
+	},
+	kidSubTextLocked: {
+		color: '#bbb',
 	},
 	blurOverlay: {
 		...StyleSheet.absoluteFillObject,
@@ -511,18 +535,33 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		marginBottom: 20,
 	},
-
 	payNowButton: {
 		backgroundColor: '#FF8C00',
 		paddingVertical: 12,
 		paddingHorizontal: 30,
 		borderRadius: 25,
 	},
-
 	payNowText: {
 		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
 	},
+	closeButton: {
+		position: 'absolute',
+		top: 10,
+		right: 15,
+		width: 30,
+		height: 30,
+		borderRadius: 15,
+		backgroundColor: '#ccc',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	closeButtonText: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#666',
+	},
 });
+
 export default VideoListScreen;
