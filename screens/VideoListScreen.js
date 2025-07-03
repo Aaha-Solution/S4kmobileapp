@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
 	View,
 	Text,
@@ -16,32 +16,16 @@ import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { setPaidStatus, addPaidAccess, setSelectedLevel, setLevel, setLastPaidCombination, setLanguage, setAllPaidAccess } from '../Store/userSlice';
+import { setPaidStatus, addPaidAccess } from '../Store/userSlice';
 import { useStripe } from '@stripe/stripe-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 const languageLabels = {
 	Gujarati: 'Gujarati',
 	Panjabi: 'Panjabi',
 	Hindi: 'Hindi',
 };
-
-const levelLabels = {
-	Junior: 'Junior',
-	Pre_Junior: 'Pre-Junior',
-};
-
-const languageOptions = [
-	{ label: 'Gujarati', value: 'Gujarati' },
-	{ label: 'Panjabi', value: 'Panjabi' },
-	{ label: 'Hindi', value: 'Hindi' },
-];
-const levelOptions = [
-	{ label: 'Junior', value: 'Junior' },
-	{ label: 'Pre-Junior', value: 'Pre_Junior' },
-];
 
 const VideoListScreen = ({ navigation, route }) => {
 	const dispatch = useDispatch();
@@ -50,44 +34,49 @@ const VideoListScreen = ({ navigation, route }) => {
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
 	const isPaid = useSelector(state => state.user.isPaid);
+
 	const [videos, setVideos] = useState([]);
-	const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
-	const [levelDropdownOpen, setLevelDropdownOpen] = useState(false);
-	const [languageValue, setLanguageValue] = useState(selectedLanguage);
-	const [levelValue, setLevelValue] = useState(selectedLevel ? getBackendLevel(selectedLevel) : null);
+	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
+
 	const [lastPaidCombination, setLastPaidCombination] = useState(null);
-	const [showPaywall, setShowPaywall] = useState(false);
-	const prevLevelValue = useRef(levelValue);
-	const [lastUnlockedCombo, setLastUnlockedCombo] = useState({
-		language: selectedLanguage,
-		level: selectedLevel
-	});
 
 	const backendLevel = getBackendLevel(selectedLevel);
-	const backendLanguage = selectedLanguage;
-	const isUnlocked = paidAccess.some(
-		item => item.language === backendLanguage && item.level === backendLevel
+
+	const isCurrentCombinationPaid = paidAccess.some(
+		item => item.language === language && item.level === backendLevel
 	);
+	console.log("🧪 selectedLevel (UI):", selectedLevel);
+	console.log("🧪 backendLevel:", backendLevel);
+	console.log("🧪 isCurrentCombinationPaid:", isCurrentCombinationPaid);
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
-	const baseURL = 'https://smile4kidsbackend-production.up.railway.app/videos/by-category';
+	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
 
-	console.log("paidAccess",paidAccess)
-	console.log("selectedLanguage",selectedLanguage)
-	console.log("selectedLevel",selectedLevel)
-	console.log("iscurrcombo",isUnlocked)
+	const isUnlocked = paidAccess.some(
+		item => item.language === selectedLanguage && item.level === selectedLevel
+	);
 
 	useEffect(() => {
 		if (isUnlocked) {
 			fetchVideos();
 		} else {
-			setVideos([]);
+			setVideos([]); // ensure blank list if no access
 		}
 	}, [selectedLanguage, selectedLevel, paidAccess]);
+
+
+	useEffect(() => {
+		console.log('Redux Selected Age Group:', selectedLevel);
+		console.log('Redux Selected Language:', selectedLanguage);
+		console.log('🟡 isPaid from Redux:', isPaid);
+		console.log("✅ paidAccess:", paidAccess);
+		console.log("✅ current combo:", { language, selectedLevel });
+		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
+	}, [paidAccess, language, selectedLevel, isPaid]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -107,13 +96,14 @@ const VideoListScreen = ({ navigation, route }) => {
 	const handleCancelExit = () => setShowAlert(false);
 
 	const fetchVideos = useCallback(async () => {
-		if (!selectedLevel || !languageValue) {
+		if (!selectedLevel || !language) {
 			setVideos([]);
 			return;
 		}
 		setLoading(true);
 		setVideos([]);
-		const url = `${baseURL}?language=${languageValue}&level=${backendLevel}`;
+		const url = `${baseURL}?language=${language}&level=${backendLevel}`;
+		console.log("url", url);
 
 		try {
 			const token = await AsyncStorage.getItem('token');
@@ -123,6 +113,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					'Content-Type': 'application/json',
 				},
 			});
+			console.log("API Response:", response.data);
 			if (response.status === 200 && Array.isArray(response.data)) {
 				setVideos(response.data);
 			} else {
@@ -134,24 +125,17 @@ const VideoListScreen = ({ navigation, route }) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [languageValue, selectedLevel]);
+	}, [language, selectedLevel]);
 
 	useEffect(() => {
 		fetchVideos();
-	}, [selectedLevel, languageValue]);
+	}, [selectedLevel, language]);
 
 	useEffect(() => {
-		if (languageValue) {
-			setLanguage(languageValue);
-			dispatch(setLanguage(languageValue));
+		if (selectedLanguage) {
+			setLanguage(selectedLanguage);
 		}
-	}, [languageValue]);
-
-	useEffect(() => {
-		if (selectedLevel) {
-			setLevelValue(getBackendLevel(selectedLevel));
-		}
-	}, [selectedLevel]);
+	}, [selectedLanguage]);
 
 	useEffect(() => {
 		const unsubscribe = navigation.addListener('focus', () => {
@@ -164,58 +148,68 @@ const VideoListScreen = ({ navigation, route }) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
 
-	const renderItem = ({ item, index }) => {
-		const backendLevel = getBackendLevel(selectedLevel);
-		const isUnlocked = paidAccess.some(
-			access => access.language === selectedLanguage && access.level === backendLevel
+	const handleLanguageSelect = useCallback((langKey) => {
+		const isPaidCombo = paidAccess.some(
+			item => item.language === langKey && item.level === backendLevel
 		);
 
-		const handlePress = () => {
-			if (!isUnlocked) {
-				Alert.alert(
-					'Payment Required',
-					'Please pay to continue.'
-				);
-				return;
-			}
-			handleVideoPress(item);
-		};
+		if (isPaidCombo) {
+			setLanguage(langKey);
+		} else {
+			const currentAttempt = `${langKey} - ${backendLevel}`;
+			const lastPaid = lastPaidCombination
+				? `${lastPaidCombination.language} - ${lastPaidCombination.level}`
+				: 'previous paid selection';
 
-		return (
-			<TouchableOpacity
-				style={styles.kidCard}
-				onPress={handlePress}
-				activeOpacity={isUnlocked ? 0.9 : 1}
-				disabled={false}
-			>
-				<Image
-					source={item.thumbnailUrl ? { uri: item.thumbnailUrl } : require('../assets/image/splash.png')}
-					style={{
-						width: imageWidth,
-						height: imageWidth * 0.7,
-						borderRadius: 12,
-						backgroundColor: '#E6E6FA',
-						opacity: isUnlocked ? 1 : 0.5,
-					}}
-					resizeMode="contain"
-				/>
-				<View style={styles.kidTextContainer}>
-					<Text style={styles.kidTitle} numberOfLines={2}>
-						{item.title || `Video ${index + 1}`}
-					</Text>
-					<Text style={styles.kidSubText}>
-						{item.duration ? `${item.duration} min` : ''}
-					</Text>
-				</View>
-				<Icon name="chevron-forward" size={24} color="#fff" />
-				{!isUnlocked && (
-					<View style={styles.lockOverlay}>
-						<Icon name="lock-closed" size={32} color="#fff" />
-					</View>
-				)}
-			</TouchableOpacity>
-		);
-	};
+			Alert.alert(
+				"Locked Videos",
+				`Videos for  ${currentAttempt}are currently locked. 🔒\n\nPlease complete the payment to unlock them.\n\nShowing ${lastPaid} instead.`,
+				[
+					{
+						text: "OK",
+						onPress: () => {
+							if (lastPaidCombination) {
+								setLanguage(lastPaidCombination.language);
+							}
+						}
+					}
+				]
+			);
+		}
+	}, [paidAccess, selectedLevel, lastPaidCombination]);
+
+
+	const renderItem = ({ item, index }) => (
+		<TouchableOpacity
+			style={styles.kidCard}
+			onPress={() => handleVideoPress(item)}
+			activeOpacity={0.9}
+		>
+			<Image
+				source={
+					item.thumbnailUrl
+						? { uri: item.thumbnailUrl }
+						: require('../assets/image/splash.png')
+				}
+				style={{
+					width: imageWidth,
+					height: imageWidth * 0.7,
+					borderRadius: 12,
+					backgroundColor: '#E6E6FA',
+				}}
+				resizeMode="contain"
+			/>
+			<View style={styles.kidTextContainer}>
+				<Text style={styles.kidTitle} numberOfLines={2}>
+					{item.title || `Video ${index + 1}`}
+				</Text>
+				<Text style={styles.kidSubText}>
+					{item.duration ? `${item.duration} min` : ''}
+				</Text>
+			</View>
+			<Icon name="chevron-forward" size={24} color="#fff" />
+		</TouchableOpacity>
+	);
 	const screenWidth = Dimensions.get('window').width;
 	const imageWidth = screenWidth * 0.25;
 
@@ -233,12 +227,17 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const HandlePay = async () => {
 		try {
-			const token = await AsyncStorage.getItem('token');
-			const cleanLevel = getBackendLevel(selectedLevel);
-			const paymentType = `${languageValue}-${cleanLevel}`;
-			const selections = [{ language: languageValue, level: cleanLevel }];
+			const token = await AsyncStorage.getItem('token'); // ✅
+			const cleanLevel = getBackendLevel(selectedLevel); // returns "Pre_Junior"
+			const paymentType = `${language}-${cleanLevel}`;   // returns "Gujarati-Pre_Junior"
 
-			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
+			console.log("🟠 Payment Type:", paymentType);
+			const selections = [{
+				language: language,
+				level: cleanLevel
+			}];
+
+			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -248,25 +247,30 @@ const VideoListScreen = ({ navigation, route }) => {
 					type: paymentType,
 					currency: 'gbp',
 					user_id: users_id,
-					language: languageValue,
+					language,
 					level: cleanLevel,
 					courseType: paymentType,
 					selections: selections,
+
 				}),
 			});
 			const rawText = await response.text();
+			console.log("🟠 Raw Response Text:", rawText);
 			let data;
 			try {
 				data = JSON.parse(rawText);
 			} catch (error) {
+				console.error("❌ Failed to parse JSON:", error);
 				Alert.alert("Server Error", "Invalid response from payment server.");
 				return;
 			}
+
 			const clientSecret = data.clientSecret;
 			if (!clientSecret) {
 				Alert.alert("Payment Error", data.message || "No client secret received.");
 				return;
 			}
+
 			const { error: initError } = await initPaymentSheet({
 				paymentIntentClientSecret: clientSecret,
 				merchantDisplayName: 'Smile4Kids',
@@ -275,122 +279,42 @@ const VideoListScreen = ({ navigation, route }) => {
 				Alert.alert("Payment Error", initError.message);
 				return;
 			}
+
 			const { error: presentError } = await presentPaymentSheet();
 			if (presentError) {
 				Alert.alert("Payment Failed", presentError.message);
 			} else {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
-				dispatch(addPaidAccess({ language: languageValue, level: cleanLevel }));
+				dispatch(addPaidAccess({ language, level: cleanLevel }));
 			}
 		} catch (err) {
+			console.error("PaymentSheet Error:", err);
 			Alert.alert("Unexpected Error", "Something went wrong during payment.");
 		}
 	};
-
-	useEffect(() => {
-		(async () => {
-			const hasSeenPaywall = await AsyncStorage.getItem('hasSeenPaywall');
-			if (!hasSeenPaywall && !isUnlocked && initialVisitCompleted) {
-				setShowPaywall(true);
-				await AsyncStorage.setItem('hasSeenPaywall', 'true');
-			} else {
-				setShowPaywall(false);
-			}
-		})();
-	}, [isUnlocked, initialVisitCompleted]);
-
-	// Update lastUnlockedCombo whenever a new unlocked combo is selected
-	useEffect(() => {
-		if (isUnlocked && selectedLanguage && selectedLevel) {
-			setLastUnlockedCombo({ language: selectedLanguage, level: selectedLevel });
-		}
-	}, [isUnlocked, selectedLanguage, selectedLevel]);
-
-	// Language dropdown handler
-	const handleLanguageChange = (val) => {
-		if (!val) return;
-		setLanguageValue(val);
-	};
-
-	// Level dropdown handler
-	const handleLevelChange = (val) => {
-		if (!val) return;
-		setLevelValue(val);
-		dispatch(setLevel(getBackendLevel(val)));
-	};
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-			{/* Language & Level Dropdowns Side by Side */}
-			<View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, marginTop: 16, marginBottom: 16, zIndex: 20 }}>
-				<View style={{ flex: 1, marginRight: 8 }}>
-					<DropDownPicker
-						open={languageDropdownOpen}
-						value={languageValue}
-						items={languageOptions}
-						setOpen={setLanguageDropdownOpen}
-						setValue={val => handleLanguageChange(val)}
-						setItems={() => {}}
-						placeholder="Select Language"
-						style={{
-							backgroundColor: languageValue ? '#FF8C00' : '#F0F8FF',
-							borderColor: languageValue ? '#FF8C00' : '#E0E0E0',
-							borderRadius: 8,
-							shadowColor: '#000',
-							shadowOpacity: 0.08,
-							shadowOffset: { width: 0, height: 2 },
-							shadowRadius: 4,
-							elevation: 2,
-						}}
-						dropDownContainerStyle={{
-							backgroundColor: '#FFF',
-							borderColor: '#E0E0E0',
-							borderRadius: 8,
-						}}
-						textStyle={{ color: '#fff', fontWeight: 'bold' }}
-						placeholderStyle={{ color: '#888', fontWeight: 'bold' }}
-						listItemLabelStyle={{ color: '#333', fontWeight: 'bold' }}
-						selectedItemLabelStyle={{ color: '#FF8C00', fontWeight: 'bold' }}
-						selectedItemContainerStyle={{ backgroundColor: '#FFE0B2' }}
-						arrowIconStyle={{ tintColor: '#fff' }}
-					/>
-				</View>
-				<View style={{ flex: 1, marginLeft: 8 }}>
-					<DropDownPicker
-						open={levelDropdownOpen}
-						value={levelValue}
-						items={levelOptions}
-						setOpen={setLevelDropdownOpen}
-						setValue={val => handleLevelChange(val)}
-						setItems={() => {}}
-						placeholder="Select Level"
-						style={{
-							backgroundColor: levelValue ? '#4CAF50' : '#F0F8FF',
-							borderColor: levelValue ? '#4CAF50' : '#E0E0E0',
-							borderRadius: 8,
-							shadowColor: '#000',
-							shadowOpacity: 0.08,
-							shadowOffset: { width: 0, height: 2 },
-							shadowRadius: 4,
-							elevation: 2,
-						}}
-						dropDownContainerStyle={{
-							backgroundColor: '#FFF',
-							borderColor: '#E0E0E0',
-							borderRadius: 8,
-						}}
-						textStyle={{ color: '#fff', fontWeight: 'bold' }}
-						placeholderStyle={{ color: '#888', fontWeight: 'bold' }}
-						listItemLabelStyle={{ color: '#333', fontWeight: 'bold' }}
-						selectedItemLabelStyle={{ color: '#4CAF50', fontWeight: 'bold' }}
-						selectedItemContainerStyle={{ backgroundColor: '#C8E6C9' }}
-						arrowIconStyle={{ tintColor: '#fff' }}
-					/>
-				</View>
+			<View style={styles.languageRow}>
+				{Object.keys(languageLabels).map((langKey) => (
+					<TouchableOpacity
+						key={langKey}
+						style={[
+							styles.languageButton,
+							language === langKey && styles.languageButtonActive,
+						]}
+						onPress={() => handleLanguageSelect(langKey)}
+					>
+						<Text style={styles.languageButtonText}>{languageLabels[langKey]}</Text>
+					</TouchableOpacity>
+				))}
+			</View>
+			{/*Selected Age Header*/}
+
+			<View style={styles.languageHeader}>
+				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
 
-			{/* Video List */}
 			<FlatList
 				data={videos}
 				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
@@ -407,6 +331,7 @@ const VideoListScreen = ({ navigation, route }) => {
 						</Text>
 					</View>
 				)}
+				extraData={[selectedLevel, language, loading]}
 			/>
 
 			<CustomAlert
@@ -417,8 +342,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				onCancel={handleCancelExit}
 			/>
 
-			{/* Payment Blur Overlay */}
-			{showPaywall && (
+			{!isCurrentCombinationPaid && initialVisitCompleted && (
 				<View style={styles.blurOverlay}>
 					<View style={styles.blurContent}>
 						<Text style={styles.blurTitle}>Unlock Videos</Text>
@@ -439,18 +363,14 @@ const VideoListScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-	container: { flex: 1 },
+	container: {
+		flex: 1,
+	},
 	languageRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		paddingHorizontal: 20,
 		paddingTop: 10,
-	},
-	levelRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		paddingHorizontal: 20,
-		paddingVertical: 10,
 	},
 	languageButton: {
 		backgroundColor: '#FF8C00',
@@ -460,6 +380,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 5,
 		alignItems: 'center',
 	},
+
 	languageButtonActive: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
 	},
@@ -602,15 +523,6 @@ const styles = StyleSheet.create({
 		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
-	},
-
-	lockOverlay: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: 16,
-		zIndex: 10,
 	},
 });
 export default VideoListScreen;

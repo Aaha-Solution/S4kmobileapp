@@ -91,23 +91,16 @@ const userSlice = createSlice({
 		setAllPaidAccess: (state, action) => {
 			state.paidAccess = action.payload;
 		},
-		setLastPaidCombination: (state, action) => {
-			state.lastPaidSelection = action.payload;
-		},
-		
 		// ✅ NEW: Add paid combination
 		addPaidAccess: (state, action) => {
-			let { language, level } = action.payload;
-			// Ensure both are strings and in backend format
-			language = String(language);
-			level = String(level);
+			const { language, level } = action.payload;
 			const exists = state.paidAccess.some(
 				item => item.language === language && item.level === level
 			);
 			if (!exists) {
-				state.paidAccess.push({ language, level });
+				state.paidAccess.push({ language, level }); // ✅ store correctly
 			}
-			state.lastPaidSelection = { language, level };
+			state.lastPaidSelection = { language, level }; // ✅ Save last paid combo
 		}
 		
 	},
@@ -126,7 +119,5 @@ export const {
 	setPaidStatus,
 	addPaidAccess, 
 	setAllPaidAccess,
-	setLastPaidCombination,
-
 } = userSlice.actions;
 export default userSlice.reducer;

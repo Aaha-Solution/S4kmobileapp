@@ -22,37 +22,166 @@ import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 
 const Tab = createBottomTabNavigator();
 
+const AGE_GROUP_ITEMS = [
+	{ label: 'PreJunior (4-6 years)', value: 'PreJunior (4-6 years)' },
+	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
+];
+
 const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
-	const [levelValue, setLevelValue] = useState(selectedLevel ? getBackendLevel(selectedLevel) : null);
+	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
+	const [items, setItems] = useState(AGE_GROUP_ITEMS);
+	const currentRouteRef = useRef(state.routes[state.index].name);
 
-	const handleTabPress = (route) => {
-		
-		navigation.navigate(route.name);
+	useEffect(() => {
+		if (selectedLevel) {
+			setValue(getDisplayLevel(selectedLevel));
+		}
+	}, [selectedLevel]);
+
+	useFocusEffect(() => {
+		currentRouteRef.current = state.routes[state.index].name;
+	});
+
+	const handleAgeSelect = (selectedDisplayValue) => {
+		if (!selectedDisplayValue) return;
+		try {
+			const backendLevel = getBackendLevel(selectedDisplayValue);
+			dispatch(setLevel(backendLevel));
+			setValue(selectedDisplayValue);
+			setOpen(false);
+
+			if (currentRouteRef.current !== 'Home') {
+				navigation.navigate('Home');
+			}
+		} catch (error) {
+			console.error('Error in handleAgeSelect:', error);
+		}
 	};
 
-	return (
-		<View style={styles.tabBarContainer}>
-			{state.routes.map((route, index) => {
-				const { options } = descriptors[route.key];
-				const label = options.tabBarLabel ?? options.title ?? route.name;
-				const isFocused = state.index === index;
-				const iconName = getIconName(route.name, isFocused);
+	const handleOutsidePress = () => {
+		if (open) {
+			setOpen(false);
+			if (currentRouteRef.current === 'level') {
+				navigation.navigate('Home');
+			}
+		}
+	};
 
-				return (
-					<TouchableOpacity
-						key={route.key}
-						onPress={() => handleTabPress(route)}
-						style={styles.tabButton}
-					>
-						<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
-						<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
-					</TouchableOpacity>
-				);
-			})}
-		</View>
+	const handleTabPress = (route) => {
+		if (!isPaid && route.name !== 'Payment') {
+			Toast.show({
+				type: 'error',
+				text1: '⚠ Please complete payment to proceed further',
+				position: 'bottom',
+				visibilityTime: 3000,
+			});
+			return;
+		}
+
+		handleOutsidePress();
+
+		if (route.name === 'level') {
+			setOpen(prev => !prev);
+		} else {
+			navigation.navigate(route.name);
+		}
+	};
+
+	useEffect(() => {
+		const backAction = () => {
+			if (open) {
+				setOpen(false);
+				return true;
+			}
+			if (currentRouteRef.current === 'level') {
+				navigation.navigate('Home');
+				return true;
+			}
+			return false;
+		};
+
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		return () => backHandler.remove();
+	}, [open]);
+
+	return (
+		<TouchableWithoutFeedback onPress={handleOutsidePress}>
+			<View style={styles.tabBarContainer}>
+				{state.routes.map((route, index) => {
+					const { options } = descriptors[route.key];
+					const label = options.tabBarLabel ?? options.title ?? route.name;
+					const isFocused = open
+						? route.name === 'level'
+						: state.index === index;
+
+					const iconName = getIconName(route.name, isFocused);
+
+					if (route.name === 'level') {
+						return (
+							<View key={route.key} style={styles.ageTabContainer}>
+								<TouchableOpacity onPress={() => handleTabPress(route)} style={styles.tabButton}>
+									<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
+									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray'}]}>{label}</Text>
+								</TouchableOpacity>
+								{open && (
+									<View style={styles.dropdownWrapper}>
+										<DropDownPicker
+											open={open}
+											value={value}
+											items={items}
+											setOpen={setOpen}
+											setValue={setValue}
+											setItems={setItems}
+											placeholder="Select Age Group"
+											onChangeValue={(val) => handleAgeSelect(val)}
+											onSelectItem={(item) => handleAgeSelect(item.value)}
+											style={styles.dropdown}
+											dropDownContainerStyle={styles.dropdownContainer}
+											arrowIconStyle={{ tintColor: '#4CAF50' }}
+											textStyle={{ fontSize: 14, fontWeight: '500', color: '#333' }}
+											labelStyle={{ color: '#333' }}
+											listItemLabelStyle={{ color: '#333' }}
+											selectedItemContainerStyle={{
+												backgroundColor: '#E8F5E9',
+												borderLeftWidth: 4,
+												borderLeftColor: '#4CAF50',
+											}}
+											selectedItemLabelStyle={{
+												color: '#2E7D32',
+												fontWeight: 'bold',
+											}}
+											tickIconStyle={{
+												tintColor: '#4CAF50',
+												width: 20,
+												height: 20,
+											}}
+											zIndex={9999}
+											listMode="SCROLLVIEW"
+											scrollViewProps={{ nestedScrollEnabled: true }}
+											disabled={!isPaid}
+										/>
+									</View>
+								)}
+							</View>
+						);
+					}
+					return (
+						<TouchableOpacity
+							key={route.key}
+							onPress={() => handleTabPress(route)}
+							style={styles.tabButton}
+						>
+							<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
+							<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
+						</TouchableOpacity>
+					);
+				})}
+			</View>
+		</TouchableWithoutFeedback>
 	);
 };
 
@@ -61,6 +190,7 @@ const getIconName = (routeName, focused) => {
 		case 'Home': return focused ? 'home' : 'home-outline';
 		case 'Setting': return focused ? 'settings' : 'settings-outline';
 		case 'Payment': return focused ? 'wallet' : 'wallet-outline';
+		case 'level': return focused ? 'people' : 'people-outline';
 		default: return 'help-circle-outline';
 	}
 };
@@ -85,6 +215,7 @@ const BottomTabNavigator = () => {
 			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Setting' }} />
 			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
 			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
+			{/* <Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} /> */}
 		</Tab.Navigator>
 	);
 };
@@ -101,6 +232,11 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		zIndex: 1,
 	},
+	ageTabContainer: {
+		alignItems: 'center',
+		position: 'relative',
+		zIndex: 2,
+	},
 	tabButton: {
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -109,6 +245,24 @@ const styles = StyleSheet.create({
 	tabLabel: {
 		fontSize: 12,
 		marginTop: 2,
+	},
+	dropdownWrapper: {
+		position: 'absolute',
+		top: -150,
+		width: 180,
+		left: -135,
+		zIndex: 1000,
+	},
+	dropdown: {
+		borderColor: 'rgba(76, 175, 80, 0.9)',
+		borderWidth: 2,
+		borderRadius: 10,
+		width: 180,
+	},
+	dropdownContainer: {
+		borderColor: 'rgba(76, 175, 80, 0.9)',
+		borderWidth: 2,
+		borderRadius: 10,
 	},
 });
 

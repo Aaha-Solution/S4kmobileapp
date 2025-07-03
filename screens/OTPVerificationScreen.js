@@ -45,7 +45,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 			return;
 		}
 		try {
-			const response = await fetch("https://smile4kidsbackend-production.up.railway.app/forgot/verify-otp", {
+			const response = await fetch("https://smile4kids-backend.onrender.com/forgot/verify-otp", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
