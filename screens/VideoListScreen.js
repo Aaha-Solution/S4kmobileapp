@@ -229,6 +229,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		try {
 			const token = await AsyncStorage.getItem('token'); // ✅
 			const cleanLevel = getBackendLevel(selectedLevel); // returns "Pre_Junior"
+			console.log("level payment", cleanLevel)
 			const paymentType = `${language}-${cleanLevel}`;   // returns "Gujarati-Pre_Junior"
 
 			console.log("🟠 Payment Type:", paymentType);
@@ -287,6 +288,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				Alert.alert("Success", "Your payment was successful!");
 				dispatch(setPaidStatus(true));
 				dispatch(addPaidAccess({ language, level: cleanLevel }));
+				await fetchVideos();
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);
@@ -310,11 +312,10 @@ const VideoListScreen = ({ navigation, route }) => {
 				))}
 			</View>
 			{/*Selected Age Header*/}
-
 			<View style={styles.languageHeader}>
-				<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
+					<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 			</View>
-
+			{/*video list*/ }
 			<FlatList
 				data={videos}
 				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}

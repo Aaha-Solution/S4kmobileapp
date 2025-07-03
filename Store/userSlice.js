@@ -40,19 +40,24 @@ const userSlice = createSlice({
 			state.user = normalizedUser;
 			state.email = normalizedUser.email;
 
+			const paidCategories = action.payload.paid_categories || [];
 			const hasValidPaidCategory =
-				Array.isArray(action.payload.paid_categories) &&
-				action.payload.paid_categories.some(item => item.language && item.level);
+				Array.isArray(paidCategories) &&
+				paidCategories.some(item => item.language && item.level);
 
 			state.isPaid = hasValidPaidCategory;
+			state.paidAccess = paidCategories.map(item => ({
+				language: item.language,
+				level: item.level,
+			}));
 
 
-			// ✅ Set selectedLanguage and selectedLevel from API
-			state.selectedLanguage = action.payload.language || null;
-			state.selectedLevel = action.payload.level || null;
-			// Optional: Load paid access if returned from backend
-			state.paidAccess = action.payload.paidAccess || [];
-			state.paid_categories = action.payload.paid_categories || null;
+			// ✅ Fallback to first paid combo if language/level not provided
+			const fallback = paidCategories[0] || {};
+			state.selectedLanguage = action.payload.language || fallback.language || null;
+			state.selectedLevel = action.payload.level || fallback.level || null;
+
+			state.paid_categories = paidCategories;
 		},
 
 		logout: (state) => {
@@ -102,7 +107,7 @@ const userSlice = createSlice({
 			}
 			state.lastPaidSelection = { language, level }; // ✅ Save last paid combo
 		}
-		
+
 	},
 });
 
@@ -117,7 +122,7 @@ export const {
 	setVideos,
 	addVideo,
 	setPaidStatus,
-	addPaidAccess, 
+	addPaidAccess,
 	setAllPaidAccess,
 } = userSlice.actions;
 export default userSlice.reducer;

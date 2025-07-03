@@ -9,19 +9,19 @@ import {
 	Image,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import {  setLevel } from '../Store/userSlice';
+import { setLevel } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 const ageGroups = [
-	{ id: '1', name: 'PreJunior (4–6 years)' },
+	{ id: '1', name: 'PreSchool (4–6 years)' },
 	{ id: '2', name: 'Junior (7 & above years)' },
 ];
 
 const AgeSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
-	const selectedLevel = useSelector((state) => state.user.selectedLevel );
+	const selectedLevel = useSelector((state) => state.user.selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
 
 	const [animations, setAnimations] = useState(
@@ -49,12 +49,14 @@ const AgeSelectionScreen = ({ navigation }) => {
 
 	const handleAgeSelect = (group) => {
 		animateSelection(group.id);
-		dispatch( setLevel(group.name));
-		console.log("age",group.name)
+		const backendLevel = getBackendLevel(group.name); // 🔁 Convert to backend-safe value
+		console.log("backendlevel", backendLevel)
+		dispatch(setLevel(backendLevel));
+		console.log("age", group.name)
 	};
 
 	const handleNext = () => {
-		if (selectedLevel ) {
+		if (selectedLevel) {
 			navigation.reset({
 				index: 0,
 				routes: [{ name: 'MainTabs' }],
@@ -69,7 +71,7 @@ const AgeSelectionScreen = ({ navigation }) => {
 	};
 
 	const renderItem = ({ item }) => {
-		const isSelected = selectedLevel === item.name;
+		const isSelected = selectedLevel === getBackendLevel(item.name);
 		return (
 			<TouchableOpacity
 				onPress={() => handleAgeSelect(item)}

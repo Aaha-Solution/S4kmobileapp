@@ -1,24 +1,35 @@
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../Store/userSlice'; // Replace with your login action
+import { useDispatch } from 'react-redux';
+import { login, setLevel } from '../Store/userSlice';
 
 const SplashScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        const userData = await AsyncStorage.getItem('user');
-        console.log("userdata",userData)
+        const [token, userData, preferences] = await Promise.all([
+          AsyncStorage.getItem('token'),
+          AsyncStorage.getItem('user'),
+          AsyncStorage.getItem('selectedPreferences'),
+        ]);
+
         if (token && userData) {
-          dispatch(login(JSON.parse(userData))); // Restore to Redux
-          navigation.replace('MainTabs'); // Navigate to Home
+          const parsedUser = JSON.parse(userData);
+          dispatch(login(parsedUser)); // ✅ Restore user into Redux
+
+          if (preferences) {
+            const { selectedLevel } = JSON.parse(preferences);
+            if (selectedLevel) {
+              dispatch(setLevel(selectedLevel)); // ✅ Restore level into Redux
+            }
+          }
+
+          navigation.replace('MainTabs'); // ✅ Go to main app
         } else {
-          navigation.replace('Login'); // Go to Login
+          navigation.replace('Login'); // ❌ Not logged in
         }
       } catch (error) {
         console.log('Error checking login status', error);
@@ -26,11 +37,9 @@ const SplashScreen = ({ navigation }) => {
       }
     };
 
-    // Show splash for 2 seconds then check
-    setTimeout(() => {
-      checkLoginStatus();
-    }, 2000);
-  }, []);
+    const timer = setTimeout(checkLoginStatus, 2000);
+    return () => clearTimeout(timer);
+  }, [dispatch, navigation]);
 
   return (
     <View style={styles.container}>

@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
-import { login, setProfile, setLanguage, setLevel, setPaidStatus } from '../Store/userSlice';
+import { login, setProfile, setLanguage, setLevel, setPaidStatus, setAllPaidAccess } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
@@ -70,7 +70,7 @@ const LoginScreen = ({ navigation }) => {
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const handleLogin = async () => {
+const handleLogin = async () => {
         setEmailError('');
         setPasswordError('');
         let hasError = false;
@@ -94,11 +94,10 @@ const LoginScreen = ({ navigation }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                
                 },
                 body: JSON.stringify({ email_id: email, password }),
             });
-            console.log("response",response)
+            console.log("response", response)
 
             const data = await response.json();
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
@@ -111,8 +110,10 @@ const LoginScreen = ({ navigation }) => {
             await AsyncStorage.setItem('token', data.token);
 
             const firstPaid = data.user.paid_categories?.[0];
-            const userLang = firstPaid?.language || 'English';
-            const userLevel = getBackendLevel(firstPaid?.level );
+            const userLang = firstPaid?.language;
+            const userLevel = getBackendLevel(firstPaid?.level);
+            dispatch(setLanguage(userLang));
+            dispatch(setLevel(userLevel));
 
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
@@ -131,10 +132,19 @@ const LoginScreen = ({ navigation }) => {
                 await Keychain.resetGenericPassword();
                 await AsyncStorage.removeItem('selectedPreferences');
             }
-
-            dispatch(login(data.user));
-            dispatch(setLanguage(userLang));
-            dispatch(setLevel(userLevel));
+            const paidCategories = data.user.paid_categories || [];
+            const formatted = paidCategories.map(item => ({
+                language: item.language,
+                level: item.level,
+            }));
+            dispatch(setAllPaidAccess(formatted));
+            dispatch(login({
+                ...data.user,
+                ...data.user,
+                language: userLang,
+                level: userLevel,
+            }));
+            dispatch(setLevel(userLevel))
 
             const { paid_categories } = data.user;
             const hasValidPaidCategory =
@@ -142,17 +152,6 @@ const LoginScreen = ({ navigation }) => {
                 paid_categories.some((item) => item.language && item.level);
 
             dispatch(setProfile({ paid_categories }));
-
-            // ✅ Format and save all paid combos into Redux
-            if (Array.isArray(paid_categories)) {
-                const formatted = paid_categories.map(item => ({
-                    language: item.language,
-                    level: getBackendLevel(item.level),
-                }));
-                dispatch({ type: 'user/setAllPaidAccess', payload: formatted });
-            }
-
-
 
             if (hasValidPaidCategory) {
                 dispatch(setPaidStatus(true));

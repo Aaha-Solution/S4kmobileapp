@@ -23,7 +23,7 @@ import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 const Tab = createBottomTabNavigator();
 
 const AGE_GROUP_ITEMS = [
-	{ label: 'PreJunior (4-6 years)', value: 'PreJunior (4-6 years)' },
+	{ label: 'PreSchool (4-6 years)', value: 'PreSchool (4-6 years)' },
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 ];
 
@@ -31,8 +31,10 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
+	console.log("level",selectedLevel)
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
+	console.log("value",value)
 	const [items, setItems] = useState(AGE_GROUP_ITEMS);
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
@@ -72,15 +74,15 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	};
 
 	const handleTabPress = (route) => {
-		if (!isPaid && route.name !== 'Payment') {
-			Toast.show({
-				type: 'error',
-				text1: '⚠ Please complete payment to proceed further',
-				position: 'bottom',
-				visibilityTime: 3000,
-			});
-			return;
-		}
+		// if (!isPaid) {
+		// 	Toast.show({
+		// 		type: 'error',
+		// 		text1: '⚠ Please complete payment to proceed further',
+		// 		position: 'bottom',
+		// 		visibilityTime: 3000,
+		// 	});
+		// 	return;
+		// }
 
 		handleOutsidePress();
 
@@ -215,7 +217,7 @@ const BottomTabNavigator = () => {
 			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Setting' }} />
 			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
 			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
-			{/* <Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} /> */}
+			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} /> 
 		</Tab.Navigator>
 	);
 };

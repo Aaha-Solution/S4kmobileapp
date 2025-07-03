@@ -55,10 +55,11 @@ const EditProfileScreen = ({ route, navigation }) => {
                     },
                 });
                 const data = await response.json();
-                setImages(data);
+                setImages(Array.isArray(data) ? data : []);
                 setLoading(false);
             } catch (error) {
                 console.error('Failed to fetch avatars:', error);
+                setImages([]);
                 setLoading(false);
             }
         };
@@ -196,15 +197,8 @@ const EditProfileScreen = ({ route, navigation }) => {
         }
     };
 
-    const handleSelectAvatar = async (avatarUrl) => {
-        const updatedProfile = {
-            ...currentProfile,
-            selectedAvatar: avatarUrl,
-        };
-
+    const handleSelectAvatar = (avatarUrl) => {
         setSelectedAvatar(avatarUrl);
-        dispatch(setProfile(updatedProfile));
-        await AsyncStorage.setItem('selectedAvatar', JSON.stringify(avatarUrl));
         setModalVisible(false);
     };
 
@@ -268,7 +262,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
-                            <TextInput style={styles.input} value={email} onChangeText={setemail} keyboardType="email-address" />
+                            <TextInput style={styles.input} value={email} keyboardType="email-address" />
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Date of Birth</Text>

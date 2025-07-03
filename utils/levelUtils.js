@@ -1,14 +1,13 @@
-// utils/levelUtils.js
 
 // Map display text to backend format
 export const levelMap = {
-  'PreJunior (4-6 years)': 'Pre_Junior',
+  'PreSchool (4-6 years)': 'Pre_Junior',
   'Junior (7 & above years)': 'Junior',
 };
 
 // Map backend format to display text
 export const displayLevelMap = {
-  'Pre_Junior': 'PreJunior (4-6 years)',
+  'Pre_Junior': 'PreSchool (4-6 years)',
   'Junior': 'Junior (7 & above years)',
 };
 

@@ -8,6 +8,7 @@ import {
 	Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -249,8 +250,6 @@ const PaymentScreen = () => {
 		}
 	};
 
-
-
 	const handleToggle = (language, level) => {
 		const backendLevel = getFormattedLevel(level); // 'Junior' or 'Pre_Junior'
 		const key = `${language}-${backendLevel}`;
@@ -296,7 +295,7 @@ const PaymentScreen = () => {
 											{option}
 										</Text>
 										{isPaid ? (
-											<Icon name="lock" size={20} color="gray" />
+											<Icon name="check-circle" size={20} color="green" />
 										) : selectedItems[lang]?.includes(option) ? (
 											<Icon name="check-circle" size={20} color="green" />
 										) : null}
