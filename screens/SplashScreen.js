@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../Store/userSlice'; // Replace with your login action
+import { login, setLanguage, setLevel, setAllPaidAccess } from '../Store/userSlice'; // Replace with your login action
 
 const SplashScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user);
@@ -15,8 +15,30 @@ const SplashScreen = ({ navigation }) => {
         const userData = await AsyncStorage.getItem('user');
         console.log("userdata",userData)
         if (token && userData) {
-          dispatch(login(JSON.parse(userData))); // Restore to Redux
-          navigation.replace('MainTabs'); // Navigate to Home
+          const user = JSON.parse(userData);
+          dispatch(login(user)); // Restore to Redux
+
+          // Set paidAccess, selectedLanguage, and selectedLevel from paid_categories
+          if (Array.isArray(user.paid_categories) && user.paid_categories.length > 0) {
+            const first = user.paid_categories[0];
+            dispatch(setLanguage(first.language));
+            dispatch(setLevel(first.level));
+            const formatted = user.paid_categories.map(item => ({
+              language: item.language,
+              level: item.level,
+            }));
+            dispatch(setAllPaidAccess(formatted));
+          }
+
+          const hasValidPaidCategory =
+            Array.isArray(user.paid_categories) &&
+            user.paid_categories.some(item => item.language && item.level);
+
+          if (hasValidPaidCategory) {
+            navigation.replace('MainTabs');
+          } else {
+            navigation.replace('LanguageSelectionScreen'); // Or your payment/selection screen
+          }
         } else {
           navigation.replace('Login'); // Go to Login
         }

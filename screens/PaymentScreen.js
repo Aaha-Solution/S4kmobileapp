@@ -62,7 +62,7 @@ const PaymentScreen = () => {
 		}
 
 		try {
-			const response = await fetch('https://smile4kids-backend.onrender.com/payment/calculate-amount', {
+			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/calculate-amount', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const PaymentScreen = () => {
 	const fetchPaidCourses = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await fetch(`https://smile4kids-backend.onrender.com/payment/my-paid-videos?user_id=${users_id}`,
+			const response = await fetch(`https://smile4kidsbackend-production.up.railway.app/payment/my-paid-videos?user_id=${users_id}`,
 				{
 					method: 'GET',
 					headers: {
@@ -182,7 +182,7 @@ const PaymentScreen = () => {
 			const firstSelection = unpaidSelections[0];
 			const paymentType = `${firstSelection.language}-${firstSelection.level}`;
 
-			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kidsbackend-production.up.railway.app/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

@@ -85,7 +85,7 @@ const SignupScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('https://smile4kids-backend.onrender.com/signup', {
+      const response = await fetch('https://smile4kidsbackend-production.up.railway.app/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email_id: email, password, confirm_password: confirmPassword }),

@@ -90,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kids-backend.onrender.com/login', {
+            const response = await fetch('https://smile4kidsbackend-production.up.railway.app/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
