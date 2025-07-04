@@ -77,14 +77,16 @@ const SettingsScreen = ({ route, navigation }) => {
 				'userLevel'
 			]);
 			await AsyncStorage.setItem('rememberMe', 'false');
-            
+            setShowAlert(false);
 			dispatch(logout());
+			setTimeout(() => {
 			navigation.dispatch(
 				CommonActions.reset({
 					index: 0,
 					routes: [{ name: 'Login' }],
 				})
 			);
+			}, 100);
 		} catch (error) {
 			console.error('Logout failed:', error);
 			setShowAlert(false);
