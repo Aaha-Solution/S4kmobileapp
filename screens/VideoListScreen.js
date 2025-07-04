@@ -32,6 +32,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const paidAccess = useSelector(state => state.user.paidAccess);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
+	console.log("🌐 Redux selectedLanguage:", selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
 	const isPaid = useSelector(state => state.user.isPaid);
 
@@ -61,6 +62,22 @@ const VideoListScreen = ({ navigation, route }) => {
 	useEffect(() => {
 		fetchVideos();
 	}, [language, selectedLevel, paidAccess]);
+
+	// Add this useEffect to save preferences when they change
+useEffect(() => {
+  const savePreferences = async () => {
+    if (selectedLanguage && selectedLevel) {
+      const preferences = {
+        selectedLanguage,
+        selectedLevel,
+      };
+      await AsyncStorage.setItem('selectedPreferences', JSON.stringify(preferences));
+      console.log('✅ Preferences saved:', preferences);
+    }
+  };
+  
+  savePreferences();
+}, [selectedLanguage, selectedLevel]);
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
