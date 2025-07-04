@@ -51,6 +51,9 @@ const SignupScreen = ({ navigation }) => {
 	}, []);
 
 	const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+	const validatePassword = (pwd) =>
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
+
 
 	const handleSignUp = async () => {
 		setemailError('');
@@ -75,10 +78,13 @@ const SignupScreen = ({ navigation }) => {
 		if (!password) {
 			setPasswordError('Password is required');
 			hasError = true;
-		} else if (password.length < 6) {
-			setPasswordError('Password must be at least 6 characters');
+		} else if (!validatePassword(password)) {
+			setPasswordError(
+				'Min 8 chars, 1 uppercase, 1 lowercase, 1 number & 1 special char'
+			);
 			hasError = true;
 		}
+
 
 		if (!confirmPassword) {
 			setConfirmPasswordError('Please confirm your password');
@@ -126,6 +132,22 @@ const SignupScreen = ({ navigation }) => {
 			setLoading(false);
 		}
 	};
+
+	const handlePassword = (text) => {
+		setPassword(text);
+		if (passwordError) setPasswordError('');
+
+		// show helper as user types
+		setPasswordHelperVisible(true);
+		if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+		typingTimeoutRef.current = setTimeout(
+			() => setPasswordHelperVisible(false),
+			2000
+		);
+	};
+
+
+
 
 	return (
 		<KeyboardAvoidingView
@@ -204,14 +226,9 @@ const SignupScreen = ({ navigation }) => {
 
 							<CustomTextInput
 								value={password}
-								onChangeText={(text) => {
-									setPassword(text);
-									setPasswordHelperVisible(true);
-									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-									typingTimeoutRef.current = setTimeout(() => {
-										setPasswordHelperVisible(false);
-									}, 2000);
-								}}
+								onChangeText={handlePassword}
+								placeholder="Password"
+								secureTextEntry
 								onFocus={() => {
 									setFocusedField('password');
 									setPasswordHelperVisible(true);
@@ -220,8 +237,6 @@ const SignupScreen = ({ navigation }) => {
 									setFocusedField(null);
 									setPasswordHelperVisible(false);
 								}}
-								placeholder="Password"
-								secureTextEntry
 							/>
 							{passwordHelperVisible && (
 								<View style={styles.helperCard}>

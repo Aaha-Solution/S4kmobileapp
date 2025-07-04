@@ -299,7 +299,7 @@ const PaymentScreen = ({navigation}) => {
 											{option}
 										</Text>
 										{isPaid ? (
-											<Icon name="check-circle" size={20} color="green" />
+											<Icon name="check-circle" size={20} color="#FF8C00" />
 										) : selectedItems[lang]?.includes(option) ? (
 											<Icon name="check-circle" size={20} color="green" />
 										) : null}
