@@ -20,7 +20,7 @@ const ageGroups = [
 	{ id: '2', name: 'Junior (7 & above years)' },
 ];
 
-const AgeSelectionScreen = ({ navigation }) => {
+const AgeSelectionScreen = () => {
 	const dispatch = useDispatch();
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
