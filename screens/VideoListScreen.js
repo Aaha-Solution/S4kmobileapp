@@ -352,7 +352,6 @@ const VideoListScreen = ({ navigation, route }) => {
 								}
 							}}
 						>
-							<Text style={styles.closeButtonText}>✕</Text>
 						</TouchableOpacity>
 						<Text style={styles.blurTitle}>Unlock Videos</Text>
 						<Text style={styles.blurDescription}>
@@ -545,22 +544,6 @@ const styles = StyleSheet.create({
 		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
-	},
-	closeButton: {
-		position: 'absolute',
-		top: 10,
-		right: 15,
-		width: 30,
-		height: 30,
-		borderRadius: 15,
-		backgroundColor: '#ccc',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	closeButtonText: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: '#666',
 	},
 });
 

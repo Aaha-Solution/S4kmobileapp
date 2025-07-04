@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
 	View,
 	StyleSheet,
@@ -32,6 +32,12 @@ const SignupScreen = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
 	const [keyboardVisible, setKeyboardVisible] = useState(false);
 	const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+	const [focusedField, setFocusedField] = useState(null);
+	const [usernameHelperVisible, setUsernameHelperVisible] = useState(false);
+	const [passwordHelperVisible, setPasswordHelperVisible] = useState(false);
+	const [confirmHelperVisible, setConfirmHelperVisible] = useState(false);
+	let typingTimeoutRef = useRef(null);
+
 
 	const dispatch = useDispatch();
 
@@ -153,28 +159,36 @@ const SignupScreen = ({ navigation }) => {
 								value={username}
 								onChangeText={(text) => {
 									const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
-
 									setusername(cleaned);
-									// Clear error only if new input is valid
-									if (/^[a-z]{1,6}$/.test(cleaned)) {
-										setusernameError('');
-									} else {
-										setusernameError('Username must be exactly 6 lowercase letters');
-									}
+
+									setUsernameHelperVisible(true); // show helper on typing
+
+									// Clear previous timer and start new one
+									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+									typingTimeoutRef.current = setTimeout(() => {
+										setUsernameHelperVisible(false);
+									}, 2000);
 								}}
-								onFocus={() => setIsUsernameFocused(true)}
-								onBlur={() => setIsUsernameFocused(false)}
+								onFocus={() => {
+									setFocusedField('username');
+									setUsernameHelperVisible(true);
+								}}
+								onBlur={() => {
+									setFocusedField(null);
+									setUsernameHelperVisible(false);
+								}}
 								placeholder="Username"
-								maxLength={6}   
-								autoCapitalize="none"       
+								maxLength={6}
+								autoCapitalize="none"
 							/>
-							{/* Show only while typing or when invalid */}
-							{(isUsernameFocused || username.length > 0 || usernameError) && (
-								<Text style={styles.explanationText}>
-									username should only contain 6 lower case characters or fewer
-								</Text>
+							{usernameHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>
+										Only 6 lowercase characters allowed (a–z)
+									</Text>
+								</View>
 							)}
-							{usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+
 
 							<CustomTextInput
 								value={email}
@@ -192,27 +206,62 @@ const SignupScreen = ({ navigation }) => {
 								value={password}
 								onChangeText={(text) => {
 									setPassword(text);
-									if (passwordError) setPasswordError('');
+									setPasswordHelperVisible(true);
+									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+									typingTimeoutRef.current = setTimeout(() => {
+										setPasswordHelperVisible(false);
+									}, 2000);
+								}}
+								onFocus={() => {
+									setFocusedField('password');
+									setPasswordHelperVisible(true);
+								}}
+								onBlur={() => {
+									setFocusedField(null);
+									setPasswordHelperVisible(false);
 								}}
 								placeholder="Password"
 								secureTextEntry
 							/>
-							<Text style={styles.explanationText}>Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character</Text>
+							{passwordHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>
+										At least 8 chars, 1 uppercase, 1 lowercase, 1 number & 1 special char
+									</Text>
+								</View>
+							)}
 							{passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
+
+							{/* Confirm Password */}
 							<CustomTextInput
 								value={confirmPassword}
 								onChangeText={(text) => {
 									setConfirmPassword(text);
-									if (confirmPasswordError) setConfirmPasswordError('');
+									setConfirmHelperVisible(true);
+									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+									typingTimeoutRef.current = setTimeout(() => {
+										setConfirmHelperVisible(false);
+									}, 2000);
+								}}
+								onFocus={() => {
+									setFocusedField('confirmPassword');
+									setConfirmHelperVisible(true);
+								}}
+								onBlur={() => {
+									setFocusedField(null);
+									setConfirmHelperVisible(false);
 								}}
 								placeholder="Confirm Password"
 								secureTextEntry
 							/>
-							<Text style={styles.explanationText}>Confirm Password must be same as Password</Text>
+							{confirmHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>Must match the password above</Text>
+								</View>
+							)}
 							{confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
 						</View>
-
 						<View style={styles.buttonContainer}>
 							{loading ? (
 								<ActivityIndicator size="large" color="#FF8C00" />
@@ -372,6 +421,26 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#FFE082',
 	},
+	helperCard: {
+		backgroundColor: '#FFF8DC',
+		borderRadius: 8,
+		padding: 10,
+		marginTop: 5,
+		marginBottom: 10,
+		borderWidth: 1,
+		borderColor: '#FFD700',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	helperText: {
+		color: '#333',
+		fontSize: 13,
+		fontWeight: '500',
+	},
+
 });
 
 export default SignupScreen;
