@@ -64,7 +64,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	// ✅ Confirm logout and reset state/storage
 	const handleConfirmLogout = async () => {
 		try {
-			console.log("log out pressed")
+			
 			await AsyncStorage.multiRemove([
 				'token',
 				'savedEmail',
@@ -73,6 +73,8 @@ const SettingsScreen = ({ route, navigation }) => {
 				'userProfile',
 				'selectedAvatar',
 				'selectedPreferences',
+				'Set level',
+				'userLevel'
 			]);
 			await AsyncStorage.setItem('rememberMe', 'false');
             
