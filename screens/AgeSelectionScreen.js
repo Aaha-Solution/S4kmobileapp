@@ -24,7 +24,7 @@ const AgeSelectionScreen = () => {
 	const dispatch = useDispatch();
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
-	//const navigation = useNavigation();
+	const navigation = useNavigation();
 	const [animations, setAnimations] = useState(
 		ageGroups.reduce((acc, group) => {
 			acc[group.id] = new Animated.Value(1);
