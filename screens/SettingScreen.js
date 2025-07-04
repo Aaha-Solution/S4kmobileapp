@@ -77,7 +77,7 @@ const SettingsScreen = ({ route, navigation }) => {
 				'userLevel'
 			]);
 			await AsyncStorage.setItem('rememberMe', 'false');
-
+            
 			dispatch(logout());
 			navigation.dispatch(
 				CommonActions.reset({
