@@ -144,7 +144,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     };
 
     const handleSave = async () => {
-        if (!email || !dateOfBirth || !phone || !address) {
+        if (!email || !phone || !address) {
             setAlertTitle('Validation Error');
             setAlertMessage('Please fill in all required fields.');
             setShowAlert(true);

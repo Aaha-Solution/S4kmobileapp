@@ -125,7 +125,7 @@ const ViewProfileScreen = ({ navigation }) => {
 							{[
 								{ label: 'UserName', value: profile.username },
 								{ label: 'E-Mail', value: email },
-								{ label: 'Date of Birth', value: formatDate(profile.dateOfBirth) },
+								//{ label: 'Date of Birth', value: formatDate(profile.dateOfBirth) },
 								{ label: 'Phone Number', value: profile.phone },
 								{ label: 'Address', value: profile.address, multiline: true },
 							].map((item, idx) => (
