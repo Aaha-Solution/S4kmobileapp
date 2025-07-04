@@ -264,7 +264,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                             <Text style={styles.label}>Email</Text>
                             <TextInput style={styles.input} value={email} keyboardType="email-address" />
                         </View>
-                        <View style={styles.inputGroup}>
+                        {/* <View style={styles.inputGroup}>
                             <Text style={styles.label}>Date of Birth</Text>
                             <TextInput
                                 style={[styles.input, dateError && styles.errorInput]}
@@ -275,7 +275,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 maxLength={10}
                             />
                             {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
-                        </View>
+                        </View> */}
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Phone Number</Text>
                             <TextInput

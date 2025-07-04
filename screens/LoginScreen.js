@@ -118,6 +118,7 @@ const handleLogin = async () => {
         // ✅ Set Redux state immediately
         dispatch(setLanguage(userLang));
         dispatch(setLevel(userLevel));
+        console.log("Set Redux state immediately",userLang,)
 
         if (rememberMe) {
             await Keychain.setGenericPassword(email, password);
