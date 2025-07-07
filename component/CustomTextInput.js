@@ -44,8 +44,10 @@ const styles = StyleSheet.create({
   icon: {
     position: 'absolute',
     right: 10,
-    top: '35%',
+    top: '50%',
+    transform: [{ translateY: -10 }],
   },
+  
   shadow: {
     ...Platform.select({
       ios: {
