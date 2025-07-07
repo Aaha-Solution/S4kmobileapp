@@ -56,6 +56,13 @@ const SignupScreen = ({ navigation }) => {
 
 
 	const handleSignUp = async () => {
+		// 👇 Force all inputs to finalize
+		Keyboard.dismiss();
+		console.log('username:', username);
+		console.log('email:', email);
+		console.log('password:', password);
+		console.log('confirmPassword:', confirmPassword);
+
 		setemailError('');
 		setusernameError('');
 		setPasswordError('');
