@@ -217,6 +217,7 @@ const SignupScreen = ({ navigation }) => {
 									</Text>
 								</View>
 							)}
+							{usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
 
 							<CustomTextInput
