@@ -209,8 +209,6 @@ const ResetPasswordScreen = ({ route }) => {
 			borderRadius: 30,
 			paddingVertical: 18,
 			paddingHorizontal: 40,
-			borderWidth: 3,
-			borderColor: '#FFD700',
 		},
 		decorativeElements: {
 			marginTop: 25,

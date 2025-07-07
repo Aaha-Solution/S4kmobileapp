@@ -17,7 +17,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import { useDispatch } from 'react-redux';
-
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 const { width, height } = Dimensions.get('window');
 
 const SignupScreen = ({ navigation }) => {
@@ -366,32 +366,32 @@ const styles = StyleSheet.create({
 		marginTop: -50,
 	},
 	logo: {
-		width: 160,
-		height: 130,
-		marginBottom: 10,
+		width: width * 0.4,
+		height: height * 0.15,
+		marginBottom: 20,
 	},
 	signupTitle: {
-		fontSize: 32,
-		fontWeight: '700',
-		color: '#4A90E2',
-		textShadowOffset: { width: 1, height: 1 },
-		textShadowRadius: 2,
+		fontSize: width * 0.07 ,// Adjust the multiplier as needed
+		fontWeight: 'bold',
+		color: '#333',
 		marginBottom: 20,
-		letterSpacing: 1,
-		shadowColor: '#000',
 	},
 	inputContainer: {
 		width: '100%',
 		maxWidth: 350,
+		alignItems: 'center', // ⬅️ Center children horizontally
+		alignSelf: 'center',  // ⬅️ Center the container itself in parent
 	},
+
 	errorText: {
-		color: '#FF4444',
-		fontSize: 12,
-		marginTop: -8,
-		marginBottom: 8,
-		marginLeft: 15,
-		fontWeight: '500',
-	},
+        color: '#FF4444',
+        fontSize: RFValue(11),            // Responsive font size
+        alignSelf: 'flex-start',
+        marginLeft: RFValue(10),          // Responsive left margin
+        marginTop: RFValue(-6),           // Adjusted to avoid overlap
+        marginBottom: RFValue(6),         // Responsive bottom spacing
+    },
+
 	buttonContainer: {
 		marginTop: 20,
 		alignItems: 'center',
@@ -420,6 +420,10 @@ const styles = StyleSheet.create({
 		height: height * 0.18,
 		resizeMode: 'contain',
 	},
+	logo: {
+        width: width * 0.6,
+        height: height * 0.2,
+    },
 	loginContainer: {
 		position: 'absolute',
 		bottom: 30,
@@ -434,10 +438,9 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 	},
 	loginText: {
-		color: '#fff',
 		fontSize: 16,
-		fontWeight: '600',
-	},
+		color: 'white',
+	  },
 	loginLink: {
 		textDecorationLine: 'underline',
 		fontWeight: 'bold',

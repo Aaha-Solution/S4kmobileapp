@@ -11,13 +11,12 @@ import {
     ActivityIndicator
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
 import CustomAlert from '../component/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
 import { setEmail as setReduxEmail } from '../Store/userSlice';
-
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 const { width, height } = Dimensions.get('window');
 
 const ForgotPasswordScreen = ({ navigation }) => {
@@ -143,13 +142,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
             {/* Main Content */}
             <View style={styles.mainContent}>
-                {/* <View style={styles.logoContainer}>
-                    <Image
-                        source={require('../assets/image/splash.png')}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                </View> */}
 
                 <View style={styles.titleContainer}>
                     <Animated.Text
@@ -203,12 +195,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     </View>
                 </View>
             </View>
-
-            {/* Bottom Graphics */}
-            {/* <View style={styles.bottomGraphics}>
-                <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
-            </View> */}
-
             {/* Back to Login */}
             <View style={styles.backToLoginContainer}>
                 <Pressable 
@@ -240,15 +226,15 @@ const styles = StyleSheet.create({
         top: height * 0.05,
         left: 0,
         right: 0,
-        height: 80,
+        height: height * 0.12,
         zIndex: 1,
     },
     sun: {
         position: 'absolute',
         left: 20,
         top: 0,
-        width: 50,
-        height: 50,
+        width: width * 0.12,
+        height: width * 0.12,
         resizeMode: 'contain',
     },
     cloudContainer: {
@@ -257,8 +243,8 @@ const styles = StyleSheet.create({
         top: -10,
     },
     cloud: {
-        width: 70,
-        height: 70,
+        width: width * 0.18,
+        height: width * 0.18,
         resizeMode: 'contain',
     },
     
@@ -266,41 +252,30 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 20,
-        marginTop: -80,
+        paddingHorizontal: width * 0.05,
+        marginTop: -height * 0.12,
     },
-    // logoContainer: {
-    //     marginBottom: 20,
-    //     alignItems: 'center',
-    // },
-    // logo: {
-    //     width: 180,
-    //     height: 50,
-    // },
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 30,
+        marginBottom: height * 0.03,
     },
     emoji: {
-        fontSize: 36,
+        fontSize: RFPercentage(4.0),
         marginRight: 10,
     },
     titleText: {
-        fontSize: 28,
+        fontSize: RFPercentage(4),
         fontWeight: '700',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
         letterSpacing: 1,
         shadowColor: '#000',
     },
     card: {
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         borderRadius: 20,
-        padding: 25,
+        padding: width * 0.06,
         width: '100%',
-        // maxWidth: 360,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
@@ -309,29 +284,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: RFPercentage(2.2),
         color: 'black',
         textAlign: 'center',
-        marginBottom: 25,
-        lineHeight: 22,
+        marginBottom: height * 0.03,
         fontWeight: 'bold',
-	
+        lineHeight: RFPercentage(3.2),
     },
     inputContainer: {
         width: '100%',
-        marginBottom: 20,
+        marginBottom: height * 0.025,
 		alignContent:'center',
 		justifyContent:'center'
-
     },
     errorText: {
         color: '#FF4444',
-        fontSize: 12,
-        marginTop: -10,
-        marginBottom: 10,
-        marginLeft: 15,
+        fontSize: RFPercentage(1.6),
+        marginTop: height * -0.015,
+        marginBottom: height * 0.015,
+        marginLeft: width * 0.01,
         fontWeight: '500',
-    },
+        alignSelf: 'flex-start',
+        maxWidth: '95%',
+      },
+      
     buttonContainer: {
         width: '100%',
         alignItems: 'center',
@@ -339,44 +315,23 @@ const styles = StyleSheet.create({
     sendButton: {
         backgroundColor: '#FF8C00',
         width: '70%',
-        paddingVertical: 14,
+        paddingVertical: height * 0.018,
         borderRadius: 30,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
         elevation: 5,
     },
     sendButtonText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: RFPercentage(2.2),
         fontWeight: 'bold',
         letterSpacing: 1,
     },
     loadingIndicator: {
         paddingVertical: 18,
     },
-    bottomGraphics: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: height * 0.25,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    kidsImage: {
-        position: 'absolute',
-        bottom: 85,
-        width: width * 0.45,
-        height: height * 0.18,
-        resizeMode: 'contain',
-        zIndex: 2,
-    },
     backToLoginContainer: {
         position: 'absolute',
-        bottom: 50,
+        bottom: height * 0.05,
         left: 0,
         right: 0,
         alignItems: 'center',
@@ -384,18 +339,14 @@ const styles = StyleSheet.create({
     },
     backToLoginButton: {
         backgroundColor: 'rgba(76, 175, 80, 0.9)',
-        paddingVertical: 12,
-        paddingHorizontal: 30,
+        paddingVertical: height * 0.016,
+        paddingHorizontal: width * 0.08,
         borderRadius: 25,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
         elevation: 3,
     },
     backToLoginText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: RFPercentage(2),
         textAlign: 'center',
         fontWeight: '600',
     },

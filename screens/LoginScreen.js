@@ -70,126 +70,126 @@ const LoginScreen = ({ navigation }) => {
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// Replace the handleLogin function with this fixed version
+    // Replace the handleLogin function with this fixed version
 
-const handleLogin = async () => {
-    setEmailError('');
-    setPasswordError('');
-    let hasError = false;
+    const handleLogin = async () => {
+        setEmailError('');
+        setPasswordError('');
+        let hasError = false;
 
-    if (!email) {
-        setEmailError('Email is required');
-        hasError = true;
-    } else if (!validateEmail(email)) {
-        setEmailError('Enter a valid email');
-        hasError = true;
-    }
-    if (!password) {
-        setPasswordError('Password is required');
-        hasError = true;
-    }
-    if (hasError) return;
-
-    setLoading(true);
-    try {
-        const response = await fetch('https://smile4kids-backend.onrender.com/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email_id: email, password }),
-        });
-        console.log("response", response)
-
-        const data = await response.json();
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-        if (!response.ok) {
-            Alert.alert('Login Failed', data.message || 'Invalid credentials');
-            return;
+        if (!email) {
+            setEmailError('Email is required');
+            hasError = true;
+        } else if (!validateEmail(email)) {
+            setEmailError('Enter a valid email');
+            hasError = true;
         }
-
-        await AsyncStorage.setItem('token', data.token);
-
-        const firstPaid = data.user.paid_categories?.[0];
-        const userLang = firstPaid?.language;
-        const userLevel = getBackendLevel(firstPaid?.level);
-        
-        // ✅ Set Redux state immediately
-        dispatch(setLanguage(userLang));
-        dispatch(setLevel(userLevel));
-        console.log("Set Redux state immediately",userLang,)
-
-        if (rememberMe) {
-            await Keychain.setGenericPassword(email, password);
-            
-            // ✅ Save preferences to AsyncStorage when rememberMe is true
-            await AsyncStorage.setItem(
-                'selectedPreferences',
-                JSON.stringify({
-                    selectedLevel: userLevel,
-                    selectedLanguage: userLang,
-                })
-            );
-            console.log("✅ Preferences saved:", { userLang, userLevel });
-            
-            // ✅ Update local state for UI consistency
-            setSelectedLanguage(userLang);
-            setselectedLevel(userLevel);
-        } else {
-            await Keychain.resetGenericPassword();
-            await AsyncStorage.removeItem('selectedPreferences');
-            console.log("⚠️ Preferences removed - rememberMe is false");
+        if (!password) {
+            setPasswordError('Password is required');
+            hasError = true;
         }
+        if (hasError) return;
 
-        const paidCategories = data.user.paid_categories || [];
-        const formatted = paidCategories.map(item => ({
-            language: item.language,
-            level: item.level,
-        }));
-        dispatch(setAllPaidAccess(formatted));
-        
-        dispatch(login({
-            ...data.user,
-            language: userLang,
-            level: userLevel,
-        }));
+        setLoading(true);
+        try {
+            const response = await fetch('https://smile4kids-backend.onrender.com/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email_id: email, password }),
+            });
+            console.log("response", response)
 
-        const { paid_categories } = data.user;
-        const hasValidPaidCategory =
-            Array.isArray(paid_categories) &&
-            paid_categories.some((item) => item.language && item.level);
+            const data = await response.json();
+            await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
-        dispatch(setProfile({ paid_categories }));
+            if (!response.ok) {
+                Alert.alert('Login Failed', data.message || 'Invalid credentials');
+                return;
+            }
 
-        if (hasValidPaidCategory) {
-            dispatch(setPaidStatus(true));
-            console.log("✅ isPaid dispatched");
+            await AsyncStorage.setItem('token', data.token);
 
-            navigation.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: 'MainTabs',
-                        state: {
-                            index: 0,
-                            routes: [{ name: 'Home' }],
+            const firstPaid = data.user.paid_categories?.[0];
+            const userLang = firstPaid?.language;
+            const userLevel = getBackendLevel(firstPaid?.level);
+
+            // ✅ Set Redux state immediately
+            dispatch(setLanguage(userLang));
+            dispatch(setLevel(userLevel));
+            console.log("Set Redux state immediately", userLang,)
+
+            if (rememberMe) {
+                await Keychain.setGenericPassword(email, password);
+
+                // ✅ Save preferences to AsyncStorage when rememberMe is true
+                await AsyncStorage.setItem(
+                    'selectedPreferences',
+                    JSON.stringify({
+                        selectedLevel: userLevel,
+                        selectedLanguage: userLang,
+                    })
+                );
+                console.log("✅ Preferences saved:", { userLang, userLevel });
+
+                // ✅ Update local state for UI consistency
+                setSelectedLanguage(userLang);
+                setselectedLevel(userLevel);
+            } else {
+                await Keychain.resetGenericPassword();
+                await AsyncStorage.removeItem('selectedPreferences');
+                console.log("⚠️ Preferences removed - rememberMe is false");
+            }
+
+            const paidCategories = data.user.paid_categories || [];
+            const formatted = paidCategories.map(item => ({
+                language: item.language,
+                level: item.level,
+            }));
+            dispatch(setAllPaidAccess(formatted));
+
+            dispatch(login({
+                ...data.user,
+                language: userLang,
+                level: userLevel,
+            }));
+
+            const { paid_categories } = data.user;
+            const hasValidPaidCategory =
+                Array.isArray(paid_categories) &&
+                paid_categories.some((item) => item.language && item.level);
+
+            dispatch(setProfile({ paid_categories }));
+
+            if (hasValidPaidCategory) {
+                dispatch(setPaidStatus(true));
+                console.log("✅ isPaid dispatched");
+
+                navigation.reset({
+                    index: 0,
+                    routes: [
+                        {
+                            name: 'MainTabs',
+                            state: {
+                                index: 0,
+                                routes: [{ name: 'Home' }],
+                            },
                         },
-                    },
-                ],
-            });
-        } else {
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'LanguageSelectionScreen' }],
-            });
+                    ],
+                });
+            } else {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'LanguageSelectionScreen' }],
+                });
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Login Credentials not found! Try again.');
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        Alert.alert('Error', 'Login Credentials not found! Try again.');
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
     return (
@@ -235,7 +235,10 @@ const handleLogin = async () => {
                                 </Pressable>
                             </View>
                         </View>
-                        <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
+                        <View style={{ alignItems: 'center', width: '100%' }}>
+                            <Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
+                        </View>
+
                         <View style={styles.signUpContainer}>
                             <Pressable style={styles.signUpButton} onPress={() => navigation.navigate('SignupScreen')}>
                                 <Text style={styles.signUpText}>
@@ -302,10 +305,13 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: '#FF4444',
-        fontSize: 12,
-        marginTop: -10,
-        marginBottom: 10,
+        fontSize: RFValue(11),            // Responsive font size
+        alignSelf: 'flex-start',
+        marginLeft: RFValue(10),          // Responsive left margin
+        marginTop: RFValue(-6),           // Adjusted to avoid overlap
+        marginBottom: RFValue(6),         // Responsive bottom spacing
     },
+
     buttonContainer: {
         marginBottom: 20,
     },
@@ -337,7 +343,7 @@ const styles = StyleSheet.create({
         width: 18,
         height: 18,
         borderWidth: 2,
-        borderColor: '#ccc',
+        borderColor: '#080c2f',
         borderRadius: 3,
         marginRight: 8,
     },
@@ -347,11 +353,13 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: 14,
-        color: '#444',
+        color: '#000000',
+        fontWeight: 50
     },
     forgotPasswordText: {
-        color: '#770737',
+        color: '#000000',
         textDecorationLine: 'underline',
+        fontWeight: 50
     },
     kidsImage: {
         width: width * 0.45,

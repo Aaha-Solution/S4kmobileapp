@@ -16,7 +16,8 @@ import PressableButton from '../component/PressableButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomAlert from '../component/CustomAlertMessage';
 import { useDispatch } from 'react-redux';
-
+import { Dimensions } from 'react-native';
+const { width } = Dimensions.get('window');
 const OTPVerificationScreen = ({ navigation }) => {
 	const email = useSelector((state) => state.user.email || ''); // Get email from Redux
 	const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -249,39 +250,38 @@ const styles = StyleSheet.create({
 	},
 	otpContainer: {
 		flexDirection: 'row',
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 		alignItems: 'center',
+		alignSelf: 'center',
+		width: width * 0.75,
 		marginBottom: 20,
-		gap: 10,                // Increased from 8 to 10 for better spacing
 	},
+	
 	otpWrapper: {
-		position: 'relative',
+		width: width * 0.11,
 		alignItems: 'center',
 	},
 	otpInput: {
-		width: 45,              // Increased from 35 to 45
-		height: 50,             // Increased from 40 to 50 for better proportion
+		width: width * 0.11,           // Responsive width ~ 11% of screen
+		height: width * 0.13,          // Keeps shape proportional
 		borderWidth: 2.5,
 		borderColor: '#ADD8E6',
 		borderRadius: 10,
-		fontSize: 18,           // Increased from 16 to 18
+		fontSize: width * 0.05,
 		fontWeight: '700',
 		textAlign: 'center',
 		color: '#333',
 		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
+		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
 		elevation: 2,
-		// Add these properties for better text alignment
-		lineHeight: 50,         // Match the height for perfect vertical centering
-		paddingTop: 0,          // Remove any default padding
+		lineHeight: width * 0.13,
+		paddingTop: 0,
 		paddingBottom: 0,
-		includeFontPadding: false, // Android specific - removes extra font padding
+		includeFontPadding: false,
 	},
+	
 	inputColors: [
 		'#FFE4E1', // Light pink
 		'#E6E6FA', // Lavender  
