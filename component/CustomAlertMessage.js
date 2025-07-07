@@ -17,7 +17,7 @@ const CustomAlert = ({ visible, title, message, onConfirm, onCancel }) => {
 							</TouchableOpacity>
 						)}
 						<TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={onConfirm}>
-							<Text style={styles.buttonText}>Sure</Text>
+							<Text style={styles.buttonText}>Ok</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

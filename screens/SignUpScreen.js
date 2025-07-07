@@ -66,7 +66,6 @@ const SignupScreen = ({ navigation }) => {
 			setusernameError('Username is required');
 			hasError = true;
 		}
-
 		if (!email.trim()) {
 			setemailError('Email is required');
 			hasError = true;
@@ -124,6 +123,7 @@ const SignupScreen = ({ navigation }) => {
 					if (data.errors.password) setPasswordError(data.errors.password);
 				} else {
 					Alert.alert('Sign Up Failed', data.message || 'Something went wrong');
+					console.log("error",data.message)
 				}
 			}
 		} catch (error) {

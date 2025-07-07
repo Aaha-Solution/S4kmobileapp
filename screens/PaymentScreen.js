@@ -17,7 +17,7 @@ import { setPaidStatus } from '../Store/userSlice';
 import { setAllPaidAccess } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
-const PaymentScreen = ({navigation}) => {
+const PaymentScreen = ({ navigation }) => {
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
@@ -83,7 +83,7 @@ const PaymentScreen = ({navigation}) => {
 			setTotalAmount(res)
 			console.log("res", res)
 
-			
+
 			// if (response.ok && typeof data.amount === 'number') {
 			// 	setTotalAmount(data.amount); // 👈 Set total from backend
 			// } else {
@@ -156,6 +156,9 @@ const PaymentScreen = ({navigation}) => {
 	};
 
 	const HandlePay = async () => {
+		if (loading || totalAmount === 0 || isEverythingPaid) {
+		return;
+	}
 		try {
 			setLoading(true);
 			const token = await AsyncStorage.getItem('token');
@@ -243,8 +246,8 @@ const PaymentScreen = ({navigation}) => {
 				await fetchPaidCourses();
 				//navigate to home
 				navigation.navigate('MainTabs', {
-				screen: 'Home',
-			});
+					screen: 'Home',
+				});
 			}
 		} catch (err) {
 			console.error("PaymentSheet Error:", err);
@@ -271,6 +274,14 @@ const PaymentScreen = ({navigation}) => {
 			return { ...prev, [language]: updated };
 		});
 	};
+
+	const isEverythingPaid = (() => {
+		const allCombos = languages.flatMap(
+			lang => ageOptions.map(age => `${lang}-${getFormattedLevel(age)}`)
+		);
+		return allCombos.every(combo => paidSet.has(combo));
+	})();
+
 
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.gradientContainer}>
@@ -299,7 +310,7 @@ const PaymentScreen = ({navigation}) => {
 											{option}
 										</Text>
 										{isPaid ? (
-											<Icon name="check-circle" size={20} color="#FF8C00" />
+											<Icon name="check-circle" size={20} color="#A9A9A9" />
 										) : selectedItems[lang]?.includes(option) ? (
 											<Icon name="check-circle" size={20} color="green" />
 										) : null}
@@ -312,16 +323,26 @@ const PaymentScreen = ({navigation}) => {
 				))}
 
 				<View style={styles.totalContainer}>
-					<Text style={styles.totalLabel}>Total</Text>
+					<Text style={styles.totalLabel}>Total Cost</Text>
 					<Text style={styles.totalValue}>£{totalAmount}</Text>
 				</View>
 
 				<PressableButton
-					title={loading ? "Processing..." : "Pay Now"}
-					disabled={loading || totalAmount === 0}
+					title={
+						isEverythingPaid
+							? "All Courses Purchased"
+							: loading
+								? "Processing..."
+								: "Pay Now"
+					}
+					disabled={loading || totalAmount === 0 || isEverythingPaid}
 					onPress={HandlePay}
-					style={styles.payButton}
+					style={[
+						styles.payButton,
+						(isEverythingPaid || totalAmount === 0) && { opacity: 0.5 },
+					]}
 				/>
+
 			</ScrollView>
 		</LinearGradient>
 	);

@@ -63,7 +63,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 				Alert.alert("Success", data.message);
 				navigation.navigate('ResetPasswordScreen', { email, otp: otp.join('') });
 			} else {
-				setAlertTitle("Error");
+				setAlertTitle("Invalid");
 				setAlertMessage(data.message);
 				setShowAlert(true);
 			}

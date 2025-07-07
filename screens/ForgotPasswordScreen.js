@@ -109,7 +109,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     dispatch(setReduxEmail(email));
                     navigation.navigate('OTPVerification');
                 } else {
-                    Alert.alert("Error", data.message || "Something went wrong.");
+                    Alert.alert("Invalid","This email is not registered. Please check or sign up.");
                     console.error("Server error:", data);
                 }
             } else {

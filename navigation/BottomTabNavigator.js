@@ -31,10 +31,10 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
-	console.log("level",selectedLevel)
+	console.log("level", selectedLevel)
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
-	console.log("value",value)
+	console.log("value", value)
 	const [items, setItems] = useState(AGE_GROUP_ITEMS);
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
@@ -74,18 +74,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	};
 
 	const handleTabPress = (route) => {
-		// if (!isPaid) {
-		// 	Toast.show({
-		// 		type: 'error',
-		// 		text1: '⚠ Please complete payment to proceed further',
-		// 		position: 'bottom',
-		// 		visibilityTime: 3000,
-		// 	});
-		// 	return;
-		// }
-
 		handleOutsidePress();
-
 		if (route.name === 'level') {
 			setOpen(prev => !prev);
 		} else {
@@ -127,7 +116,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 							<View key={route.key} style={styles.ageTabContainer}>
 								<TouchableOpacity onPress={() => handleTabPress(route)} style={styles.tabButton}>
 									<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
-									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray'}]}>{label}</Text>
+									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
 								</TouchableOpacity>
 								{open && (
 									<View style={styles.dropdownWrapper}>
@@ -165,6 +154,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 											listMode="SCROLLVIEW"
 											scrollViewProps={{ nestedScrollEnabled: true }}
 											disabled={!isPaid}
+											
 										/>
 									</View>
 								)}
@@ -214,10 +204,10 @@ const BottomTabNavigator = () => {
 				},
 			}}
 		>
-			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Setting' }} />
 			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
 			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
-			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} /> 
+			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} />
+			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Setting' }} />
 		</Tab.Navigator>
 	);
 };

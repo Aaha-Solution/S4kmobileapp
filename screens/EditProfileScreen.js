@@ -16,7 +16,6 @@ const EditProfileScreen = ({ route, navigation }) => {
     const dispatch = useDispatch();
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
-    const username = profile?.username || '';
     const routeAvatar = route.params?.selectedAvatar;
     const BASE_URL = 'https://smile4kids-backend.onrender.com';
 
@@ -24,6 +23,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const [address, setAddress] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [phone, setPhone] = useState('');
+    const [username,setUsername]=useState('');
 
     useEffect(() => {
         if (profile) {
@@ -31,11 +31,12 @@ const EditProfileScreen = ({ route, navigation }) => {
             setAddress(profile.address || '');
             setDateOfBirth(profile.dateOfBirth || '');
             setPhone(profile.phone || '');
+            setUsername(profile?.username || '')
         }
     }, [profile]);
 
     const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);  
     const [phoneError, setPhoneError] = useState('');
     const [dateError, setDateError] = useState('');
     const [showAlert, setShowAlert] = useState(false);
@@ -127,21 +128,20 @@ const EditProfileScreen = ({ route, navigation }) => {
     };
 
     const HandlePhonenumber = (number) => {
-        const cleaned = number.replace(/\D/g, '');
-        setPhone(cleaned);
-        if (!cleaned) {
+        const cleanedNumber = number.replace(/\D/g, ''); // keep only digits
+        const ukMobileRegex = /^07\d{9}$/;
+
+        setPhone(number); // still show original input
+
+        if (!cleanedNumber) {
             setPhoneError('Phone number is required');
-        } else if (cleaned.length !== 10) {
-            setPhoneError('Phone number must be 10 digits');
+        } else if (!ukMobileRegex.test(cleanedNumber)) {
+            setPhoneError('Enter a valid UK mobile number (11 digits starting with 07)');
         } else {
             setPhoneError('');
         }
     };
 
-    const handleDateChange = (text) => {
-        const formatted = validateAndFormatDate(text);
-        setDateOfBirth(formatted);
-    };
 
     const handleSave = async () => {
         if (!email || !phone || !address) {
@@ -258,24 +258,17 @@ const EditProfileScreen = ({ route, navigation }) => {
                     <View style={styles.formContainer}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>UserName</Text>
-                            <TextInput style={styles.input} value={profile.username} editable={false} />
+                            <TextInput style={styles.input} value={username} 
+                            onChangeText={(text) => {
+									const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
+									setUsername(cleaned);
+								}} />
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
-                            <TextInput style={styles.input} value={email} keyboardType="email-address" />
+                            <TextInput style={styles.input} value={email} editable={false} keyboardType="email-address" />
                         </View>
-                        {/* <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Date of Birth</Text>
-                            <TextInput
-                                style={[styles.input, dateError && styles.errorInput]}
-                                value={dateOfBirth}
-                                onChangeText={handleDateChange}
-                                placeholder="YYYY/MM/DD"
-                                keyboardType="numeric"
-                                maxLength={10}
-                            />
-                            {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
-                        </View> */}
+
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Phone Number</Text>
                             <TextInput
@@ -283,7 +276,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 value={phone}
                                 onChangeText={HandlePhonenumber}
                                 keyboardType="phone-pad"
-                                maxLength={10}
+                                maxLength={11}
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
                         </View>
