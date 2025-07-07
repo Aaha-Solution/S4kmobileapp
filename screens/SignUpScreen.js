@@ -417,8 +417,9 @@ const styles = StyleSheet.create({
 	},
 	kidsImage: {
 		width: width * 0.45,
-		height: height * 0.18,
-		resizeMode: 'contain',
+        height: width * 0.25,
+        resizeMode: 'contain',
+        marginTop: 20,
 	},
 	logo: {
         width: width * 0.6,
@@ -447,11 +448,13 @@ const styles = StyleSheet.create({
 		color: '#FFE082',
 	},
 	helperCard: {
+		alignSelf: 'flex-start',                 // aligns to the left of parent
 		backgroundColor: '#FFF8DC',
-		borderRadius: 8,
-		padding: 10,
-		marginTop: 5,
-		marginBottom: 10,
+		borderRadius: width * 0.02,
+		paddingVertical: height * 0.01,
+		paddingHorizontal: width * 0.03,
+		marginTop: height * 0.005,
+		marginBottom: height * 0.015,
 		borderWidth: 1,
 		borderColor: '#FFD700',
 		shadowColor: '#000',
@@ -459,11 +462,14 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.2,
 		shadowRadius: 4,
 		elevation: 3,
+		width: '100%',                           // match input width
+		maxWidth: width * 0.85,                  // same as input box
 	},
 	helperText: {
 		color: '#333',
-		fontSize: 13,
+		fontSize: RFValue(11),                   // responsive font size
 		fontWeight: '500',
+		textAlign: 'left',
 	},
 
 });
