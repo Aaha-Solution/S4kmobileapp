@@ -46,11 +46,13 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: 'bold',
 		marginBottom: 10,
+		color: '#000000',
 	},
 	message: {
 		fontSize: 16,
 		textAlign: 'center',
 		marginBottom: 20,
+		color: '#000000', // change to your desired color
 	},
 	buttonContainer: {
 		flexDirection: 'row',

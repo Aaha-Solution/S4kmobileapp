@@ -51,9 +51,15 @@ const LoginScreen = ({ navigation }) => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 const userData = await AsyncStorage.getItem('user');
-                if (!token) return;
-                if (token && userData) {
-                    dispatch(login(JSON.parse(userData)));
+    
+                if (!token || !userData) return;
+    
+                const user = JSON.parse(userData);
+                dispatch(login(user));
+    
+                if (user.is_admin === 1) {
+                    navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
+                } else {
                     navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
                 }
             } catch (error) {
@@ -67,6 +73,7 @@ const LoginScreen = ({ navigation }) => {
             isMounted = false;
         };
     }, [navigation]);
+    
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -76,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
         setEmailError('');
         setPasswordError('');
         let hasError = false;
-
+    
         if (!email) {
             setEmailError('Email is required');
             hasError = true;
@@ -84,99 +91,79 @@ const LoginScreen = ({ navigation }) => {
             setEmailError('Enter a valid email');
             hasError = true;
         }
+    
         if (!password) {
             setPasswordError('Password is required');
             hasError = true;
         }
+    
         if (hasError) return;
-
+    
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kids-backend.onrender.com/login', {
+            const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email_id: email, password }),
             });
-            console.log("response", response)
-
+    
             const data = await response.json();
-            await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-            if (!response.ok) {
-                Alert.alert('Login Failed', data.message || 'Invalid credentials');
+    
+            if (!response.ok || !data?.user) {
+                Alert.alert('Login Failed', data?.message || 'Invalid credentials');
                 return;
             }
+    
+            const { user, token } = data;
+    
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+            await AsyncStorage.setItem('token', token);
+            console.log("🧪 is_admin:", user.is_admin);
 
-            await AsyncStorage.setItem('token', data.token);
-
-            const firstPaid = data.user.paid_categories?.[0];
+            if (user.is_admin === 1) {
+                // ✅ Admin login: redirect to AdminPanel
+                dispatch(login(user));
+                navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
+                return;
+            }
+    
+            // Normal user login logic
+            const firstPaid = user.paid_categories?.[0];
             const userLang = firstPaid?.language;
             const userLevel = getBackendLevel(firstPaid?.level);
-
-            // ✅ Set Redux state immediately
+    
             dispatch(setLanguage(userLang));
             dispatch(setLevel(userLevel));
-            console.log("Set Redux state immediately", userLang,)
-
+    
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
-
-                // ✅ Save preferences to AsyncStorage when rememberMe is true
-                await AsyncStorage.setItem(
-                    'selectedPreferences',
-                    JSON.stringify({
-                        selectedLevel: userLevel,
-                        selectedLanguage: userLang,
-                    })
-                );
-                console.log("✅ Preferences saved:", { userLang, userLevel });
-
-                // ✅ Update local state for UI consistency
-                setSelectedLanguage(userLang);
-                setselectedLevel(userLevel);
+                await AsyncStorage.setItem('selectedPreferences', JSON.stringify({ selectedLanguage: userLang, selectedLevel: userLevel }));
             } else {
                 await Keychain.resetGenericPassword();
                 await AsyncStorage.removeItem('selectedPreferences');
-                console.log("⚠️ Preferences removed - rememberMe is false");
             }
-
-            const paidCategories = data.user.paid_categories || [];
-            const formatted = paidCategories.map(item => ({
+    
+            const formatted = (user.paid_categories || []).map(item => ({
                 language: item.language,
                 level: item.level,
             }));
             dispatch(setAllPaidAccess(formatted));
-
+    
             dispatch(login({
-                ...data.user,
+                ...user,
                 language: userLang,
                 level: userLevel,
             }));
-
-            const { paid_categories } = data.user;
-            const hasValidPaidCategory =
-                Array.isArray(paid_categories) &&
-                paid_categories.some((item) => item.language && item.level);
-
-            dispatch(setProfile({ paid_categories }));
-
-            if (hasValidPaidCategory) {
-                dispatch(setPaidStatus(true));
-                console.log("✅ isPaid dispatched");
-
+    
+            dispatch(setProfile({ paid_categories: user.paid_categories }));
+            dispatch(setPaidStatus(Boolean(user.paid_categories?.length)));
+    
+            if (user.paid_categories?.length) {
                 navigation.reset({
                     index: 0,
-                    routes: [
-                        {
-                            name: 'MainTabs',
-                            state: {
-                                index: 0,
-                                routes: [{ name: 'Home' }],
-                            },
-                        },
-                    ],
+                    routes: [{ name: 'MainTabs' }],
                 });
             } else {
                 navigation.reset({
@@ -185,12 +172,13 @@ const LoginScreen = ({ navigation }) => {
                 });
             }
         } catch (error) {
-            Alert.alert('Error', 'Login Credentials not found! Try again.');
+            console.error('Login error:', error);
+            Alert.alert('Error', 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
-
+    
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -343,7 +331,7 @@ const styles = StyleSheet.create({
         width: 18,
         height: 18,
         borderWidth: 2,
-        borderColor: '#080c2f',
+        borderColor: '#65358c',
         borderRadius: 3,
         marginRight: 8,
     },
@@ -353,11 +341,11 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: 14,
-        color: '#000000',
+        color: '#65358c',
         fontWeight: 50
     },
     forgotPasswordText: {
-        color: '#000000',
+        color: '#65358c',
         textDecorationLine: 'underline',
         fontWeight: 50
     },

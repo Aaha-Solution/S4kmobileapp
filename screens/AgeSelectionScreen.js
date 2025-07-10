@@ -5,8 +5,9 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	Animated,
-	FlatList,
 	Image,
+	ScrollView,
+	Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,7 +15,10 @@ import { setLevel } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import CustomAlert from '../component/CustomAlertMessage';
-import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
+import { getBackendLevel } from '../utils/levelUtils';
+
+const { width, height } = Dimensions.get('window');
+
 const ageGroups = [
 	{ id: '1', name: 'PreSchool (4–6 years)' },
 	{ id: '2', name: 'Junior (7 & above years)' },
@@ -25,7 +29,7 @@ const AgeSelectionScreen = () => {
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
 	const navigation = useNavigation();
-	const [animations, setAnimations] = useState(
+	const [animations] = useState(
 		ageGroups.reduce((acc, group) => {
 			acc[group.id] = new Animated.Value(1);
 			return acc;
@@ -50,10 +54,8 @@ const AgeSelectionScreen = () => {
 
 	const handleAgeSelect = (group) => {
 		animateSelection(group.id);
-		const backendLevel = getBackendLevel(group.name); // 🔁 Convert to backend-safe value
-		console.log("backendlevel", backendLevel)
+		const backendLevel = getBackendLevel(group.name);
 		dispatch(setLevel(backendLevel));
-		console.log("age", group.name)
 	};
 
 	const handleNext = () => {
@@ -71,48 +73,47 @@ const AgeSelectionScreen = () => {
 		setShowAlert(false);
 	};
 
-	const renderItem = ({ item }) => {
-		const isSelected = selectedLevel === getBackendLevel(item.name);
-		return (
-			<TouchableOpacity
-				onPress={() => handleAgeSelect(item)}
-				style={{ width: '100%', alignItems: 'center' }}
-			>
-				<Animated.View
-					style={[
-						styles.ageBox,
-						isSelected && styles.selectedBox,
-						{ transform: [{ scale: animations[item.id] }] },
-					]}
-				>
-					<Text style={[styles.ageText, isSelected && styles.selectedText]}>
-						{item.name}
-					</Text>
-				</Animated.View>
-			</TouchableOpacity>
-		);
-	};
-
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-			<View style={styles.innerContainer}>
+			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<Image
 					source={require('../assets/image/toy.png')}
 					style={styles.image}
 					resizeMode="contain"
 				/>
-				<Text style={styles.title}> Pick Your Age Group!</Text>
 
-				<FlatList
-					data={ageGroups}
-					renderItem={renderItem}
-					keyExtractor={(item) => item.id}
-					contentContainerStyle={styles.ageList}
-				/>
+				<Text style={styles.title}>Pick Your Age Group!</Text>
+
+				<View style={styles.ageList}>
+					{ageGroups.map((item) => {
+						const isSelected = selectedLevel === getBackendLevel(item.name);
+						return (
+							<TouchableOpacity
+								key={item.id}
+								onPress={() => handleAgeSelect(item)}
+								style={styles.ageTouchable}
+							>
+								<Animated.View
+									style={[
+										styles.ageBox,
+										isSelected && styles.selectedBox,
+										{ transform: [{ scale: animations[item.id] }] },
+									]}
+								>
+									<Text style={[styles.ageText, isSelected && styles.selectedText]}>
+										{item.name}
+									</Text>
+								</Animated.View>
+							</TouchableOpacity>
+						);
+					})}
+				</View>
+
 				<View style={styles.bottomButtonContainer}>
 					<PressableButton title="Next ➡️" onPress={handleNext} style={styles.nextButton} />
 				</View>
-			</View>
+			</ScrollView>
+
 			<CustomAlert
 				visible={showAlert}
 				title="Selection Required"
@@ -127,50 +128,54 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	innerContainer: {
-		flex: 1,
+	scrollContent: {
+		flexGrow: 1,
 		alignItems: 'center',
-		paddingHorizontal: 20,
-		paddingTop: 60,
+		justifyContent: 'center',
+		paddingVertical: height * 0.05,
+		paddingHorizontal: width * 0.05,
 	},
 	image: {
-		width: 140,
-		height: 140,
-		marginBottom: 20,
+		width: width * 0.35,
+		height: height * 0.2,
+		marginBottom: height * 0.025,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: width * 0.06,
 		fontWeight: 'bold',
 		color: '#4B0082',
-		marginBottom: 6,
+		marginBottom: height * 0.03,
 		textAlign: 'center',
 	},
 	ageList: {
 		width: '100%',
 		alignItems: 'center',
-		paddingBottom: 20,
+	},
+	ageTouchable: {
+		width: '100%',
+		alignItems: 'center',
+		marginBottom: height * 0.015,
 	},
 	ageBox: {
-		width: 300,
-		height: 55,
-		backgroundColor: '#ffffff',
-		marginVertical: 8,
+		width: '85%',
+		height: height * 0.07,
+		backgroundColor: '#fff',
 		borderRadius: 25,
 		justifyContent: 'center',
 		alignItems: 'center',
 		// elevation: 4,
 		// shadowColor: '#000',
-		// shadowOpacity: 0.1,
-		// shadowRadius: 5,
 		// shadowOffset: { width: 1, height: 2 },
+		// shadowOpacity: 0.2,
+		// shadowRadius: 4,
 	},
 	selectedBox: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
-		borderColor: 'rgba(76, 175, 80, 0.9)',
-		borderWidth: 1.5,
+		borderColor: '#4CAF50',
+		borderWidth: 2,
 	},
 	ageText: {
-		fontSize: 17,
+		fontSize: width * 0.045,
 		fontWeight: '600',
 		color: '#000',
 	},
@@ -179,13 +184,13 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	nextButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 35,
+		paddingVertical: height * 0.015,
+		paddingHorizontal: width * 0.15,
 		borderRadius: 15,
+		backgroundColor: '#FF8C00',
 	},
 	bottomButtonContainer: {
-		marginTop: 100,
-		marginBottom: 100,
+		marginTop: height * 0.05,
 	},
 });
 

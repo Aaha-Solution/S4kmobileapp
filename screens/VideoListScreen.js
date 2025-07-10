@@ -56,7 +56,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
-	const baseURL = 'https://smile4kids-backend.onrender.com/videos/by-category';
+	const baseURL = 'https://smile4kidsbackend-production-159e.up.railway.app/videos/by-category';
 
 	// Fixed: Always fetch videos when component mounts or dependencies change
 	useEffect(() => {
@@ -247,7 +247,7 @@ useEffect(() => {
 				level: cleanLevel
 			}];
 
-			const response = await fetch('https://smile4kids-backend.onrender.com/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
