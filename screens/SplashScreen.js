@@ -17,7 +17,7 @@ const SplashScreen = ({ navigation }) => {
 	const fetchPaidCourses = async (userId, token) => {
 		console.log("⏳ Fetching paid videos for user:", userId);
 		try {
-			const response = await fetch(`https://smile4kids-backend.onrender.com/payment/my-paid-videos?user_id=${userId}`, {
+			const response = await fetch(`https://smile4kidsbackend-production-159e.up.railway.app/payment/my-paid-videos?user_id=${userId}`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`, // ✅ attach token here
@@ -56,14 +56,20 @@ const SplashScreen = ({ navigation }) => {
 					dispatch(login(parsedUser));
 					console.log("parseduser", parsedUser);
 
+					// ✅ Admin check: if true, redirect to AdminPannel
+					if (parsedUser.is_admin === 1) {
+						console.log('👨‍💼 Admin detected. Redirecting to AdminPannel');
+						navigation.replace('AdminPannel');
+						return;
+					}
+
+					// ✅ Fetch paid categories
 					let selectedLanguage = null;
 					let selectedLevel = null;
-
-					// ✅ Always fetch from backend
 					const paidData = await fetchPaidCourses(parsedUser.users_id, token);
 
 					if (Array.isArray(paidData) && paidData.length > 0) {
-						dispatch(setPaidStatus(true)); // ✅ only if there's paid access
+						dispatch(setPaidStatus(true));
 
 						const prefs = selectedPreferences ? JSON.parse(selectedPreferences) : null;
 						const lastPaid = prefs?.lastPaidSelection;
@@ -85,32 +91,22 @@ const SplashScreen = ({ navigation }) => {
 						}
 					}
 
-					// If no paid data or selection, fallback to stored preferences
-					if ((!selectedLanguage || !selectedLevel)) {
+					// ✅ Fallback: No valid language/level
+					if (!selectedLanguage || !selectedLevel) {
 						await AsyncStorage.removeItem('selectedPreferences');
 						console.log('⚠️ No valid language/level. Redirecting to LanguageSelectionScreen');
 						navigation.replace('LanguageSelectionScreen');
 						return;
 					}
 
-					// // Fallback defaults
-					// if (!selectedLanguage) {
-					// 	selectedLanguage = 'Hindi';
-					// 	console.log('✅ Set default language: Hindi');
-					// }
-
-					// if (!selectedLevel) {
-					// 	selectedLevel = 'Junior';
-					// 	console.log('✅ Set default level: Junior');
-					// }
-
 					dispatch(setLanguage(selectedLanguage));
-					console.log('✅ Set language:', selectedLanguage);
-
 					dispatch(setLevel(selectedLevel));
+
+					console.log('✅ Set language:', selectedLanguage);
 					console.log('✅ Set level:', selectedLevel);
 
 					navigation.replace('MainTabs');
+
 				} else {
 					navigation.replace('Login');
 				}

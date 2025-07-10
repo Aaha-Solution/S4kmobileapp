@@ -1,42 +1,46 @@
-import React, { useState,useEffect } from 'react';
-import { View, ActivityIndicator, TouchableOpacity, StyleSheet, StatusBar, Dimensions, Text, BackHandler  } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Dimensions,
+  Text,
+  BackHandler,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-const { width } = Dimensions.get('window');
 
-  
+const { width } = Dimensions.get('window');
 
 const VideoPlayerScreen = ({ route, navigation }) => {
   const { videoUri } = route.params;
+
   const [loading, setLoading] = useState(true);
   const [paused, setPaused] = useState(false);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(false);
+  const [token, setToken] = useState(null);
+  const [tokenLoaded, setTokenLoaded] = useState(false); // ✅ New flag
 
-  // Extract video URL from the API response object
+  // Extract URL from object or string
   const getVideoSource = (videoData) => {
-    console.log('📹 Video data received:', videoData);
-    
-    // If it's already a direct URI/path (from static files)
     if (typeof videoData === 'string' || typeof videoData === 'number') {
       return videoData;
     }
-    
-    // If it's an API response object, extract the video URL
     if (videoData && typeof videoData === 'object') {
-      // Common video URL field names in API responses
-      const videoUrl = videoData.videoUrl || 
-                      videoData.url || 
-                      videoData.videoUri || 
-                      videoData.uri || 
-                      videoData.video_url ||
-                      videoData.file_url ||
-                      videoData.src;
-      
-      console.log('📹 Extracted video URL:', videoUrl);
-      return videoUrl;
+      return (
+        videoData.videoUrl ||
+        videoData.url ||
+        videoData.videoUri ||
+        videoData.uri ||
+        videoData.video_url ||
+        videoData.file_url ||
+        videoData.src
+      );
     }
-    
     return null;
   };
 
@@ -44,7 +48,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 
   const handleLoad = (data) => {
     setLoading(false);
-    setDuration(data.duration); // duration in seconds
+    setDuration(data.duration);
     setError(false);
   };
 
@@ -53,29 +57,54 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   };
 
   const handleError = (error) => {
-    console.error('Video playback error:', error);
+    console.error('❌ Video playback error:', JSON.stringify(error, null, 2));
     setLoading(false);
     setError(true);
   };
 
-  // Convert seconds to MM:SS
-  const formatTime = (timeSec) => {
-    const minutes = Math.floor(timeSec / 60);
-    const seconds = Math.floor(timeSec % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
+  // ✅ Fetch token and wait
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedToken) {
+          setToken(storedToken);
+        } else {
+          console.warn('⚠️ No auth token found in AsyncStorage');
+          setError(true);
+        }
+      } catch (e) {
+        console.error('❌ Failed to fetch token:', e);
+        setError(true);
+      } finally {
+        setTokenLoaded(true); // ✅ Mark as finished
+      }
+    };
 
+    fetchToken();
+  }, []);
+
+  // Handle back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.navigate('MainTabs');
       return true;
     });
-      return () => backHandler.remove(); // cleanup
- 
-  },[]);
 
-  // If no valid video source found
-  if (!videoSource) {
+    return () => backHandler.remove();
+  }, []);
+
+  // ⏳ Wait until token is fetched
+  if (!tokenLoaded) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#9346D2" />
+        <Text style={styles.loadingText}>Preparing video...</Text>
+      </View>
+    );
+  }
+
+  if (!videoSource || !token) {
     return (
       <View style={styles.container}>
         <StatusBar hidden />
@@ -84,40 +113,40 @@ const VideoPlayerScreen = ({ route, navigation }) => {
         </TouchableOpacity>
         <View style={styles.errorContainer}>
           <Icon name="error" size={50} color="#ff6b6b" />
-          <Text style={styles.errorText}>Video source not found</Text>
-          <Text style={styles.errorSubText}>
-            Please check the video URL or try again later
-          </Text>
+          <Text style={styles.errorText}>Video source or token not found</Text>
         </View>
       </View>
     );
   }
-
+  console.log('📺 Video URI:', videoSource);
+  console.log('🛂 Sent Token:', token);
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-
-      {/* Back button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={28} color="#fff" />
       </TouchableOpacity>
 
-      {/* Video Player */}
       <Video
-        source={{ uri: videoSource }}
+        source={{
+          uri: videoSource.includes('/signed-stream/')
+            ? `${videoSource}?token=${token}`
+            : videoSource
+        }}
         style={styles.video}
         resizeMode="contain"
+        onLoadStart={() => console.log('📥 Loading started:', videoSource)}
         onBuffer={handleBuffer}
         onLoad={handleLoad}
         onError={handleError}
         paused={paused}
-        controls={true}
+        controls
         allowsExternalPlayback={false}
         playWhenInactive={false}
         playInBackground={false}
       />
 
-      {/* Loading indicator */}
+
       {loading && !error && (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color="#9346D2" />
@@ -125,13 +154,12 @@ const VideoPlayerScreen = ({ route, navigation }) => {
         </View>
       )}
 
-      {/* Error state */}
       {error && (
         <View style={styles.errorContainer}>
           <Icon name="error" size={50} color="#ff6b6b" />
           <Text style={styles.errorText}>Failed to load video</Text>
-          <TouchableOpacity 
-            style={styles.retryButton} 
+          <TouchableOpacity
+            style={styles.retryButton}
             onPress={() => {
               setError(false);
               setLoading(true);
@@ -159,6 +187,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'black',
   },
   loadingText: {
     color: '#fff',
@@ -175,22 +204,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   errorContainer: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#000000AA',
   },
   errorText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
-    textAlign: 'center',
-  },
-  errorSubText: {
-    color: '#ccc',
-    fontSize: 14,
-    marginTop: 5,
     textAlign: 'center',
   },
   retryButton: {

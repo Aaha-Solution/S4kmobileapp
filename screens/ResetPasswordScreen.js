@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 	}
 
 		try{
-			const response = await fetch ("https://smile4kids-backend.onrender.com/forgot/reset-password",{
+			const response = await fetch ("https://smile4kidsbackend-production-159e.up.railway.app/forgot/reset-password",{
 				method:"POST",
 				headers:{
 					"Content-type":"application/json"

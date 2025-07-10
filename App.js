@@ -24,6 +24,7 @@ import ChangePasswordScreen from './screens/ChangePasswordScreen.js';
 import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SignupScreen from './screens/SignUpScreen.js';
+import AdminPannel from './screens/AdminPannelScreen.js';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Stack = createStackNavigator();
@@ -58,6 +59,7 @@ const App = () => {
           <NavigationContainer>
             <Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false }}>
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
+              <Stack.Screen name="AdminPannel" component={AdminPannel} />
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
               <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
@@ -70,7 +72,7 @@ const App = () => {
                   title: 'Language',
                   headerTitleAlign: 'center',
                   headerStyle: { backgroundColor: '#87CEEB' },
-                  headerTitleStyle: { fontWeight: 'bold' },
+                  headerTitleStyle: { fontWeight: 'bold',color: '#4B0082', },
                   headerLeft: () => null,
                 }}
               />
@@ -82,7 +84,7 @@ const App = () => {
                   title: 'Age Group',
                   headerTitleAlign: 'center',
                   headerStyle: { backgroundColor: '#87CEEB' },
-                  headerTitleStyle: { fontWeight: 'bold' },
+                  headerTitleStyle: { fontWeight: 'bold',color: '#4B0082' },
                 }}
               />
               <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
@@ -95,7 +97,7 @@ const App = () => {
                   headerTitle: 'Profile',
                   headerTitleAlign: 'center',
                   headerTransparent: true,
-                  headerStyle: { backgroundColor: '#87CEEB' },
+                  headerStyle: { backgroundColor: '#87CEEB', color: '#4B0082' },
                   headerLeft: () => (
                     <Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
                   )
@@ -110,7 +112,7 @@ const App = () => {
                   headerTitleAlign: 'center',
                   headerTransparent: true,
                   headerStyle: { backgroundColor: '#87CEEB' },
-                  headerTitleStyle: { fontWeight: 'bold' },
+                  headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
                   headerLeft: () => (
                     <Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('MainTabs', { screen: 'Setting' })} />
                   )

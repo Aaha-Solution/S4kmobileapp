@@ -17,7 +17,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
-    const BASE_URL = 'https://smile4kids-backend.onrender.com';
+    const BASE_URL = 'https://smile4kidsbackend-production-159e.up.railway.app';
 
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     formContainer: { padding: 20 },
     inputGroup: { marginBottom: 20 },
     label: { fontSize: 16, color: '#666', marginBottom: 8 },
-    input: { backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+    input: { backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', color: '#000' },
     errorInput: { borderColor: 'red' },
     errorText: { color: 'red', fontSize: 12, marginTop: 5 },
     addressInput: { height: 100, textAlignVertical: 'top', backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' }
