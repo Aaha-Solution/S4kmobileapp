@@ -13,7 +13,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { Dimensions } from 'react-native';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
@@ -21,7 +21,7 @@ import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 
 const Tab = createBottomTabNavigator();
-
+const { width, height } = Dimensions.get('window');
 const AGE_GROUP_ITEMS = [
 	{ label: 'PreSchool (4-6 years)', value: 'PreSchool (4-6 years)' },
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
@@ -101,7 +101,10 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	return (
 		<TouchableWithoutFeedback onPress={handleOutsidePress}>
-			<View style={styles.tabBarContainer}>
+			<View style={[
+				styles.tabBarContainer,
+				currentRouteRef.current === 'level' && { bottom: 50 } // raise only for 'level' tab
+			]}>
 				{state.routes.map((route, index) => {
 					const { options } = descriptors[route.key];
 					const label = options.tabBarLabel ?? options.title ?? route.name;
@@ -154,7 +157,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 											listMode="SCROLLVIEW"
 											scrollViewProps={{ nestedScrollEnabled: true }}
 											disabled={!isPaid}
-											
+
 										/>
 									</View>
 								)}
@@ -221,7 +224,10 @@ const styles = StyleSheet.create({
 		paddingVertical: 5,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
-		position: 'relative',
+		position: 'absolute',     // Required for `bottom` to work
+		bottom: 0,                 // default position
+		left: 0,
+		right: 0,
 		zIndex: 1,
 	},
 	ageTabContainer: {

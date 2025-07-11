@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-    View, 
-    Text, 
-    StyleSheet, 
-    Animated, 
-    Pressable, 
-    Alert, 
+import {
+    View,
+    Text,
+    StyleSheet,
+    Animated,
+    Pressable,
+    Alert,
     Image,
     Dimensions,
     ActivityIndicator
@@ -74,7 +74,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
     const handleSendOTP = async () => {
         setError('');
-        
+
         if (!email.trim()) {
             setError('Please enter your email.');
             return;
@@ -108,7 +108,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     dispatch(setReduxEmail(email));
                     navigation.navigate('OTPVerification');
                 } else {
-                    Alert.alert("Invalid","This email is not registered. Please check or sign up.");
+                    Alert.alert("Invalid", "This email is not registered. Please check or sign up.");
                     console.error("Server error:", data);
                 }
             } else {
@@ -176,6 +176,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                             keyboardType="email-address"
                             autoCapitalize="none"
                             accessibilityLabel="Email Input"
+                            style={{width: '100%'}}
                         />
                         {error ? <Text style={styles.errorText}>{error}</Text> : null}
                     </View>
@@ -197,8 +198,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
             </View>
             {/* Back to Login */}
             <View style={styles.backToLoginContainer}>
-                <Pressable 
-                    style={styles.backToLoginButton} 
+                <Pressable
+                    style={styles.backToLoginButton}
                     onPress={() => navigation.navigate('Login')}
                 >
                     <Text style={styles.backToLoginText}>
@@ -211,7 +212,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 visible={showAlert}
                 title="Error"
                 message="Please enter a valid email address"
-                
+
             />
         </LinearGradient>
     );
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
         height: width * 0.18,
         resizeMode: 'contain',
     },
-    
+
     mainContent: {
         flex: 1,
         alignItems: 'center',
@@ -294,8 +295,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         width: '100%',
         marginBottom: height * 0.025,
-		alignContent:'center',
-		justifyContent:'center'
+        alignItems: 'center',
+        alignSelf: 'center',
+        maxWidth: width * 0.9 > 400 ? 400 : width * 0.9, // max 400px or 90% of screen
     },
     errorText: {
         color: '#FF4444',
@@ -306,8 +308,8 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         alignSelf: 'flex-start',
         maxWidth: '95%',
-      },
-      
+    },
+
     buttonContainer: {
         width: '100%',
         alignItems: 'center',

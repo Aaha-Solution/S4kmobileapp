@@ -119,5 +119,6 @@ dependencies {
         implementation jscFlavor
     }
 
-    
+    implementation("com.nimbusds:nimbus-jose-jwt:9.37") // or keep using 9.46 if already used
+
 }

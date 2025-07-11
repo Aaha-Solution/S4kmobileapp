@@ -125,7 +125,6 @@ const ViewProfileScreen = ({ navigation }) => {
 							{[
 								{ label: 'UserName', value: profile.username },
 								{ label: 'E-Mail', value: email },
-								//{ label: 'Date of Birth', value: formatDate(profile.dateOfBirth) },
 								{ label: 'Phone Number', value: profile.phone },
 								{ label: 'Address', value: profile.address, multiline: true },
 							].map((item, idx) => (
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
 	},
 	label: {
 		fontSize: 16,
-		color: '#666',
+		color: 'black',
 		marginBottom: 8,
 	},
 	readonlyText: {
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderRadius: 8,
 		alignItems: 'center',
-		marginTop: 10,
+		marginTop: 20,
 	},
 });
 

@@ -53,6 +53,7 @@ const App = () => {
   if (!isConnected) return <NoInternetScreen />;
 
   return (
+    
     <StripeProvider publishableKey="pk_test_51RbK6IH6OK1hLW4ieNUI38Hdxs9DdFOaBJ7XkqLH8vqTT5oGlbRKColi1J3SgPhMZNrBIvNA3MQj7sV0IjDta54V00W3f5HIXg">
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
@@ -97,7 +98,7 @@ const App = () => {
                   headerTitle: 'Profile',
                   headerTitleAlign: 'center',
                   headerTransparent: true,
-                  headerStyle: { backgroundColor: '#87CEEB', color: '#4B0082' },
+                  headerStyle: { backgroundColor: '#87CEEB', color: 'black' },
                   headerLeft: () => (
                     <Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
                   )
@@ -112,7 +113,7 @@ const App = () => {
                   headerTitleAlign: 'center',
                   headerTransparent: true,
                   headerStyle: { backgroundColor: '#87CEEB' },
-                  headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+                  headerTitleStyle: { fontWeight: 'bold', color: 'black' },
                   headerLeft: () => (
                     <Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('MainTabs', { screen: 'Setting' })} />
                   )

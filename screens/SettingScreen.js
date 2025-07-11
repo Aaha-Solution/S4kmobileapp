@@ -130,7 +130,6 @@ const SettingsScreen = ({ route, navigation }) => {
 								resizeMode="cover"
 								onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 							/>
-
 							<View>
 								<Text style={styles.name}>{username}</Text>
 								<Text style={styles.email}>{email}</Text>
@@ -211,7 +210,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	email: {
-		color: 'Black',
+		color: 'black',
 		fontSize: 14,
 		fontWeight:'bold',
 	},

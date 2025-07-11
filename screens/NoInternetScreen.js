@@ -1,10 +1,11 @@
-// NoInternetScreen.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const NoInternetScreen = () => (
   <View style={styles.container}>
-    <Text style={styles.text}>⚠️ No internet connection</Text>
+    <Icon name="wifi-off" size={50} color="red" />
+    <Text style={styles.text}>No internet connection</Text>
     <Text style={styles.subText}>Please connect to the internet to use the app.</Text>
   </View>
 );
