@@ -78,7 +78,7 @@ const AdminPannel = () => {
         style: 'destructive',
         onPress: async () => {
           await AsyncStorage.clear();
-          navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] });
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
         },
       },
     ]);
