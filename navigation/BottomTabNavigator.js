@@ -13,21 +13,21 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
-import { Dimensions } from 'react-native';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
 import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const Tab = createBottomTabNavigator();
-const { width, height } = Dimensions.get('window');
+
 const AGE_GROUP_ITEMS = [
 	{ label: 'PreSchool (4-6 years)', value: 'PreSchool (4-6 years)' },
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 ];
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
+	 const insets = useSafeAreaInsets(); 
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
@@ -101,10 +101,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 	return (
 		<TouchableWithoutFeedback onPress={handleOutsidePress}>
-			<View style={[
-				styles.tabBarContainer,
-				currentRouteRef.current === 'level' && { bottom: 50 } // raise only for 'level' tab
-			]}>
+			<View  style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
 				{state.routes.map((route, index) => {
 					const { options } = descriptors[route.key];
 					const label = options.tabBarLabel ?? options.title ?? route.name;
@@ -192,6 +189,7 @@ const getIconName = (routeName, focused) => {
 
 const BottomTabNavigator = () => {
 	return (
+		
 		<Tab.Navigator
 			initialRouteName="Home"
 			tabBar={(props) => <CustomTabBar {...props} />}
@@ -224,11 +222,9 @@ const styles = StyleSheet.create({
 		paddingVertical: 5,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
-		position: 'absolute',     // Required for `bottom` to work
-		bottom: 0,                 // default position
-		left: 0,
-		right: 0,
+		position: 'relative',
 		zIndex: 1,
+		marginBottom: dynamicMargin,
 	},
 	ageTabContainer: {
 		alignItems: 'center',
@@ -252,15 +248,21 @@ const styles = StyleSheet.create({
 		zIndex: 1000,
 	},
 	dropdown: {
-		borderColor: 'rgba(76, 175, 80, 0.9)',
-		borderWidth: 2,
-		borderRadius: 10,
-		width: 180,
+		height: 0,
+		padding: 0,
+		margin: 0,
+		borderWidth: 0,
+		position: 'absolute',
+		top: -9999,
+		left: -9999,
+		opacity: 0,
+		borderRadius:5
 	},
 	dropdownContainer: {
 		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
-		borderRadius: 10,
+		borderRadius: 3,
+		marginLeft: 75,
 	},
 });
 

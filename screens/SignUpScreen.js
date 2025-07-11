@@ -91,7 +91,7 @@ const SignupScreen = ({ navigation }) => {
 
 		setLoading(true);
 		try {
-			const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/signup', {
+			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
 		marginTop: RFValue(-6),
 		marginBottom: RFValue(6),
 		paddingLeft: RFValue(10),   // Aligns with input padding
-		textAlign:'center' // Aligns text to the left
+		textAlign:'left' // Aligns text to the left
 	},
 	inputWrapper: {
 		width: '100%',

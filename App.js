@@ -58,7 +58,7 @@ const App = () => {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false,contentStyle: { backgroundColor: '#F0F8FF' } }}>
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="AdminPannel" component={AdminPannel} />
               <Stack.Screen name="Login" component={LoginScreen} />
@@ -88,6 +88,7 @@ const App = () => {
                   headerTitleStyle: { fontWeight: 'bold',color: '#4B0082' },
                 }}
               />
+              
               <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
               <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
               <Stack.Screen
