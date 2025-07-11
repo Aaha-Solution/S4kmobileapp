@@ -1,539 +1,416 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-
   TextInput, TouchableOpacity, Alert, StatusBar
-
 } from 'react-native';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 
-import { useNavigation } from '@react-navigation/native';
-
-import DropDownPicker from 'react-native-dropdown-picker';
-
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
- 
 const AdminPannel = () => {
-
-  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   const [users, setUsers] = useState([]);
-
   const [filtered, setFiltered] = useState([]);
-
   const [search, setSearch] = useState('');
-
-  const [loading, setLoading] = useState(true);
-
   const [page, setPage] = useState(1);
-
-  const [languageOpen, setLanguageOpen] = useState(false);
-
-  const [levelOpen, setLevelOpen] = useState(false);
-
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
-
-  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [token, setToken] = useState(null);
 
   const pageSize = 10;
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const languages = ['Hindi', 'Panjabi', 'Gujarati'];
+  const levels = ['Pre_Junior', 'Junior'];
 
-  const navigation = useNavigation();
- 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const fetchUsers = async () => {
-
     try {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+      console.log('🔐 Token:', storedToken);
 
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-
-        Alert.alert('Unauthorized', 'No token found. Please log in again.');
-
-        setLoading(false);
-
+      if (!storedToken) {
+        Alert.alert('Error', 'Token not found. Please login again.');
         return;
-
       }
- 
-      const response = await fetch(
 
+      const res = await fetch(
         'https://smile4kidsbackend-production-2970.up.railway.app/admin/users-with-purchases',
-
         {
-
-          method: 'GET',
-
-          headers: {
-
-            Authorization: `Bearer ${token}`,
-
-            'Content-Type': 'application/json',
-
-          },
-
+          headers: { Authorization: `Bearer ${storedToken}` },
         }
-
       );
- 
-      const data = await response.json();
+
+      const data = await res.json();
+      console.log('📦 API Response:', data);
+
+      if (res.status === 401 || res.status === 403) {
+        Alert.alert('Session Expired', 'Please login again.');
+        await AsyncStorage.clear();
+        navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] });
+        return;
+      }
 
       if (Array.isArray(data)) {
-
-        setUsers(data);
-
-        setFiltered(data.slice(0, pageSize));
-
+        const sorted = data.sort((a, b) => (b.id || 0) - (a.id || 0));
+        setUsers(sorted);
+        setFiltered(sorted.slice(0, pageSize));
       } else {
-
-        Alert.alert('Error', data.message || 'Invalid response from server');
-
+        Alert.alert('Error', 'Unexpected response from server.');
       }
-
-    } catch (error) {
-
-      Alert.alert('Error', 'Failed to fetch user data.');
-
+    } catch (e) {
+      console.error('❌ Fetch error:', e);
+      Alert.alert('Error', 'Failed to fetch users.');
     } finally {
-
       setLoading(false);
-
     }
-
   };
- 
-  useEffect(() => {
 
-    fetchUsers();
-
-  }, []);
- 
-  const logout = async () => {
-
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-
+  const logout = () => {
+    Alert.alert('Logout', 'Confirm logout?', [
       { text: 'Cancel', style: 'cancel' },
-
       {
-
         text: 'Logout',
-
         style: 'destructive',
-
         onPress: async () => {
-
           await AsyncStorage.clear();
-
-          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-
+          navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] });
         },
-
       },
-
     ]);
-
   };
- 
-  const handleSearch = (text) => {
 
-    setSearch(text);
-
-    applyFilters(text, selectedLanguage, selectedLevel);
-
-  };
- 
-  const applyFilters = (searchText = search, lang = selectedLanguage, level = selectedLevel) => {
-
+  const applyFilters = useCallback(() => {
     let result = [...users];
-
-    if (lang) result = result.filter(u => u.language === lang);
-
-    if (level) result = result.filter(u => u.level === level);
-
-    if (searchText)
-
-      result = result.filter(
-
-        u =>
-
-          u?.username?.toLowerCase().includes(searchText.toLowerCase()) ||
-
-          u?.email_id?.toLowerCase().includes(searchText.toLowerCase())
-
+    if (selectedLanguage) result = result.filter(u => u.language === selectedLanguage);
+    if (selectedLevel) result = result.filter(u => u.level === selectedLevel);
+    if (search) {
+      result = result.filter(u =>
+        u.username?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email_id?.toLowerCase().includes(search.toLowerCase())
       );
-
+    }
     setFiltered(result.slice(0, pageSize));
-
     setPage(1);
+  }, [users, search, selectedLanguage, selectedLevel]);
 
+  const handleSearch = (text) => {
+    setSearch(text);
+    setTimeout(() => {
+      let result = [...users];
+      if (selectedLanguage) result = result.filter(u => u.language === selectedLanguage);
+      if (selectedLevel) result = result.filter(u => u.level === selectedLevel);
+      if (text) {
+        result = result.filter(u =>
+          u.username?.toLowerCase().includes(text.toLowerCase()) ||
+          u.email_id?.toLowerCase().includes(text.toLowerCase())
+        );
+      }
+      setFiltered(result.slice(0, pageSize));
+      setPage(1);
+    }, 300);
   };
- 
+
   const clearFilters = () => {
-
     setSearch('');
-
-    setSelectedLanguage(null);
-
-    setSelectedLevel(null);
-
+    setSelectedLanguage('');
+    setSelectedLevel('');
     setFiltered(users.slice(0, pageSize));
-
     setPage(1);
-
+    setShowFilters(false);
   };
- 
+
   const loadMore = () => {
-
     const nextPage = page + 1;
-
-    const nextUsers = users.slice(0, nextPage * pageSize);
-
-    setFiltered(nextUsers);
-
+    const filteredUsers = getFilteredUsers();
+    setFiltered(filteredUsers.slice(0, nextPage * pageSize));
     setPage(nextPage);
-
   };
- 
-  const renderUser = ({ item, index }) => (
-<View style={[styles.row, index % 2 === 0 ? styles.evenRow : styles.oddRow]}>
-<Text style={[styles.cell, styles.name]}>{item.username || 'N/A'}</Text>
-<Text style={[styles.cell, styles.email]}>{item.email_id || 'N/A'}</Text>
-<Text style={[styles.cell, styles.lang]}>{item.language || 'N/A'}</Text>
-<Text style={[styles.cell, styles.level]}>{item.level || 'N/A'}</Text>
-</View>
 
-  );
- 
-  const TableHeader = () => (
-<View style={styles.tableHeader}>
-<Text style={[styles.headerCell, styles.name]}>Name</Text>
-<Text style={[styles.headerCell, styles.email]}>Email</Text>
-<Text style={[styles.headerCell, styles.lang]}>Language</Text>
-<Text style={[styles.headerCell, styles.level]}>Level</Text>
-</View>
+  const getFilteredUsers = () => {
+    let result = [...users];
+    if (selectedLanguage) result = result.filter(u => u.language === selectedLanguage);
+    if (selectedLevel) result = result.filter(u => u.level === selectedLevel);
+    if (search) {
+      result = result.filter(u =>
+        u.username?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email_id?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return result;
+  };
 
+  const renderItem = ({ item, index }) => (
+    <View style={[styles.row, index % 2 ? styles.oddRow : styles.evenRow]}>
+      <Text style={[styles.cell, styles.name]} numberOfLines={1}>{item.username}</Text>
+      <Text style={[styles.cell, styles.email]} numberOfLines={1}>{item.email_id}</Text>
+      <Text style={[styles.cell, styles.lang]}>{item.language}</Text>
+      <Text style={[styles.cell, styles.level]}>{item.level}</Text>
+    </View>
   );
- 
+
+  const FilterButton = ({ title, options, selected, onSelect }) => (
+    <View style={styles.filterGroup}>
+      <Text style={styles.filterLabel}>{title}</Text>
+      <View style={styles.filterOptions}>
+        {options.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[styles.filterOption, selected === option && styles.selectedOption]}
+            onPress={() => onSelect(selected === option ? '' : option)}
+          >
+            <Text style={[styles.filterOptionText, selected === option && styles.selectedOptionText]}>
+              {option}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const totalFilteredUsers = getFilteredUsers().length;
+
   return (
-<SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
-<StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
-<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+    <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
 
-        {/* Header with Logout */}
-<View style={styles.header}>
-<Text style={styles.title}>Admin Panel</Text>
-<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-<Text style={styles.logoutText}>Logout</Text>
-</TouchableOpacity>
-</View>
- 
-        {/* Search Input */}
-<TextInput
+        {/* Logout at top */}
+        <View style={styles.logoutRow}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
 
-          placeholder="Search by name or email"
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Text style={styles.iconText}>🔍</Text>
+          </TouchableOpacity>
 
-          value={search}
+          <Text style={styles.title}>Admin Panel</Text>
 
-          onChangeText={handleSearch}
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilters(!showFilters)}>
+            <Text style={styles.iconText}>⚙️</Text>
+          </TouchableOpacity>
+        </View>
 
-          placeholderTextColor="#666"
-
-          style={styles.searchInput}
-
-        />
- 
-        {/* Dropdown Filters */}
-<View style={styles.dropdownContainer}>
-<DropDownPicker
-
-            open={languageOpen}
-
-            setOpen={setLanguageOpen}
-
-            value={selectedLanguage}
-
-            setValue={setSelectedLanguage}
-
-            items={[
-
-              { label: 'Hindi', value: 'Hindi' },
-
-              { label: 'Panjabi', value: 'Panjabi' },
-
-              { label: 'Gujarati', value: 'Gujarati' },
-
-            ]}
-
-            placeholder="Language"
-
-            onChangeValue={() => applyFilters()}
-
-            style={styles.dropdown}
-
-            dropDownContainerStyle={styles.dropdownList}
-
-            zIndex={3000}
-
-          />
-<DropDownPicker
-
-            open={levelOpen}
-
-            setOpen={setLevelOpen}
-
-            value={selectedLevel}
-
-            setValue={setSelectedLevel}
-
-            items={[
-
-              { label: 'Pre_Junior', value: 'Pre_Junior' },
-
-              { label: 'Junior', value: 'Junior' },
-
-            ]}
-
-            placeholder="Level"
-
-            onChangeValue={() => applyFilters()}
-
-            style={styles.dropdown}
-
-            dropDownContainerStyle={styles.dropdownList}
-
-            zIndex={2000}
-
-          />
-</View>
- 
-        {/* Table List */}
-
-        {loading ? (
-<ActivityIndicator size="large" color="#007BFF" />
-
-        ) : (
-<View style={styles.tableContainer}>
-<FlatList
-
-              data={filtered}
-
-              renderItem={renderUser}
-
-              keyExtractor={(item, index) => index.toString()}
-
-              ListHeaderComponent={TableHeader}
-
-              contentContainerStyle={styles.listContent}
-
-              showsVerticalScrollIndicator={false}
-
+        {/* Search Bar */}
+        {showSearch && (
+          <View style={styles.searchBar}>
+            <TextInput
+              placeholder="Search by name or email..."
+              value={search}
+              onChangeText={handleSearch}
+              style={styles.searchInput}
+              placeholderTextColor="#6b7280"
             />
-</View>
-
+            <TouchableOpacity onPress={() => {
+              setSearch('');
+              setFiltered(users.slice(0, pageSize));
+              setShowSearch(false);
+            }}>
+              <Text style={styles.closeText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         )}
- 
-        {/* Load More */}
 
-        {filtered.length < users.length && !loading && (
-<TouchableOpacity style={styles.loadMoreBtn} onPress={loadMore}>
-<Text style={styles.buttonText}>
-
-              Load More ({users.length - filtered.length} remaining)
-</Text>
-</TouchableOpacity>
-
+        {/* Filter Panel */}
+        {showFilters && (
+          <View style={styles.filterPanel}>
+            <FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
+            <FilterButton title="Level" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
+            <View style={styles.filterActions}>
+              <TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
+                <Text style={styles.btnText}>Apply</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
+                <Text style={styles.btnText}>Clear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         )}
-</LinearGradient>
-</SafeAreaView>
 
+        {/* Table */}
+        <View style={styles.tableContainer}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
+          ) : (
+            <>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.headerCell, styles.name]}>Name</Text>
+                <Text style={[styles.headerCell, styles.email]}>Email</Text>
+                <Text style={[styles.headerCell, styles.lang]}>Language</Text>
+                <Text style={[styles.headerCell, styles.level]}>Level</Text>
+              </View>
+
+              <FlatList
+                data={filtered}
+                keyExtractor={(_, i) => i.toString()}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                  <View style={{ padding: 20, alignItems: 'center' }}>
+                    <Text style={{ color: '#4682B4' }}>No users found</Text>
+                  </View>
+                }
+              />
+
+              {filtered.length < totalFilteredUsers && (
+                <TouchableOpacity style={styles.loadMoreBtn} onPress={loadMore}>
+                  <Text style={styles.loadMoreText}>Load More</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
-
 };
- 
+
 const styles = StyleSheet.create({
-
-  safeArea: { flex: 1, backgroundColor: '#87CEEB' },
-
-  container: { flex: 1, paddingHorizontal: 16 },
-
-  header: {
-
+  safeArea: { flex: 1, padding: 16 },
+  logoutRow: {
     flexDirection: 'row',
-
-    justifyContent: 'space-between',
-
-    alignItems: 'center',
-
-    marginVertical: 12,
-
+    justifyContent: 'flex-end',
+    marginBottom: 6,
   },
-
-  title: { fontSize: 20, fontWeight: '700', color: '#1F1D62' },
-
   logoutBtn: {
-
-    backgroundColor: '#FF8C00',
-
+    backgroundColor: '#FF6347',
     paddingHorizontal: 12,
-
     paddingVertical: 6,
-
-    borderRadius: 6,
-
+    borderRadius: 8,
   },
-
-  logoutText: { color: 'white', fontWeight: '600' },
-
-  searchInput: {
-
-    backgroundColor: 'white',
-
-    borderRadius: 6,
-
-    paddingHorizontal: 12,
-
-    paddingVertical: 10,
-
-    fontSize: 14,
-
-    marginBottom: 10,
-
-    borderWidth: 1,
-
-    borderColor: '#ccc',
-
-  },
-
-  dropdownContainer: { flexDirection: 'row', gap: 8, zIndex: 4000, marginBottom: 12 },
-
-  dropdown: {
-
-    flex: 1,
-
-    backgroundColor: 'white',
-
-    borderColor: '#ccc',
-
-  },
-
-  dropdownList: {
-
-    backgroundColor: '#fff',
-
-    borderColor: '#ccc',
-
-    zIndex: 1000,
-
-  },
-
-  tableContainer: {
-
-    backgroundColor: '#fff',
-
-    borderRadius: 6,
-
-    flex: 1,
-
-  },
-
-  tableHeader: {
-
-    flexDirection: 'row',
-
-    backgroundColor: '#4CAF50',
-
-    paddingVertical: 10,
-
-    paddingHorizontal: 8,
-
-    borderTopLeftRadius: 6,
-
-    borderTopRightRadius: 6,
-
-  },
-
-  headerCell: {
-
+  logoutText: {
     color: '#fff',
-
-    fontWeight: '700',
-
-    fontSize: 13,
-
-    textAlign: 'center',
-
-  },
-
-  row: {
-
-    flexDirection: 'row',
-
-    paddingVertical: 10,
-
-    paddingHorizontal: 8,
-
-    borderBottomWidth: 1,
-
-    borderBottomColor: '#eee',
-
-  },
-
-  evenRow: { backgroundColor: '#f9f9f9' },
-
-  oddRow: { backgroundColor: '#fff' },
-
-  cell: {
-
-    fontSize: 13,
-
-    color: '#333',
-
-    textAlign: 'center',
-
-  },
-
-  name: { flex: 1.5 },
-
-  email: { flex: 2.5 },
-
-  lang: { flex: 1.2 },
-
-  level: { flex: 1.2 },
-
-  buttonText: {
-
-    fontSize: 13,
-
-    color: '#fff',
-
     fontWeight: '600',
-
   },
-
-  loadMoreBtn: {
-
-    backgroundColor: '#6c757d',
-
-    padding: 10,
-
-    alignSelf: 'center',
-
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    borderBottomColor: '#ADD8E6',
+  },
+  iconButton: {
+    padding: 6,
+    backgroundColor: '#dbe1e3',
     borderRadius: 6,
-
-    marginTop: 10,
-
-    marginBottom: 20,
-
   },
-
-  listContent: { paddingBottom: 10 },
-
+  iconText: { fontSize: 18 },
+  title: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1f2937',
+  },
+  closeText: {
+    fontSize: 18,
+    color: '#ef4444',
+    marginLeft: 10,
+  },
+  filterPanel: {
+    backgroundColor: '#F0F8FF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  filterGroup: { marginBottom: 12 },
+  filterLabel: { marginBottom: 8, fontWeight: '600', color: '#1f2937' },
+  filterOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  filterOption: {
+    backgroundColor: '#ADD8E6',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  selectedOption: { backgroundColor: '#4682B4' },
+  filterOptionText: { color: '#1f2937' },
+  selectedOptionText: { color: '#fff' },
+  filterActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+  applyBtn: {
+    flex: 1,
+    backgroundColor: '#4682B4',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  clearBtn: {
+    flex: 1,
+    backgroundColor: '#ADD8E6',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  btnText: { fontWeight: '600', color: '#fff' },
+  tableContainer: {
+    flex: 1,
+    backgroundColor: '#F0F8FF',
+    borderRadius: 10,
+    paddingBottom: 10,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#D6EAF8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ADD8E6',
+  },
+  headerCell: {
+    fontWeight: '700',
+    color: '#1f2937',
+    flex: 1,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ADD8E6',
+  },
+  evenRow: { backgroundColor: '#ffffff' },
+  oddRow: { backgroundColor: '#F0F8FF' },
+  cell: { flex: 1, textAlign: 'center' },
+  name: { flex: 1.5 },
+  email: { flex: 2 },
+  lang: { flex: 1 },
+  level: { flex: 1 },
+  loadMoreBtn: {
+    backgroundColor: '#ADD8E6',
+    padding: 10,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  loadMoreText: {
+    color: '#1f2937',
+    fontWeight: '600',
+  },
 });
- 
-export default AdminPannel;
 
- 
+export default AdminPannel;
