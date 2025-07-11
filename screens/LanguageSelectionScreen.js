@@ -161,12 +161,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    // Elevation for Android
-    elevation: 3,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 1, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3,
+    // // Elevation for Android
+    // elevation: 3,
   },
   selectedBox: {
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
