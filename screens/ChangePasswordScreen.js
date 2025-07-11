@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		gap: 10,
 		maxHeight: 80,
+		paddingLeft:20,
 	},
 	saveButton: {
 		padding: 10,
@@ -224,7 +225,8 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		flex: 1,
 		marginRight: 10,
-		alignContent: 'center'
+		alignContent: 'center',
+		
 	},
 
 });

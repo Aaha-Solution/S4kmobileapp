@@ -231,13 +231,18 @@ const styles = StyleSheet.create({
 	ageTabContainer: {
 		alignItems: 'center',
 		position: 'relative',
+		justifyContent: 'center',
 		zIndex: 2,
+		paddingHorizontal: screenWidth * 0.02,
+		paddingVertical: screenHeight * 0.01,
+		
 	},
 
 	tabButton: {
 		alignItems: 'center',
 		justifyContent: 'center',
 		paddingHorizontal: screenWidth * 0.02,
+		
 	},
 
 	tabLabel: {
