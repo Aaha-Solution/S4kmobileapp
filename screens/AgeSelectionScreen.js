@@ -132,16 +132,16 @@ const styles = StyleSheet.create({
 		flexGrow: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		paddingVertical: height * 0.05,
-		paddingHorizontal: width * 0.05,
+		paddingVertical: height * 0.04,
+		paddingHorizontal: width * 0.06,
 	},
 	image: {
-		width: width * 0.35,
-		height: height * 0.2,
-		marginBottom: height * 0.025,
+		width: width * 0.4,
+		height: height * 0.22,
+		marginBottom: height * 0.03,
 	},
 	title: {
-		fontSize: width * 0.06,
+		fontSize: Math.min(width * 0.065, 24),
 		fontWeight: 'bold',
 		color: '#4B0082',
 		marginBottom: height * 0.03,
@@ -154,20 +154,24 @@ const styles = StyleSheet.create({
 	ageTouchable: {
 		width: '100%',
 		alignItems: 'center',
-		marginBottom: height * 0.015,
+		marginBottom: height * 0.02,
 	},
 	ageBox: {
 		width: '85%',
-		height: height * 0.07,
+		minHeight: height * 0.065,
 		backgroundColor: '#fff',
 		borderRadius: 25,
 		justifyContent: 'center',
 		alignItems: 'center',
-		// elevation: 4,
-		// shadowColor: '#000',
-		// shadowOffset: { width: 1, height: 2 },
-		// shadowOpacity: 0.2,
-		// shadowRadius: 4,
+
+		// Elevation for Android
+		elevation: 3,
+		// Shadow for iOS
+		shadowColor: '#000',
+		shadowOffset: { width: 1, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 3,
+		paddingHorizontal: width * 0.02,
 	},
 	selectedBox: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
@@ -175,9 +179,10 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 	},
 	ageText: {
-		fontSize: width * 0.045,
+		fontSize: Math.min(width * 0.048, 18),
 		fontWeight: '600',
 		color: '#000',
+		textAlign: 'center',
 	},
 	selectedText: {
 		color: '#000080',
@@ -188,10 +193,12 @@ const styles = StyleSheet.create({
 		paddingHorizontal: width * 0.15,
 		borderRadius: 15,
 		backgroundColor: '#FF8C00',
+		minWidth: width * 0.5,
+		alignSelf: 'center',
 	},
 	bottomButtonContainer: {
 		marginTop: height * 0.05,
+		marginBottom: height * 0.03,
 	},
 });
-
 export default AgeSelectionScreen;

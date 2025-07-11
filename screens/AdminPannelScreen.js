@@ -62,7 +62,7 @@ const AdminPannel = () => {
  
       const response = await fetch(
 
-        'https://smile4kidsbackend-production-159e.up.railway.app/admin/users-with-purchases',
+        'https://smile4kidsbackend-production-2970.up.railway.app/admin/users-with-purchases',
 
         {
 

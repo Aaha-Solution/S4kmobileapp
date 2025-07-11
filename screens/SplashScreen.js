@@ -17,7 +17,7 @@ const SplashScreen = ({ navigation }) => {
 	const fetchPaidCourses = async (userId, token) => {
 		console.log("⏳ Fetching paid videos for user:", userId);
 		try {
-			const response = await fetch(`https://smile4kidsbackend-production-159e.up.railway.app/payment/my-paid-videos?user_id=${userId}`, {
+			const response = await fetch(`https://smile4kidsbackend-production-2970.up.railway.app/payment/my-paid-videos?user_id=${userId}`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`, // ✅ attach token here

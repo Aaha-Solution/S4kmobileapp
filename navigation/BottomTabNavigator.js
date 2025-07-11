@@ -19,8 +19,10 @@ import SettingScreen from '../screens/SettingScreen';
 import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Dimensions } from 'react-native';
 const Tab = createBottomTabNavigator();
-
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const dynamicMargin = screenHeight * 0.025; // 2.5% of screen height (adjust as needed)
 const AGE_GROUP_ITEMS = [
 	{ label: 'PreSchool (4-6 years)', value: 'PreSchool (4-6 years)' },
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
@@ -218,35 +220,39 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		backgroundColor: '#F0F8FF',
-		height: 60,
-		paddingVertical: 5,
+		height: screenHeight * 0.08,
+		paddingVertical: screenHeight * 0.01,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		position: 'relative',
 		zIndex: 1,
-		marginBottom: dynamicMargin,
 	},
+
 	ageTabContainer: {
 		alignItems: 'center',
 		position: 'relative',
 		zIndex: 2,
 	},
+
 	tabButton: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		padding: 5,
+		paddingHorizontal: screenWidth * 0.02,
 	},
+
 	tabLabel: {
-		fontSize: 12,
+		fontSize: screenWidth * 0.03,
 		marginTop: 2,
 	},
+
 	dropdownWrapper: {
 		position: 'absolute',
-		top: -150,
-		width: 180,
-		left: -135,
+		top: -150, // approximately 15-18% of screen height
+		width: screenWidth * 0.5,  // 50% of screen width
+		left: -screenWidth * 0.35, // center align left
 		zIndex: 1000,
 	},
+
 	dropdown: {
 		height: 0,
 		padding: 0,
@@ -256,14 +262,16 @@ const styles = StyleSheet.create({
 		top: -9999,
 		left: -9999,
 		opacity: 0,
-		borderRadius:5
+		borderRadius: 5,
 	},
+
 	dropdownContainer: {
 		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
-		borderRadius: 3,
-		marginLeft: 75,
+		borderRadius: 6,
+		marginLeft: screenWidth * 0.2,
+		minWidth: screenWidth * 0.4,
+		maxWidth: screenWidth * 0.7,
 	},
 });
-
 export default BottomTabNavigator;
