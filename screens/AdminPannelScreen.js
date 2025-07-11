@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const AdminPannel = () => {
   const navigation = useNavigation();
@@ -34,8 +35,6 @@ const AdminPannel = () => {
     try {
       const storedToken = await AsyncStorage.getItem('token');
       setToken(storedToken);
-      console.log('🔐 Token:', storedToken);
-
       if (!storedToken) {
         Alert.alert('Error', 'Token not found. Please login again.');
         return;
@@ -49,7 +48,6 @@ const AdminPannel = () => {
       );
 
       const data = await res.json();
-      console.log('📦 API Response:', data);
 
       if (res.status === 401 || res.status === 403) {
         Alert.alert('Session Expired', 'Please login again.');
@@ -59,14 +57,13 @@ const AdminPannel = () => {
       }
 
       if (Array.isArray(data)) {
-        const sorted = data.sort((a, b) => (b.id || 0) - (a.id || 0));
+        const sorted = data.sort((a, b) => new Date(b.last_login) - new Date(a.last_login));
         setUsers(sorted);
         setFiltered(sorted.slice(0, pageSize));
       } else {
         Alert.alert('Error', 'Unexpected response from server.');
       }
     } catch (e) {
-      console.error('❌ Fetch error:', e);
       Alert.alert('Error', 'Failed to fetch users.');
     } finally {
       setLoading(false);
@@ -149,10 +146,10 @@ const AdminPannel = () => {
 
   const renderItem = ({ item, index }) => (
     <View style={[styles.row, index % 2 ? styles.oddRow : styles.evenRow]}>
-      <Text style={[styles.cell, styles.name]} numberOfLines={1}>{item.username}</Text>
-      <Text style={[styles.cell, styles.email]} numberOfLines={1}>{item.email_id}</Text>
-      <Text style={[styles.cell, styles.lang]}>{item.language}</Text>
-      <Text style={[styles.cell, styles.level]}>{item.level}</Text>
+      <Text style={[styles.cell, styles.name, { color: '#000' }]} numberOfLines={1}>{item.username}</Text>
+      <Text style={[styles.cell, styles.email, { color: '#000' }]} numberOfLines={1}>{item.email_id}</Text>
+      <Text style={[styles.cell, styles.lang, { color: '#000' }]}>{item.language}</Text>
+      <Text style={[styles.cell, styles.level, { color: '#000' }]}>{item.level === 'Pre_Junior' ? 'Preschool' : item.level}</Text>
     </View>
   );
 
@@ -167,7 +164,7 @@ const AdminPannel = () => {
             onPress={() => onSelect(selected === option ? '' : option)}
           >
             <Text style={[styles.filterOptionText, selected === option && styles.selectedOptionText]}>
-              {option}
+              {option === 'Pre_Junior' ? 'Preschool' : option}
             </Text>
           </TouchableOpacity>
         ))}
@@ -182,14 +179,12 @@ const AdminPannel = () => {
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
 
-        {/* Logout at top */}
         <View style={styles.logoutRow}>
           <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Text style={styles.iconText}>🔍</Text>
@@ -198,7 +193,7 @@ const AdminPannel = () => {
           <Text style={styles.title}>Admin Panel</Text>
 
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilters(!showFilters)}>
-            <Text style={styles.iconText}>⚙️</Text>
+            <Icon name="filter" size={20} color="#1f2937" />
           </TouchableOpacity>
         </View>
 
@@ -226,7 +221,7 @@ const AdminPannel = () => {
         {showFilters && (
           <View style={styles.filterPanel}>
             <FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
-            <FilterButton title="Level" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
+            <FilterButton title="Ages" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
             <View style={styles.filterActions}>
               <TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
                 <Text style={styles.btnText}>Apply</Text>
@@ -248,7 +243,7 @@ const AdminPannel = () => {
                 <Text style={[styles.headerCell, styles.name]}>Name</Text>
                 <Text style={[styles.headerCell, styles.email]}>Email</Text>
                 <Text style={[styles.headerCell, styles.lang]}>Language</Text>
-                <Text style={[styles.headerCell, styles.level]}>Level</Text>
+                <Text style={[styles.headerCell, styles.level]}>Ages</Text>
               </View>
 
               <FlatList
@@ -283,7 +278,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   logoutBtn: {
-    backgroundColor: '#FF6347',
+    backgroundColor: '#FF8C00',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -298,7 +293,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderBottomWidth: 1,
     paddingBottom: 8,
-    borderBottomColor: '#ADD8E6',
+    borderBottomColor: '#fff',
+
   },
   iconButton: {
     padding: 6,
@@ -311,7 +307,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 22,
     fontWeight: '700',
-    color: '#1f2937',
+    color:  '#4B0082',
   },
   searchBar: {
     flexDirection: 'row',
@@ -342,30 +338,32 @@ const styles = StyleSheet.create({
   filterLabel: { marginBottom: 8, fontWeight: '600', color: '#1f2937' },
   filterOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   filterOption: {
-    backgroundColor: '#ADD8E6',
+    backgroundColor: '#FF8C00',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     marginRight: 8,
   },
-  selectedOption: { backgroundColor: '#4682B4' },
-  filterOptionText: { color: '#1f2937' },
+  selectedOption: { backgroundColor: 'rgba(76, 175, 80, 0.9)' },
+  filterOptionText: { color: '#fff' },
   selectedOptionText: { color: '#fff' },
   filterActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
   applyBtn: {
     flex: 1,
-    backgroundColor: '#4682B4',
+    backgroundColor: '#FF8C00',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
     marginRight: 8,
+    color: '#fff',
   },
   clearBtn: {
     flex: 1,
-    backgroundColor: '#ADD8E6',
+    backgroundColor: 'gray',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
+
   },
   btnText: { fontWeight: '600', color: '#fff' },
   tableContainer: {
@@ -373,6 +371,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F8FF',
     borderRadius: 10,
     paddingBottom: 10,
+
   },
   tableHeader: {
     flexDirection: 'row',
