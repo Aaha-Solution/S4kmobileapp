@@ -26,7 +26,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 		}
 
 		// Password validation
-		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
 		if (!passwordRegex.test(newPassword)) {
 			Alert.alert(
 				'Error',
@@ -114,6 +114,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 								placeholder="Enter current password"
 								secureTextEntry={!isCurrentPasswordVisible}
 								placeholderTextColor="#999"
+								selectTextOnFocus={false} contextMenuHidden={true}
 							/>
 							<Pressable style={styles.icon} onPress={() => setCurrentPasswordVisible(!isCurrentPasswordVisible)}>
 								<Icon name={isCurrentPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
@@ -130,6 +131,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 								secureTextEntry={!isNewPasswordVisible}
 								placeholderTextColor="#999"
 								editable={true} // Always editable
+								selectTextOnFocus={false} contextMenuHidden={true}
 							/>
 							<Pressable style={styles.icon} onPress={() => setNewPasswordVisible(!isNewPasswordVisible)}>
 								<Icon name={isNewPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
@@ -146,6 +148,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 								secureTextEntry={!isConfirmPasswordVisible}
 								placeholderTextColor="#999"
 								editable={true} // Always editable
+								selectTextOnFocus={false} contextMenuHidden={true}
 							/>
 							<Pressable style={styles.icon} onPress={() => setConfirmPasswordVisible(!isConfirmPasswordVisible)}>
 								<Icon name={isConfirmPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#888" />
@@ -180,7 +183,7 @@ const styles = StyleSheet.create({
 	},
 	label: {
 		fontSize: 16,
-		color: '#666',
+		color: 'black',
 		marginBottom: 8,
 		fontWeight: '500',
 	},

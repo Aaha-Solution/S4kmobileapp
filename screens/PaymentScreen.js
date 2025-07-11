@@ -36,7 +36,7 @@ const PaymentScreen = ({ navigation }) => {
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
 	const languages = ['Gujarati', 'Panjabi', 'Hindi'];
-	const ageOptions = ['PreJunior (4–6 years)', 'Junior (7 & above years)'];
+	const ageOptions = ['PreSchool (4–6 years)', 'Junior (7 & above years)'];
 
 
 	// 🧮 Total cost in £
@@ -63,7 +63,7 @@ const PaymentScreen = ({ navigation }) => {
 		}
 
 		try {
-			const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/payment/calculate-amount', {
+			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/payment/calculate-amount', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const PaymentScreen = ({ navigation }) => {
 	const fetchPaidCourses = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await fetch(`https://smile4kidsbackend-production-159e.up.railway.app/payment/my-paid-videos?user_id=${users_id}`,
+			const response = await fetch(`https://smile4kidsbackend-production-2970.up.railway.app/payment/my-paid-videos?user_id=${users_id}`,
 				{
 					method: 'GET',
 					headers: {
@@ -186,7 +186,7 @@ const PaymentScreen = ({ navigation }) => {
 			const firstSelection = unpaidSelections[0];
 			const paymentType = `${firstSelection.language}-${firstSelection.level}`;
 
-			const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ const PaymentScreen = ({ navigation }) => {
 										disabled={isPaid} // 🔒 disables press
 									>
 										<Text style={[styles.ageText, isPaid && styles.disabledText]}>
-											{option}
+											{getDisplayLevel(option)}
 										</Text>
 										{isPaid ? (
 											<Icon name="check-circle" size={20} color="#A9A9A9" />

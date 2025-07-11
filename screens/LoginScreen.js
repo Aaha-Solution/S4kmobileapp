@@ -51,12 +51,12 @@ const LoginScreen = ({ navigation }) => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 const userData = await AsyncStorage.getItem('user');
-    
+
                 if (!token || !userData) return;
-    
+
                 const user = JSON.parse(userData);
                 dispatch(login(user));
-    
+
                 if (user.is_admin === 1) {
                     navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
                 } else {
@@ -73,7 +73,7 @@ const LoginScreen = ({ navigation }) => {
             isMounted = false;
         };
     }, [navigation]);
-    
+
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -83,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
         setEmailError('');
         setPasswordError('');
         let hasError = false;
-    
+
         if (!email) {
             setEmailError('Email is required');
             hasError = true;
@@ -91,33 +91,33 @@ const LoginScreen = ({ navigation }) => {
             setEmailError('Enter a valid email');
             hasError = true;
         }
-    
+
         if (!password) {
             setPasswordError('Password is required');
             hasError = true;
         }
-    
+
         if (hasError) return;
-    
+
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kidsbackend-production-159e.up.railway.app/login', {
+            const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email_id: email, password }),
             });
-    
+
             const data = await response.json();
-    
+
             if (!response.ok || !data?.user) {
                 Alert.alert('Login Failed', data?.message || 'Invalid credentials');
                 return;
             }
-    
+
             const { user, token } = data;
-    
+
             await AsyncStorage.setItem('user', JSON.stringify(user));
             await AsyncStorage.setItem('token', token);
             console.log("🧪 is_admin:", user.is_admin);
@@ -128,15 +128,15 @@ const LoginScreen = ({ navigation }) => {
                 navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
                 return;
             }
-    
+
             // Normal user login logic
             const firstPaid = user.paid_categories?.[0];
             const userLang = firstPaid?.language;
             const userLevel = getBackendLevel(firstPaid?.level);
-    
+
             dispatch(setLanguage(userLang));
             dispatch(setLevel(userLevel));
-    
+
             if (rememberMe) {
                 await Keychain.setGenericPassword(email, password);
                 await AsyncStorage.setItem('selectedPreferences', JSON.stringify({ selectedLanguage: userLang, selectedLevel: userLevel }));
@@ -144,22 +144,22 @@ const LoginScreen = ({ navigation }) => {
                 await Keychain.resetGenericPassword();
                 await AsyncStorage.removeItem('selectedPreferences');
             }
-    
+
             const formatted = (user.paid_categories || []).map(item => ({
                 language: item.language,
                 level: item.level,
             }));
             dispatch(setAllPaidAccess(formatted));
-    
+
             dispatch(login({
                 ...user,
                 language: userLang,
                 level: userLevel,
             }));
-    
+
             dispatch(setProfile({ paid_categories: user.paid_categories }));
             dispatch(setPaidStatus(Boolean(user.paid_categories?.length)));
-    
+
             if (user.paid_categories?.length) {
                 navigation.reset({
                     index: 0,
@@ -178,7 +178,7 @@ const LoginScreen = ({ navigation }) => {
             setLoading(false);
         }
     };
-    
+
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -202,7 +202,8 @@ const LoginScreen = ({ navigation }) => {
                             </Text>
                             <CustomTextInput value={email} onChangeText={setEmail} placeholder="Email" keyboardType="email-address" autoCapitalize="none" />
                             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-                            <CustomTextInput value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry />
+                            <CustomTextInput value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry selectTextOnFocus={false} contextMenuHidden={true} // hides copy/paste menu
+                            />
                             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
                             <View style={styles.buttonContainer}>
                                 {loading ? (
@@ -283,8 +284,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     logo: {
-        width: width * 0.6,
-        height: height * 0.2,
+       width: width * 0.4,
+		height: width * 0.3,
+        marginBottom: 10,
     },
     loginTitle: {
         fontSize: RFPercentage(4.2),
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
         color: '#FF4444',
         fontSize: RFValue(11),            // Responsive font size
         alignSelf: 'flex-start',
-        marginLeft: RFValue(10),          // Responsive left margin
+        marginLeft: RFValue(20),          // Responsive left margin
         marginTop: RFValue(-6),           // Adjusted to avoid overlap
         marginBottom: RFValue(6),         // Responsive bottom spacing
     },
@@ -308,6 +310,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 40,
         borderRadius: 30,
+       
     },
     loginButtonText: {
         color: 'white',
@@ -340,14 +343,15 @@ const styles = StyleSheet.create({
         borderColor: '#FFA500',
     },
     optionText: {
-        fontSize: 14,
+        fontSize: RFValue(11),
         color: '#65358c',
         fontWeight: 50
     },
     forgotPasswordText: {
         color: '#65358c',
         textDecorationLine: 'underline',
-        fontWeight: 50
+        fontWeight: 50,
+        fontSize: RFValue(11),
     },
     kidsImage: {
         width: width * 0.45,

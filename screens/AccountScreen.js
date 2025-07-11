@@ -87,10 +87,10 @@ const AccountScreen = ({ route, navigation }) => {
 								}}
 							>
 								<View style={styles.iconLabel}>
-									<Icon name={item.icon} size={22} color="#5A5A5A" />
+									<Icon name={item.icon} size={22} color="black" />
 									<Text style={styles.label}>{item.label}</Text>
 								</View>
-								<Icon name="chevron-forward" size={20} color="#B0B0B0" />
+								<Icon name="chevron-forward" size={20} color="black" />
 							</Pressable>
 						))}
 					</ScrollView>
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
 	label: {
 		marginLeft: 15,
 		fontSize: 16,
-		color: '#333',
+		color: 'black',
 	},
 	editButton: {
 		position: 'absolute',

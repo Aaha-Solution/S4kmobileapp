@@ -11,19 +11,20 @@ import PressableButton from '../component/PressableButton';
 import CustomAlert from '../component/CustomAlertMessage';
 import { setProfile } from '../Store/userSlice';
 import profile_avatar from '../assets/image/profile_avatar.png';
-
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
 const EditProfileScreen = ({ route, navigation }) => {
     const dispatch = useDispatch();
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
     const BASE_URL = 'https://smile4kidsbackend-production-159e.up.railway.app';
-
+    
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [phone, setPhone] = useState('');
-    const [username,setUsername]=useState('');
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
         if (profile) {
@@ -36,7 +37,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     }, [profile]);
 
     const [selectedAvatar, setSelectedAvatar] = useState(profile_avatar);
-    const [modalVisible, setModalVisible] = useState(false);  
+    const [modalVisible, setModalVisible] = useState(false);
     const [phoneError, setPhoneError] = useState('');
     const [dateError, setDateError] = useState('');
     const [showAlert, setShowAlert] = useState(false);
@@ -91,33 +92,33 @@ const EditProfileScreen = ({ route, navigation }) => {
         return () => backHandler.remove();
     }, [navigation]);
 
-    const validateAndFormatDate = (inputDate) => {
-        let raw = inputDate.replace(/\D/g, '');
-        let formattedDate = '';
-        if (raw.length >= 5 && raw.length <= 6) {
-            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4)}`;
-        } else if (raw.length >= 7) {
-            formattedDate = `${raw.slice(0, 4)}/${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
-        } else {
-            formattedDate = raw;
-        }
-        if (raw.length === 8) {
-            const year = parseInt(raw.slice(0, 4), 10);
-            const month = parseInt(raw.slice(4, 6), 10);
-            const day = parseInt(raw.slice(6, 8), 10);
-            const date = new Date(year, month - 1, day);
-            if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
-                setDateError('Please enter a valid date');
-            } else {
-                setDateError('');
-            }
-        } else if (raw.length > 0 && raw.length < 8) {
-            setDateError('Please complete the date');
-        } else {
-            setDateError('');
-        }
-        return formattedDate;
-    };
+    // const validateAndFormatDate = (inputDate) => {
+    //     let raw = inputDate.replace(/\D/g, '');
+    //     let formattedDate = '';
+    //     if (raw.length >= 5 && raw.length <= 6) {
+    //         formattedDate = `${raw.slice(0, 4)}/${raw.slice(4)}`;
+    //     } else if (raw.length >= 7) {
+    //         formattedDate = `${raw.slice(0, 4)}/${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
+    //     } else {
+    //         formattedDate = raw;
+    //     }
+    //     if (raw.length === 8) {
+    //         const year = parseInt(raw.slice(0, 4), 10);
+    //         const month = parseInt(raw.slice(4, 6), 10);
+    //         const day = parseInt(raw.slice(6, 8), 10);
+    //         const date = new Date(year, month - 1, day);
+    //         if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+    //             setDateError('Please enter a valid date');
+    //         } else {
+    //             setDateError('');
+    //         }
+    //     } else if (raw.length > 0 && raw.length < 8) {
+    //         setDateError('Please complete the date');
+    //     } else {
+    //         setDateError('');
+    //     }
+    //     return formattedDate;
+    // };
 
     const toMySQLDate = (formattedDate) => {
         if (!formattedDate) return null;
@@ -258,11 +259,11 @@ const EditProfileScreen = ({ route, navigation }) => {
                     <View style={styles.formContainer}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>UserName</Text>
-                            <TextInput style={styles.input} value={username} 
-                            onChangeText={(text) => {
-									const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
-									setUsername(cleaned);
-								}} />
+                            <TextInput style={styles.input} value={username}
+                                onChangeText={(text) => {
+                                    const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
+                                    setUsername(cleaned);
+                                }} />
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
@@ -290,7 +291,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 numberOfLines={4}
                             />
                         </View>
-                        <PressableButton title="Save" onPress={handleSave} />
+                        <PressableButton title="Save" onPress={handleSave} style={{ marginTop: 20 }} />
                     </View>
                 </ScrollView>
 
@@ -307,26 +308,115 @@ const EditProfileScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    header: { alignItems: 'center', paddingVertical: 20, marginTop: 130 },
-    profileContainer: { position: 'relative' },
-    avatar: { width: 100, height: 100, borderRadius: 50, borderWidth: 2, borderColor: 'white' },
-    editButton: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#FF8C00', padding: 8, borderRadius: 20 },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: 'white', borderRadius: 20, padding: 20, width: '90%', maxHeight: '80%' },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-    modalTitle: { fontSize: 20, fontWeight: 'bold', color: 'purple' },
-    closeButton: { padding: 5 },
-    loadingText: { textAlign: 'center', fontSize: 16, color: '#666', padding: 20 },
-    avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
-    avatarOption: { width: '30%', aspectRatio: 1, marginBottom: 15 },
-    selectedAvatar: { borderWidth: 3, borderColor: '#8A2BE2', transform: [{ scale: 1.1 }] },
-    formContainer: { padding: 20 },
-    inputGroup: { marginBottom: 20 },
-    label: { fontSize: 16, color: '#666', marginBottom: 8 },
-    input: { backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', color: '#000' },
-    errorInput: { borderColor: 'red' },
-    errorText: { color: 'red', fontSize: 12, marginTop: 5 },
-    addressInput: { height: 100, textAlignVertical: 'top', backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' }
+    header: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        marginTop: 130
+    },
+    profileContainer: {
+        position: 'relative'
+    },
+    avatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 2,
+        borderColor: 'white'
+    },
+    editButton: {
+        position: 'absolute',
+        bottom: 0, right: 0,
+        backgroundColor: '#FF8C00',
+        padding: 8,
+        borderRadius: 20
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: width * 0.05, // responsive padding
+        width: width * 0.9, // 90% of screen width
+        maxHeight: height * 0.8, // 80% of screen height
+        marginTop: height * 0.02, // 2% top margin
+        alignSelf: 'center', // center modal horizontally
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'purple'
+    },
+    closeButton: {
+        padding: 5
+    },
+    loadingText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#666',
+        padding: 20
+    },
+    avatarGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around'
+    },
+    avatarOption: {
+        width: '30%',
+        aspectRatio: 1,
+        marginBottom: 15
+    },
+    selectedAvatar: {
+        borderWidth: 3,
+        borderColor: '#8A2BE2',
+        transform: [{ scale: 1.1 }]
+    },
+    formContainer: {
+        padding: 20
+    },
+    inputGroup: {
+        marginBottom: 20
+    },
+    label: {
+        fontSize: 16,
+        color: 'black',
+        marginBottom: 8
+    },
+    input: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        color: '#000'
+    },
+    errorInput: {
+        borderColor: 'red'
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 5
+    },
+    addressInput: {
+        height: 100,
+        textAlignVertical: 'top',
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        color: '#000'
+    }
 });
 
 export default EditProfileScreen;
