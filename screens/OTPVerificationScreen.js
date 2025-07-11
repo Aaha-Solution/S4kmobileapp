@@ -46,7 +46,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 			return;
 		}
 		try {
-			const response = await fetch("https://smile4kidsbackend-production-159e.up.railway.app/forgot/verify-otp", {
+			const response = await fetch("https://smile4kidsbackend-production-2970.up.railway.app/forgot/verify-otp", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
@@ -134,7 +134,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 					{/* Error Message */}
 					{error ? (
 						<View style={styles.errorContainer}>
-							<Text style={styles.errorEmoji}>😅</Text>
+							<Text style={styles.errorEmoji}></Text>
 							<Text style={styles.errorText}>{error}</Text>
 						</View>
 					) : null}

@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
 		marginTop: RFValue(-6),
 		marginBottom: RFValue(6),
 		paddingLeft: RFValue(10),   // Aligns with input padding
-		textAlign:'left' // Aligns text to the left
+		textAlign:'center' // Aligns text to the left
 	},
 	inputWrapper: {
 		width: '100%',

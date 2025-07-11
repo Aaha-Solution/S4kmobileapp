@@ -44,7 +44,7 @@ const ViewProfileScreen = ({ navigation }) => {
 			try {
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`https://smile4kidsbackend-production-159e.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
+					`https://smile4kidsbackend-production-2970.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
 					{
 						method: 'GET',
 						headers: {
@@ -200,6 +200,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderRadius: 8,
 		alignItems: 'center',
+		alignContent:'center',
+		alignSelf: 'center',
 		marginTop: 20,
 	},
 });
