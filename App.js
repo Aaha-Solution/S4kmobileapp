@@ -129,7 +129,8 @@ const App = () => {
 										headerTitle: 'Change Password',
 										headerTitleAlign: 'center',
 										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' ,color: '#4B0082',},
+										headerStyle: { backgroundColor: '#87CEEB' },
+										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
 										headerLeft: () => (
 											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
 										)
