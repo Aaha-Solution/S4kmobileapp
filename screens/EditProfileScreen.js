@@ -18,7 +18,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
-    const BASE_URL = 'https://smile4kidsbackend-production-2970.up.railway.app/';
+    const BASE_URL = 'https://smile4kidsbackend-production-2970.up.railway.app';
 
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
@@ -50,7 +50,7 @@ const EditProfileScreen = ({ route, navigation }) => {
         const fetchAvatar = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                const response = await fetch(`${BASE_URL}api/images`, {
+                const response = await fetch(`${BASE_URL}/api/images`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
@@ -172,7 +172,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}signup/update-profile`, {
+            const response = await fetch(`${BASE_URL}/signup/update-profile`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -222,16 +222,19 @@ const EditProfileScreen = ({ route, navigation }) => {
                 <ScrollView>
                     <View style={styles.header}>
                         <View style={styles.profileContainer}>
-                            <Image
-                                source={typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar}
-                                style={styles.avatar}
-                            />
+                            <View style={styles.avatarWrapper}>
+                                <Image
+                                    source={typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar}
+                                    style={styles.avatar}
+                                    resizeMode='contain'
+                                />
+                            </View>
                             <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
                                 <Ionicons name="camera" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                    </View>
 
+                    </View>
                     <Modal animationType="slide" transparent={true} visible={modalVisible}>
                         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
                             <View style={styles.modalContent}>
@@ -330,16 +333,26 @@ const styles = StyleSheet.create({
         marginTop: 130
     },
     profileContainer: {
-        position: 'relative'
+        position: 'relative',
+
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        resizeMode: 'contain',
-        //backgroundColor: 'white',
-      },
-      
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 2,
+        borderColor: 'white',
+        overflow: 'hidden'
+    },
+    avatarWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+   
+},
     editButton: {
         position: 'absolute',
         bottom: 0, right: 0,

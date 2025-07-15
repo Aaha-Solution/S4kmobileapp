@@ -1,60 +1,51 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-	View,
-	StyleSheet,
-	Text,
-	Image,
-	Alert,
-	ActivityIndicator,
-	Dimensions,
-	KeyboardAvoidingView,
-	Platform,
-	TouchableWithoutFeedback,
-	Keyboard,
-	ScrollView,
-	Pressable,
-	SafeAreaView
+	View, StyleSheet, Text, Pressable, Image, Alert, ActivityIndicator,
+	Dimensions, TouchableOpacity, KeyboardAvoidingView, Platform,
+	TouchableWithoutFeedback, Keyboard, ScrollView
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useDispatch } from 'react-redux';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import CustomTextInput from '../component/CustomTextInput';
-import { useDispatch } from 'react-redux';
-import { RFValue } from 'react-native-responsive-fontsize';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+import { getBackendLevel } from '../utils/levelUtils';
 
 const { width, height } = Dimensions.get('window');
 
 const SignupScreen = ({ navigation }) => {
-	const [username, setusername] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
-	const [usernameError, setusernameError] = useState('');
 	const [emailError, setemailError] = useState('');
 	const [passwordError, setPasswordError] = useState('');
+	const [username, setusername] = useState('');
+	const [usernameError, setusernameError] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [confirmPasswordError, setConfirmPasswordError] = useState('');
-	const [loading, setLoading] = useState(false);
-	const [keyboardVisible, setKeyboardVisible] = useState(false);
 	const [usernameHelperVisible, setUsernameHelperVisible] = useState(false);
 	const [passwordHelperVisible, setPasswordHelperVisible] = useState(false);
 	const [confirmHelperVisible, setConfirmHelperVisible] = useState(false);
-	let typingTimeoutRef = useRef(null);
-	const dispatch = useDispatch();
 
-	useEffect(() => {
-		const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-		const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-		return () => {
-			show.remove();
-			hide.remove();
-		};
-	}, []);
+	const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+	const [isConfirmFocused, setIsConfirmFocused] = useState(false);
+	const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+	const [isEmailFocused, setIsEmailFocused] = useState(false);
+	
+	const [loading, setLoading] = useState(false);
+	const dispatch = useDispatch();
+	let typingTimeoutRef = useRef(null);
 
 	const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	const validatePassword = (pwd) =>
-		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,15}$/.test(pwd);
+	const validatePassword = (password) => {
+		const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+		return regex.test(password);
+	};
+
+	// Replace the handleLogin function with this fixed version
 
 	const handleSignUp = async () => {
-		Keyboard.dismiss();
 		setemailError('');
 		setusernameError('');
 		setPasswordError('');
@@ -121,7 +112,7 @@ const SignupScreen = ({ navigation }) => {
 				if (data.errors.password) setPasswordError(data.errors.password);
 			} else {
 				// Order of checks matters here
-				if (username === data.username && email === data.email_id) {
+				if (username === data.username && data.email_id === email) {
 					Alert.alert('Username and Email already exist', 'Please choose a different username and email.');
 				} else if (email === data.email_id) {
 					Alert.alert('Email already exists', 'Please use a different email.');
@@ -138,7 +129,6 @@ const SignupScreen = ({ navigation }) => {
 		}
 	};
 
-
 	const handlePassword = (text) => {
 		setPassword(text);
 		if (passwordError) setPasswordError('');
@@ -146,169 +136,162 @@ const SignupScreen = ({ navigation }) => {
 		if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 		typingTimeoutRef.current = setTimeout(() => setPasswordHelperVisible(false), 2000);
 	};
+	useEffect(() => {
+		return () => {
+			if (typingTimeoutRef.current) {
+				clearTimeout(typingTimeoutRef.current);
+			}
+		};
+	}, []);
+
 
 	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: '#F0F8FF' }}>
-			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-				style={{ flex: 1 }}
-			>
-				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<ScrollView
-						contentContainerStyle={styles.scrollContent}
-						keyboardShouldPersistTaps="handled"
-						showsVerticalScrollIndicator={false}
-					>
-						<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-
-							<View style={styles.topGraphics}>
-								<Image source={require('../assets/image/sun.png')} style={styles.sun} />
-								<Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
-							</View>
-
-							<View style={styles.mainContent}>
+		<KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+				<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+					<ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+						<View style={styles.topGraphics}>
+							<Image source={require('../assets/image/sun.png')} style={styles.sun} />
+							<Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
+						</View>
+						<View style={styles.mainContent}>
+							<View style={styles.logoContainer}>
 								<Image source={require('../assets/image/splash.png')} style={styles.logo} resizeMode="contain" />
-
-								<Text style={styles.signupTitle}>
-									<Text style={{ color: '#D2042D' }}>S</Text>
-									<Text style={{ color: '#E97451' }}>I</Text>
-									<Text style={{ color: '#FDDA0D' }}>G</Text>
-									<Text style={{ color: '#50C878' }}>N</Text>
-									<Text> </Text>
-									<Text style={{ color: '#9370DB' }}>U</Text>
-									<Text style={{ color: '#FF1493' }}>P</Text>
-								</Text>
-								<View style={styles.inputWrapper}>
-									<CustomTextInput
-										value={username}
-										onChangeText={(text) => {
-											const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
-											setusername(cleaned);
-											setUsernameHelperVisible(true);
-											if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-											typingTimeoutRef.current = setTimeout(() => {
-												setUsernameHelperVisible(false);
-											}, 2000);
-										}}
-										placeholder="Username"
-										maxLength={6}
-										autoCapitalize="none"
-										style={{ width: '100%' }}
-									/>
-									{usernameHelperVisible && (
-										<View style={styles.helperCard}>
-											<Text style={styles.helperText}>Only 6 lowercase characters allowed (a–z)</Text>
-										</View>
-									)}
-									{usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
-								</View>
-								<View style={styles.inputWrapper}>
-									<CustomTextInput
-										value={email}
-										onChangeText={(text) => {
-											setEmail(text);
-											if (emailError) setemailError('');
-										}}
-										placeholder="Email"
-										keyboardType="email-address"
-										autoCapitalize="none"
-										style={{ width: '100%' }}
-									/>
-									{emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-								</View>
-								<View style={styles.inputWrapper}>
-									<CustomTextInput
-										value={password}
-										onChangeText={handlePassword}
-										placeholder="Password"
-										secureTextEntry
-										style={{ width: '100%' }}
-										selectTextOnFocus={false} contextMenuHidden={true}
-									/>
-									{passwordHelperVisible && (
-										<View style={styles.helperCard}>
-											<Text style={styles.helperText}>
-												At least 8 chars, 1 uppercase, 1 lowercase, 1 number & 1 special char
-											</Text>
-										</View>
-									)}
-									{passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-								</View>
-								<View style={styles.inputWrapper}>
-									<CustomTextInput
-										value={confirmPassword}
-										onChangeText={(text) => {
-											setConfirmPassword(text);
-											setConfirmHelperVisible(true);
-											if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-											typingTimeoutRef.current = setTimeout(() => {
-												setConfirmHelperVisible(false);
-											}, 2000);
-										}}
-										placeholder="Confirm Password"
-										secureTextEntry
-										style={{ width: '100%' }}
-										selectTextOnFocus={false} contextMenuHidden={true}
-									/>
-									{confirmHelperVisible && (
-										<View style={styles.helperCard}>
-											<Text style={styles.helperText}>Must match the password above</Text>
-										</View>
-									)}
-									{confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
-
-								</View>
-								<View style={styles.buttonContainer}>
-									{loading ? (
-										<ActivityIndicator size="large" color="#FF8C00" />
-									) : (
-										<PressableButton
-											title="SIGN UP"
-											onPress={handleSignUp}
-											style={styles.signupButton}
-											textStyle={styles.signupButtonText}
-										/>
-									)}
-								</View>
-
-								{!keyboardVisible && (
-									<View style={styles.bottomGraphics}>
-										<Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
-									</View>
-								)}
-
-								<View style={styles.loginContainer}>
-									<Pressable style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-										<Text style={styles.loginText}>
-											Already have an account? <Text style={styles.loginLink}>Login</Text>
-										</Text>
-									</Pressable>
-								</View>
 							</View>
+							<Text style={styles.loginTitle}>
+								<Text style={{ color: '#D2042D' }}>S</Text>
+								<Text style={{ color: '#E97451' }}>I</Text>
+								<Text style={{ color: '#FDDA0D' }}>G</Text>
+								<Text style={{ color: '#50C878' }}>N</Text>
+								<Text> </Text>
+								<Text style={{ color: '#9370DB' }}>U</Text>
+								<Text style={{ color: '#FF1493' }}>P</Text>
+							</Text>
+							<CustomTextInput
+								value={username}
+								onChangeText={(text) => {
+									const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
+									setusername(cleaned);
+									setUsernameHelperVisible(true);
+									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+									typingTimeoutRef.current = setTimeout(() => {
+										setUsernameHelperVisible(false);
+									}, 2000);
+								}}
+								placeholder="Username"
+								maxLength={6}
+								autoCapitalize="none"
+								style={{ width: '100%' }}
+							/>
+							{usernameHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>Only 6 lowercase characters allowed (a–z)</Text>
+								</View>
+							)}
+							{usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+							<CustomTextInput
+								value={email}
+								onChangeText={(text) => {
+									setEmail(text);
+									if (emailError) setemailError('');
+								}}
+								placeholder="Email"
+								keyboardType="email-address"
+								autoCapitalize="none"
+								style={{ width: '100%' }}
+							/>
+							{emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+							<CustomTextInput
+								value={password}
+								onChangeText={handlePassword}
+								placeholder="Password"
+								secureTextEntry
+								style={{ width: '100%' }}
+								selectTextOnFocus={false} contextMenuHidden={true}
+							/>
+							{passwordHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>
+										At least 8 chars, 1 uppercase, 1 lowercase, 1 number & 1 special char
+									</Text>
+								</View>
+							)}
+							{passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+							<CustomTextInput
+								value={confirmPassword}
+								onChangeText={(text) => {
+									setConfirmPassword(text);
+									setConfirmHelperVisible(true);
+									if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+									typingTimeoutRef.current = setTimeout(() => {
+										setConfirmHelperVisible(false);
+									}, 2000);
+								}}
+								placeholder="Confirm Password"
+								secureTextEntry
+								style={{ width: '100%' }}
+								selectTextOnFocus={false} contextMenuHidden={true}
+							/>
+							{confirmHelperVisible && (
+								<View style={styles.helperCard}>
+									<Text style={styles.helperText}>Must match the password above</Text>
+								</View>
+							)}
+							{confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
+							<View style={styles.buttonContainer}>
+								{loading ? (
+									<ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
+								) : (
+									<PressableButton
+										title="SIGN UP"
+										onPress={handleSignUp}
+										disabled={loading}
+										style={[styles.loginButton, loading && { opacity: 0.6 }]}
+										textStyle={styles.loginButtonText}
+									/>
 
-						</LinearGradient>
+								)}
+							</View>
+						</View>
+						<View style={{ alignItems: 'center', width: '100%' }}>
+							<Image source={require('../assets/image/kids.png')} style={styles.kidsImage} />
+						</View>
+
+						<View style={styles.signUpContainer}>
+							<Pressable style={styles.signUpButton} onPress={() => navigation.navigate('Login')}>
+								<Text style={styles.signUpText}>
+									Already have an account? <Text style={styles.signUpLink}>Login</Text>
+								</Text>
+							</Pressable>
+						</View>
 					</ScrollView>
-				</TouchableWithoutFeedback>
-			</KeyboardAvoidingView>
-		</SafeAreaView>
+				</LinearGradient>
+			</TouchableWithoutFeedback>
+		</KeyboardAvoidingView>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: { flex: 1 },
+	container: {
+		flex: 1,
+	},
 	scrollContent: {
 		flexGrow: 1,
 		justifyContent: 'center',
+		alignItems: 'center',
 		paddingVertical: 20,
-		paddingBottom: 40, // Add breathing room at bottom
-		marginTop: Platform.OS === 'ios' ? 0 : -20, // Adjust for Android status bar
+		paddingHorizontal: 16,
 	},
 	topGraphics: {
+		position: 'absolute',
+		top: Platform.OS === 'ios' ? 60 : 30,
+		left: 0,
+		right: 0,
+		height: 80,
+		zIndex: 2,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		paddingHorizontal: 20,
-		marginBottom: 10,
-		marginTop: 60
 	},
 	sun: {
 		width: width * 0.12,
@@ -321,104 +304,117 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 	},
 	mainContent: {
-		width: '100%',
+		width: '90%',
+		maxWidth: 400,
 		alignItems: 'center',
-		paddingHorizontal: '8%',
+		justifyContent: 'center',
+	},
+	logoContainer: {
+		marginBottom: 20,
 	},
 	logo: {
 		width: width * 0.4,
 		height: width * 0.3,
 		marginBottom: 10,
 	},
-	signupTitle: {
-		fontSize: RFValue(24),
-		fontWeight: 'bold',
-		marginBottom: 20,
-	},
-	inputContainer: {
-		width: '100%',
-		paddingHorizontal: '5%',
-		alignItems: 'center',
-		justifyContent: 'center',
+	loginTitle: {
+		fontSize: RFPercentage(4.2),
+		fontWeight: '700',
+		marginBottom: 40,
 	},
 	errorText: {
 		color: '#FF4444',
-		fontSize: RFValue(11),
-		width: '100%',              // Ensures full width
-		marginTop: RFValue(-6),
-		marginBottom: RFValue(6),
-		paddingLeft: RFValue(10),   // Aligns with input padding
-		textAlign:'center' // Aligns text to the left
+		fontSize: RFValue(11),            // Responsive font size
+		alignSelf: 'flex-start',
+		marginLeft: RFValue(20),          // Responsive left margin
+		marginTop: RFValue(-6),           // Adjusted to avoid overlap
+		marginBottom: RFValue(6),         // Responsive bottom spacing
 	},
-	inputWrapper: {
-		width: '100%',
-		marginBottom: RFValue(5),
-		alignItems: 'center',
-	},
+
 	buttonContainer: {
-		marginTop: 10,
-		alignItems: 'center',
+		marginBottom: 20,
 	},
-	signupButton: {
+	loginButton: {
 		backgroundColor: '#FF8C00',
 		paddingVertical: 12,
 		paddingHorizontal: 40,
 		borderRadius: 30,
+
 	},
-	signupButtonText: {
+	loginButtonText: {
 		color: 'white',
-		fontSize: 18,
+		fontSize: RFValue(20),
 		fontWeight: 'bold',
 	},
-	bottomGraphics: {
-		marginTop: 20,
+	loadingIndicator: {
+		paddingVertical: 18,
+	},
+	optionsRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		width: '100%',
+		paddingHorizontal: 10,
+	},
+	rememberMe: {
+		flexDirection: 'row',
 		alignItems: 'center',
-		marginBottom: 10,
+	},
+	checkbox: {
+		width: 18,
+		height: 18,
+		borderWidth: 2,
+		borderColor: '#65358c',
+		borderRadius: 3,
+		marginRight: 8,
+	},
+	checkboxChecked: {
+		backgroundColor: '#FFA500',
+		borderColor: '#FFA500',
+	},
+	optionText: {
+		fontSize: RFValue(11),
+		color: '#65358c',
+		fontWeight: 50
+	},
+	forgotPasswordText: {
+		color: '#65358c',
+		textDecorationLine: 'underline',
+		fontWeight: 50,
+		fontSize: RFValue(11),
 	},
 	kidsImage: {
 		width: width * 0.45,
 		height: width * 0.25,
 		resizeMode: 'contain',
+		marginTop: 20,
 	},
-	loginContainer: {
-		marginTop: 10,
-		marginBottom: 30, // Prevent overlap with notch/safe area
-		alignItems: 'center',
+	signUpContainer: {
+		marginTop: 8,
 	},
-	loginButton: {
+	signUpButton: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
 		paddingVertical: 12,
 		paddingHorizontal: 30,
 		borderRadius: 25,
 	},
-	loginText: {
+	signUpText: {
+		color: '#fff',
 		fontSize: RFValue(13),
-		color: 'white',
-		textAlign: 'center'
+		textAlign: 'center',
 	},
-	loginLink: {
+	signUpLink: {
 		textDecorationLine: 'underline',
 		fontWeight: 'bold',
 		color: '#FFE082',
+		fontSize: RFValue(15)
 	},
 	helperCard: {
-		backgroundColor: '#FFF8DC',
+		backgroundColor: '#FDFBD4',
+		padding: 10,
 		borderRadius: 8,
-		paddingVertical: 8,
-		paddingHorizontal: 12,
 		marginTop: 5,
-		borderWidth: 1,
-		borderColor: '#FFD700',
-		width: '100%',                   // ← Match parent (same as input)
-		alignSelf: 'center',             // ← Center it inside wrapper
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	helperText: {
-		color: '#333',
-		fontSize: 14,
+		width: '100%',
 	},
 });
-
 
 export default SignupScreen;
