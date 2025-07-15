@@ -16,6 +16,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
+import LevelSelectorScreen from '../screens/LevelSelectorScreen';
+
 import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -208,7 +210,7 @@ const BottomTabNavigator = () => {
 			}}
 		>
 			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
-			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} />
+			<Tab.Screen name="level" component={LevelSelectorScreen} options={{ title: 'Age' }} />
 			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
 			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Settings' }} />
 		</Tab.Navigator>
