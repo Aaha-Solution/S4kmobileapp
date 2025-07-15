@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
 	dropdownContainer: {
 		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
-		borderRadius: 6,
+		borderRadius: 2,
 		marginLeft: screenWidth * 0.2,
 		minWidth: screenWidth * 0.4,
 		maxWidth: screenWidth * 0.7,
