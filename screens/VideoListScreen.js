@@ -8,7 +8,9 @@ import {
 	Image,
 	Dimensions,
 	BackHandler,
-	Alert
+	Alert,
+	useWindowDimensions,
+	ScrollView 
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -43,6 +45,9 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
 	const backendLevel = getBackendLevel(selectedLevel);
+const { width, height } = useWindowDimensions();
+const isLandscape = width > height;
+
 
 	// Fixed: Check if current combination is paid using the current state values
 	const isCurrentCombinationPaid = paidAccess.some(
@@ -307,6 +312,7 @@ useEffect(() => {
 
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
+			
 			<View style={styles.languageRow}>
 				{Object.keys(languageLabels).map((langKey) => (
 					<TouchableOpacity

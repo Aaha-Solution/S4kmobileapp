@@ -200,7 +200,7 @@ const LoginScreen = ({ navigation }) => {
                                 <Text style={{ color: '#50C878' }}>I</Text>
                                 <Text style={{ color: '#4169E1' }}>N</Text>
                             </Text>
-                            <CustomTextInput value={email} onChangeText={setEmail} placeholder="Email" keyboardType="email-address" autoCapitalize="none" />
+                            <CustomTextInput value={email} onChangeText={setEmail} placeholder="Email" placeholdertextcolour="#808080" keyboardType="email-address" autoCapitalize="none" />
                             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
                             <CustomTextInput value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry selectTextOnFocus={false} contextMenuHidden={true} // hides copy/paste menu
                             />
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     errorText: {
-        color: '#FF4444',
+        color: '#fa0202ff',
         fontSize: RFValue(11),            // Responsive font size
         alignSelf: 'flex-start',
         marginLeft: RFValue(20),          // Responsive left margin
@@ -310,11 +310,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 40,
         borderRadius: 30,
-       
     },
     loginButtonText: {
         color: 'white',
-        fontSize: RFValue(18),
+        fontSize: RFValue(20),
         fontWeight: 'bold',
     },
     loadingIndicator: {
@@ -343,7 +342,7 @@ const styles = StyleSheet.create({
         borderColor: '#FFA500',
     },
     optionText: {
-        fontSize: RFValue(11),
+        fontSize: RFValue(13),
         color: '#65358c',
         fontWeight: 50
     },
@@ -351,7 +350,7 @@ const styles = StyleSheet.create({
         color: '#65358c',
         textDecorationLine: 'underline',
         fontWeight: 50,
-        fontSize: RFValue(11),
+        fontSize: RFValue(13),
     },
     kidsImage: {
         width: width * 0.45,
@@ -377,6 +376,7 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontWeight: 'bold',
         color: '#FFE082',
+        fontSize: RFValue(15)
     },
 });
 
