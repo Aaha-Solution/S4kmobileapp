@@ -351,6 +351,7 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontWeight: 50,
         fontSize: RFValue(13),
+        marginLeft: 30,
     },
     kidsImage: {
         width: width * 0.45,
