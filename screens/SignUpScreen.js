@@ -416,6 +416,11 @@ const styles = StyleSheet.create({
 		width: '100%',
 		marginBottom: 10,
 	},
+	helperText: {
+		color: 'black', // or any contrasting color like '#000000' or '#444'
+		fontSize: RFValue(11),
+	},
+	
 });
 
 export default SignupScreen;
