@@ -19,7 +19,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
     const BASE_URL = 'https://smile4kidsbackend-production-2970.up.railway.app/';
-    
+
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
@@ -50,21 +50,32 @@ const EditProfileScreen = ({ route, navigation }) => {
         const fetchAvatar = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                const response = await fetch(`${BASE_URL}/api/images`, {
+                const response = await fetch(`${BASE_URL}api/images`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
                 const data = await response.json();
-                setImages(Array.isArray(data) ? data : []);
+
+                const imageUrls = Array.isArray(data)
+                  ? data.map(file => `${BASE_URL}${file.path.replace(/^\/+/, '')}`)
+                  : [];
+                
+                console.log('First avatar object:', data[0]);
+                console.log('Avatar URLs:', imageUrls);
+                
+                setImages(imageUrls);
                 setLoading(false);
+                
             } catch (error) {
                 console.error('Failed to fetch avatars:', error);
                 setImages([]);
                 setLoading(false);
             }
         };
+
         fetchAvatar();
     }, []);
     useEffect(() => {
@@ -151,15 +162,17 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
             return;
         }
+    
         if (dateError || phoneError) {
             setAlertTitle('Validation Error');
             setAlertMessage('Please fix the errors before saving.');
             setShowAlert(true);
             return;
         }
+    
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}/signup/update-profile`, {
+            const response = await fetch(`${BASE_URL}signup/update-profile`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -168,23 +181,23 @@ const EditProfileScreen = ({ route, navigation }) => {
                 body: JSON.stringify({
                     username,
                     email_id: email,
-                    dob: toMySQLDate(dateOfBirth),
                     ph_no: phone,
                     address,
                     avatar: selectedAvatar,
-                }),
+                })                
             });
+    
             const text = await response.text();
+            console.log('Raw backend response:', text); // ✅ Add this
             let data;
             try {
                 data = JSON.parse(text);
             } catch {
-                throw new Error(text);
+                throw new Error(text); // If not JSON, will show HTML error
             }
+    
             if (data.message?.toLowerCase().includes('profile updated')) {
                 dispatch(setProfile({ username, dateOfBirth, phone, address, selectedAvatar }));
-                console.log('Profile updated successfully:', data);
-                console.log('Selected Avatar:', selectedAvatar);
                 await AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
                 navigation.navigate('ViewProfile');
             } else {
@@ -197,7 +210,7 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
         }
     };
-
+    
     const handleSelectAvatar = (avatarUrl) => {
         setSelectedAvatar(avatarUrl);
         setModalVisible(false);
@@ -233,8 +246,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 ) : (
                                     <ScrollView>
                                         <View style={styles.avatarGrid}>
-                                            {images.map((image, index) => {
-                                                const uri = `${BASE_URL}${image.path}`;
+                                            {images.map((uri, index) => {
                                                 const isSelected = selectedAvatar === uri;
                                                 return (
                                                     <TouchableOpacity
@@ -245,10 +257,14 @@ const EditProfileScreen = ({ route, navigation }) => {
                                                         <Image
                                                             source={{ uri }}
                                                             style={[styles.avatar, isSelected && styles.selectedAvatar]}
+                                                            onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
+                                                            
                                                         />
+
                                                     </TouchableOpacity>
                                                 );
                                             })}
+
                                         </View>
                                     </ScrollView>
                                 )}
@@ -317,12 +333,13 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        borderWidth: 2,
-        borderColor: 'white'
-    },
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        resizeMode: 'contain',
+        //backgroundColor: 'white',
+      },
+      
     editButton: {
         position: 'absolute',
         bottom: 0, right: 0,
@@ -371,15 +388,24 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around'
     },
     avatarOption: {
-        width: '30%',
-        aspectRatio: 1,
-        marginBottom: 15
-    },
-    selectedAvatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        margin: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        overflow: 'hidden',
+      },
+      
+      selectedAvatar: {
         borderWidth: 3,
         borderColor: '#8A2BE2',
-        transform: [{ scale: 1.1 }]
-    },
+        backgroundColor: '#E0E0FF',
+      },
+      
     formContainer: {
         padding: 20
     },

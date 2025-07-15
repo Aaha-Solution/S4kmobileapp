@@ -186,7 +186,7 @@ const PaymentScreen = ({ navigation }) => {
 			const firstSelection = unpaidSelections[0];
 			const paymentType = `${firstSelection.language}-${firstSelection.level}`;
 
-			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/https://smile4kidsbackend-production-2970.up.railway.app/payment/create-payment-intent', {
+			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
