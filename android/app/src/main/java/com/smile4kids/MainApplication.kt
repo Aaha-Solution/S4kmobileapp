@@ -13,8 +13,7 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 
 
-import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLogger
+
 
 
 class MainApplication : Application(), ReactApplication {
@@ -41,11 +40,7 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
 
-     //  Disable Facebook SDK auto-init and auto-logging
-  FacebookSdk.setAutoInitEnabled(false)
-  FacebookSdk.setAutoLogAppEventsEnabled(false)
-  FacebookSdk.setAdvertiserIDCollectionEnabled(false) // Optional: Prevent ad ID collection
-
+     
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.

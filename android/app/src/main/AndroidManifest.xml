@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Custom permission to restrict access to exported Stripe activities -->
     <permission android:name="com.smile4kids.stripe.SAFE"
         android:protectionLevel="signature" />
 
@@ -16,6 +17,7 @@
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
 
+        <!-- Main activity -->
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -29,23 +31,32 @@
             </intent-filter>
         </activity>
 
-        <!-- Stripe SDK components: Set to exported="false" unless required -->
+        <!-- Stripe SDK activities with restricted access -->
         <activity
             android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:permission="com.smile4kids.stripe.SAFE"
+            tools:replace="android:exported" />
 
         <activity
             android:name="com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteRedirectActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:permission="com.smile4kids.stripe.SAFE"
+            tools:replace="android:exported" />
 
         <activity
             android:name="com.stripe.android.link.LinkRedirectHandlerActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:permission="com.smile4kids.stripe.SAFE"
+            tools:replace="android:exported" />
 
         <activity
             android:name="com.stripe.android.payments.StripeBrowserProxyReturnActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:permission="com.smile4kids.stripe.SAFE"
+            tools:replace="android:exported" />
 
+        <!-- Receiver fix -->
         <receiver
             android:name="androidx.profileinstaller.ProfileInstallReceiver"
             android:exported="false"
