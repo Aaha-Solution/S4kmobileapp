@@ -72,6 +72,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 				navigation.navigate("AccountScreen");
 			} else {
 				Alert.alert('Error', data.message || 'Something went wrong.');
+				//Alert.alert('Alert','Something went wrong. Please try again later.');
 			}
 		} catch (error) {
 			console.error('Error changing password:', error);

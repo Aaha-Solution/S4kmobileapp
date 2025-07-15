@@ -27,6 +27,7 @@ const ageGroups = [
 const AgeSelectionScreen = () => {
 	const dispatch = useDispatch();
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
+	console.log('Selected Level:', selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
 	const navigation = useNavigation();
 	const [animations] = useState(
@@ -59,14 +60,16 @@ const AgeSelectionScreen = () => {
 	};
 
 	const handleNext = () => {
-		if (selectedLevel) {
+		if(!selectedLevel || selectedLevel === null || selectedLevel === undefined) {
+			setShowAlert(true);
+			return;
+		}
+		else {
 			navigation.reset({
 				index: 0,
 				routes: [{ name: 'MainTabs' }],
 			});
-		} else {
-			setShowAlert(true);
-		}
+		} 
 	};
 
 	const handleConfirmAlert = () => {
