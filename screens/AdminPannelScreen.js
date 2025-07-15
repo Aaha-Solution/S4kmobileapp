@@ -44,30 +44,30 @@ const AdminPannel = () => {
         Alert.alert('Error', 'Token not found. Please login again.');
         return;
       }
-  
+
       const res = await fetch(
         'https://smile4kidsbackend-production-2970.up.railway.app/admin/users-with-purchases',
         {
           headers: { Authorization: `Bearer ${storedToken}` },
         }
       );
-  
+
       const data = await res.json();
-  
+
       if (res.status === 401 || res.status === 403) {
         Alert.alert('Session Expired', 'Please login again.');
         await AsyncStorage.clear();
         navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] });
         return;
       }
-  
+
       if (Array.isArray(data)) {
         const sorted = data
           .filter(u => u.has_paid)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        
+
         const unpaid = data.filter(u => !u.has_paid);
-  
+
         setUsers([...sorted, ...unpaid]); // ✅ Paid + newest first
         setCurrentPage(1);
       } else {
@@ -79,8 +79,6 @@ const AdminPannel = () => {
       setLoading(false);
     }
   };
-  
-
   const logout = () => {
     Alert.alert('Logout', 'Confirm logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -114,8 +112,8 @@ const AdminPannel = () => {
   //   const endIndex = startIndex + pageSize;
   //   setFiltered(filteredUsers.slice(startIndex, endIndex));
   // };
-   // ✅ Reset current page when filters/search change
-   useEffect(() => {
+  // ✅ Reset current page when filters/search change
+  useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedLanguage, selectedLevel, pageSize]);
 
@@ -126,19 +124,17 @@ const AdminPannel = () => {
     const endIndex = startIndex + pageSize;
     setFiltered(filteredUsers.slice(startIndex, endIndex));
   }, [users, currentPage, pageSize, search, selectedLanguage, selectedLevel]);
-  
+
   const handleSearch = (text) => {
     setSearch(text);
     setCurrentPage(1); // Reset to first page when searching
-    // setTimeout(() => {
-    //  // updatePaginatedData();
-    // }, 300);
   };
 
-  // const applyFilters = useCallback(() => {
-  //   setCurrentPage(1); // Reset to first page when applying filters
-  //   updatePaginatedData();
-  // }, [updatePaginatedData]);
+  const applyFilters = useCallback(() => {
+    setCurrentPage(1); // Reset to first page when applying filters
+    setShowFilters(false); // ✅ Hide filters after applying
+  }, []);
+  
 
   const clearFilters = () => {
     setSearch('');
@@ -150,7 +146,7 @@ const AdminPannel = () => {
   };
 
   const renderItem = ({ item, index }) => (
-    <View style={[styles.row, index % 2 ? styles.oddRow : styles.evenRow]}>
+    <View style={styles.row}>
       <Text style={[styles.cell, styles.name, { color: '#000' }]} numberOfLines={1}>{item.username}</Text>
       <Text style={[styles.cell, styles.email, { color: '#000' }]} numberOfLines={1}>{item.email_id}</Text>
       <Text style={[styles.cell, styles.lang, { color: '#000' }]}>{item.language}</Text>
@@ -335,20 +331,21 @@ const AdminPannel = () => {
             </TouchableOpacity>
           </View>
         )}
-
         {/* Filter Panel */}
         {showFilters && (
           <View style={styles.filterPanel}>
             <FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
             <FilterButton title="Ages" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
             <View style={styles.filterActions}>
-              <TouchableOpacity style={[styles.clearBtn, { width: '100%' }]} onPress={clearFilters}>
+              <TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
+                <Text style={styles.btnText}>Apply</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
                 <Text style={styles.btnText}>Clear</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
-
         {/* Table */}
         <View style={styles.tableContainer}>
           {loading ? (
@@ -487,7 +484,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FF',
     borderRadius: 10,
-    paddingBottom: 10,
+    //paddingBottom: 10,
   },
   tableHeader: {
     flexDirection: 'row',
@@ -511,9 +508,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ADD8E6',
+    backgroundColor: '#ffffff', // ← ✅ Uniform color for all rows
   },
-  evenRow: { backgroundColor: '#ffffff' },
-  oddRow: { backgroundColor: '#F0F8FF' },
+  
   cell: { flex: 1, textAlign: 'center' },
   name: { flex: 1.5 },
   email: { flex: 2 },
