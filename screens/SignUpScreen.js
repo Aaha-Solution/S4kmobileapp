@@ -415,6 +415,7 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		width: '100%',
 		marginBottom: 10,
+		color: 'black',
 	},
 });
 
