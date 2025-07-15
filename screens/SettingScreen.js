@@ -19,7 +19,7 @@ import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Dimensions,width } from 'react-native';
 const SettingsScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const email = useSelector((state) => state.user.email) || '';
@@ -27,7 +27,8 @@ const SettingsScreen = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [showAlert, setShowAlert] = useState(false);
-
+	const width = Dimensions.get('window').width;
+	const height = Dimensions.get('window').height;
 	// ✅ Load avatar from AsyncStorage
 	const loadAvatar = async () => {
 		try {

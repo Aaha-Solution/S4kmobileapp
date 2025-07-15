@@ -414,6 +414,7 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		marginTop: 5,
 		width: '100%',
+		marginBottom: 10,
 	},
 });
 
