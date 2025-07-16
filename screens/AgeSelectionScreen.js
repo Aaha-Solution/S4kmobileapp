@@ -71,7 +71,7 @@ const AgeSelectionScreen = () => {
 			});
 		} 
 	};
-
+ 
 	const handleConfirmAlert = () => {
 		setShowAlert(false);
 	};

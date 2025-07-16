@@ -63,7 +63,7 @@ const App = () => {
 								<Stack.Screen name="AdminPannel" component={AdminPannel} />
 								<Stack.Screen name="Login" component={LoginScreen} />
 								<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen}  options={{ headerShown: false }}/>
 								<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
 								<Stack.Screen
 									name="LanguageSelectionScreen"

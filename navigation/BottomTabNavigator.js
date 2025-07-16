@@ -16,6 +16,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
+import LevelSelectorScreen from '../screens/LevelSelectorScreen';
+
 import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

@@ -181,7 +181,7 @@ const SignupScreen = ({ navigation }) => {
 								placeholder="Username"
 								maxLength={6}
 								autoCapitalize="none"
-								style={{ width: '100%' }}
+								style={{ width: '100%',alignSelf: 'center' }}
 							/>
 							{usernameHelperVisible && (
 								<View style={styles.helperCard}>
