@@ -7,17 +7,19 @@ import {
   StatusBar,
   BackHandler,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Orientation from 'react-native-orientation-locker';
 import Slider from '@react-native-community/slider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const VideoPlayerScreen = ({ route, navigation }) => {
   const { videoUri } = route.params;
   const videoRef = useRef(null);
+  const insets = useSafeAreaInsets(); // ✅ Get device safe area insets
 
   const [paused, setPaused] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
@@ -54,7 +56,6 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
-			//navigation.goBack();
       return true;
     });
     return () => backHandler.remove();
@@ -122,7 +123,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
           </View>
 
           {/* Progress Bar */}
-          <View style={styles.progressContainer}>
+          <View style={[styles.progressContainer, { bottom: insets.bottom + 80 }]}>
             <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
             <Slider
               style={styles.slider}
@@ -138,7 +139,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
           </View>
 
           {/* Bottom Controls */}
-          <View style={styles.controls}>
+          <View style={[styles.controls, { bottom: insets.bottom + 10 }]}>
             <TouchableOpacity onPress={() => onSeek(Math.max(currentTime - 10, 0))}>
               <Icon name="replay-10" size={32} color="#fff" />
             </TouchableOpacity>
@@ -181,7 +182,6 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     position: 'absolute',
-    bottom: 80,
     left: 10,
     right: 10,
     flexDirection: 'row',
@@ -197,7 +197,6 @@ const styles = StyleSheet.create({
   },
   controls: {
     position: 'absolute',
-    bottom: 20,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
