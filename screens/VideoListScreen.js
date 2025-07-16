@@ -10,7 +10,8 @@ import {
 	BackHandler,
 	Alert,
 	useWindowDimensions,
-	ScrollView 
+	ScrollView ,
+	SafeAreaView
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -311,6 +312,7 @@ useEffect(() => {
 	};
 
 	return (
+		<SafeAreaView style={{ flex: 1 }}>
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			
 			<View style={styles.languageRow}>
@@ -390,6 +392,7 @@ useEffect(() => {
 				</View>
 			)}
 		</LinearGradient>
+		</SafeAreaView>
 	);
 };
 

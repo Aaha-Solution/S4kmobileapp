@@ -58,17 +58,19 @@ const EditProfileScreen = ({ route, navigation }) => {
                 });
 
                 const data = await response.json();
+                console.log('Avatar data:', data);
 
                 const imageUrls = Array.isArray(data)
-                  ? data.map(file => `${BASE_URL}${file.path.replace(/^\/+/, '')}`)
-                  : [];
-                
+                    ? data.map(file => `${BASE_URL}${file.path}`) // ✅ KEEP THE LEADING SLASH
+                    : [];
+
+
                 console.log('First avatar object:', data[0]);
                 console.log('Avatar URLs:', imageUrls);
-                
+
                 setImages(imageUrls);
                 setLoading(false);
-                
+
             } catch (error) {
                 console.error('Failed to fetch avatars:', error);
                 setImages([]);
@@ -88,7 +90,14 @@ const EditProfileScreen = ({ route, navigation }) => {
                 const storedAvatar = await AsyncStorage.getItem('selectedAvatar');
                 if (storedAvatar) {
                     const parsed = JSON.parse(storedAvatar);
-                    setSelectedAvatar(parsed);
+                    if (typeof parsed === 'string') {
+                        setSelectedAvatar(parsed); // it's a URL
+                    } else if (parsed?.uri) {
+                        setSelectedAvatar(parsed.uri); // if stored as { uri: ... }
+                    } else {
+                        setSelectedAvatar(profile_avatar); // fallback to local
+                    }
+
                     dispatch(setProfile({ ...currentProfile, selectedAvatar: parsed }));
                 }
             }
@@ -162,14 +171,14 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
             return;
         }
-    
+
         if (dateError || phoneError) {
             setAlertTitle('Validation Error');
             setAlertMessage('Please fix the errors before saving.');
             setShowAlert(true);
             return;
         }
-    
+
         try {
             const token = await AsyncStorage.getItem('token');
             const response = await fetch(`${BASE_URL}/signup/update-profile`, {
@@ -184,9 +193,9 @@ const EditProfileScreen = ({ route, navigation }) => {
                     ph_no: phone,
                     address,
                     avatar: selectedAvatar,
-                })                
+                })
             });
-    
+
             const text = await response.text();
             console.log('Raw backend response:', text); // ✅ Add this
             let data;
@@ -195,7 +204,7 @@ const EditProfileScreen = ({ route, navigation }) => {
             } catch {
                 throw new Error(text); // If not JSON, will show HTML error
             }
-    
+
             if (data.message?.toLowerCase().includes('profile updated')) {
                 dispatch(setProfile({ username, dateOfBirth, phone, address, selectedAvatar }));
                 await AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
@@ -210,7 +219,7 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
         }
     };
-    
+
     const handleSelectAvatar = (avatarUrl) => {
         setSelectedAvatar(avatarUrl);
         setModalVisible(false);
@@ -224,10 +233,18 @@ const EditProfileScreen = ({ route, navigation }) => {
                         <View style={styles.profileContainer}>
                             <View style={styles.avatarWrapper}>
                                 <Image
-                                    source={typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar}
+                                    source={
+                                        selectedAvatar
+                                            ? typeof selectedAvatar === 'string'
+                                                ? { uri: selectedAvatar }
+                                                : selectedAvatar
+                                            : profile_avatar
+                                    }
+                                    onError={(e) => console.log('❌ Image load failed', selectedAvatar, e.nativeEvent)}
                                     style={styles.avatar}
-                                    resizeMode='contain'
+                                    resizeMode="contain"
                                 />
+
                             </View>
                             <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
                                 <Ionicons name="camera" size={20} color="white" />
@@ -261,7 +278,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                                             source={{ uri }}
                                                             style={[styles.avatar, isSelected && styles.selectedAvatar]}
                                                             onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
-                                                            
+
                                                         />
 
                                                     </TouchableOpacity>
@@ -342,17 +359,18 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         borderWidth: 2,
         borderColor: 'white',
-        overflow: 'hidden'
+        overflow: 'hidden',
+       
     },
     avatarWrapper: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-   
-},
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
     editButton: {
         position: 'absolute',
         bottom: 0, right: 0,
@@ -411,14 +429,12 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         overflow: 'hidden',
-      },
-      
-      selectedAvatar: {
+    },
+    selectedAvatar: {
         borderWidth: 3,
         borderColor: '#8A2BE2',
         backgroundColor: '#E0E0FF',
-      },
-      
+    },
     formContainer: {
         padding: 20
     },
