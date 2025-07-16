@@ -5,7 +5,8 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	ScrollView,
-	Alert
+	Alert,
+	BackHandler,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -29,8 +30,6 @@ const PaymentScreen = ({ navigation }) => {
 	const paidSet = new Set(
 		paidAccess.map(({ language, level }) => `${language}-${level}`)
 	);
-
-
 
 	const dispatch = useDispatch();
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -56,12 +55,10 @@ const PaymentScreen = ({ navigation }) => {
 				}
 			}
 		}
-
 		if (selections.length === 0) {
 			setTotalAmount(0);
 			return;
 		}
-
 		try {
 			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/payment/calculate-amount', {
 				method: 'POST',
@@ -282,6 +279,15 @@ const PaymentScreen = ({ navigation }) => {
 		return allCombos.every(combo => paidSet.has(combo));
 	})();
 
+	// Handle back button
+		useEffect(() => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+				navigation.navigate('MainTabs');
+				//navigation.goBack();
+				return true;
+			});
+			return () => backHandler.remove();
+		}, []);
 
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.gradientContainer}>

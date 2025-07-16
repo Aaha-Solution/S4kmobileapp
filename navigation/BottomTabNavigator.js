@@ -5,7 +5,8 @@ import {
 	Text,
 	StyleSheet,
 	TouchableWithoutFeedback,
-	BackHandler
+	BackHandler,
+	SafeAreaView
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';

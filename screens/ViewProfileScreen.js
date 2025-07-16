@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
 	header: {
 		alignItems: 'center',
 		paddingVertical: 20,
-		marginTop: 110,
+		marginTop: 90,
 	},
 	profileContainer: {
 		position: 'relative',

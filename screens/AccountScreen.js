@@ -111,11 +111,11 @@ const styles = StyleSheet.create({
 	header: {
 		alignItems: 'center',
 		paddingVertical: 20,
-		marginTop: 110,
+		marginTop: 60,
 	},
 	profileContainer: {
 		alignItems: 'center',
-		marginTop: 20,
+		marginTop: 15,
 	},
 	avatar: {
 		width: 100,

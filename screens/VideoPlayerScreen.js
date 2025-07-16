@@ -88,6 +88,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('MainTabs');
+			//navigation.goBack();
 			return true;
 		});
 
@@ -118,7 +119,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 	if (!videoSource || !token) {
 		return (
 			<View style={styles.container}>
-				<StatusBar hidden />
+				
 				<TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
 					<Icon name="arrow-back" size={28} color="#fff" />
 				</TouchableOpacity>
@@ -133,7 +134,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
 	console.log('🛂 Sent Token:', token);
 	return (
 		<View style={styles.container}>
-			<StatusBar hidden />
+			
 			<TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
 				<Icon name="arrow-back" size={28} color="#fff" />
 			</TouchableOpacity>
