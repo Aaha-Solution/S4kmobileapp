@@ -1,252 +1,215 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
-	View,
-	ActivityIndicator,
-	TouchableOpacity,
-	StyleSheet,
-	StatusBar,
-	Dimensions,
-	Text,
-	BackHandler,
-  Alert,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  StatusBar,
+  BackHandler,
+  ActivityIndicator,
+  TouchableWithoutFeedback
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-const { width } = Dimensions.get('window');
+import Orientation from 'react-native-orientation-locker';
+import Slider from '@react-native-community/slider';
 
 const VideoPlayerScreen = ({ route, navigation }) => {
-	const { videoUri } = route.params;
-  console.log('🎬 Received videoUri from route.params:', JSON.stringify(videoUri, null, 2));
+  const { videoUri } = route.params;
+  const videoRef = useRef(null);
 
-	const [loading, setLoading] = useState(true);
-	const [paused, setPaused] = useState(false);
-	const [duration, setDuration] = useState(0);
-	const [error, setError] = useState(false);
-	const [token, setToken] = useState(null);
-	const [tokenLoaded, setTokenLoaded] = useState(false); // ✅ New flag
+  const [paused, setPaused] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [token, setToken] = useState(null);
 
-	// Extract URL from object or string
-	const getVideoSource = (videoData) => {
-		if (typeof videoData === 'string' || typeof videoData === 'number') {
-			return videoData;
-		}
-		if (videoData && typeof videoData === 'object') {
-			return (
-				videoData.videoUrl ||
-				videoData.url ||
-				videoData.videoUri ||
-				videoData.uri ||
-				videoData.video_url ||
-				videoData.file_url ||
-				videoData.src
-			);
-		}
-		return null;
-	};
+  const getVideoSource = (videoData) => {
+    if (typeof videoData === 'string') return videoData;
+    if (typeof videoData === 'object') {
+      return (
+        videoData.videoUrl ||
+        videoData.url ||
+        videoData.uri ||
+        videoData.video_url ||
+        videoData.file_url
+      );
+    }
+    return null;
+  };
 
-	const videoSource = getVideoSource(videoUri);
-  console.log('📼 Extracted videoSource:', videoSource);
+  const source = getVideoSource(videoUri);
 
-	const handleLoad = (data) => {
-		setLoading(false);
-		setDuration(data.duration);
-		setError(false);
-	};
+  useEffect(() => {
+    const loadToken = async () => {
+      const t = await AsyncStorage.getItem('token');
+      setToken(t);
+    };
+    loadToken();
+  }, []);
 
-	const handleBuffer = ({ isBuffering }) => {
-		setLoading(isBuffering);
-	};
-
-	const handleError = (error) => {
-		console.error('❌ Video playback error:', JSON.stringify(error, null, 2));
-		setLoading(false);
-		setError(true);
-	};
-
-	// ✅ Fetch token and wait
-	useEffect(() => {
-		const fetchToken = async () => {
-			try {
-				const storedToken = await AsyncStorage.getItem('token');
-				if (storedToken) {
-					setToken(storedToken);
-				} else {
-					console.warn('⚠️ No auth token found in AsyncStorage');
-					setError(true);
-				}
-			} catch (e) {
-				console.error('❌ Failed to fetch token:', e);
-        console.log('🛂 Token fetched from AsyncStorage:', storedToken);
-
-				setError(true);
-			} finally {
-				setTokenLoaded(true); // ✅ Mark as finished
-			}
-		};
-
-		fetchToken();
-	}, []);
-
-	// Handle back button
-	useEffect(() => {
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-			navigation.navigate('MainTabs');
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.goBack();
 			//navigation.goBack();
-			return true;
-		});
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
 
-		return () => backHandler.remove();
-	}, []);
+  // Auto-hide controls after 3 seconds
+  useEffect(() => {
+    let timeout;
+    if (controlsVisible) {
+      timeout = setTimeout(() => setControlsVisible(false), 3000);
+    }
+    return () => clearTimeout(timeout);
+  }, [controlsVisible]);
 
-	useEffect(() => {
-		// Hide StatusBar when video starts
-		StatusBar.setHidden(true, 'fade');
+  const toggleFullscreen = () => {
+    if (fullscreen) Orientation.unlockAllOrientations();
+    else Orientation.lockToLandscape();
+    setFullscreen(!fullscreen);
+  };
 
-		return () => {
-			// Restore StatusBar when leaving the screen
-			StatusBar.setHidden(false, 'fade');
-		};
-	}, []);
+  const onSeek = (time) => {
+    videoRef.current?.seek(time);
+    setCurrentTime(time);
+  };
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+  };
 
-	// ⏳ Wait until token is fetched
-	if (!tokenLoaded) {
-		return (
-			<View style={styles.loading}>
-				<ActivityIndicator size="large" color="#9346D2" />
-				<Text style={styles.loadingText}>Preparing video...</Text>
-			</View>
-		);
-	}
+  return (
+    <View style={styles.container}>
+      <StatusBar hidden />
 
-	if (!videoSource || !token) {
-    Alert.alert("Missing Video", `videoSource: ${videoSource}\ntoken: ${token}`);
-		return (
-			<View style={styles.container}>
-				
-				<TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-					<Icon name="arrow-back" size={28} color="#fff" />
-				</TouchableOpacity>
-				<View style={styles.errorContainer}>
-					<Icon name="error" size={50} color="#ff6b6b" />
-					<Text style={styles.errorText}>Video source or token not found</Text>
-				</View>
-			</View>
-		);
-	}
-	console.log('📺 Video URI:', videoSource);
-	console.log('🛂 Sent Token:', token);
-	return (
-		<View style={styles.container}>
-			
-			<TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-				<Icon name="arrow-back" size={28} color="#fff" />
-			</TouchableOpacity>
+      <TouchableWithoutFeedback onPress={() => setControlsVisible(!controlsVisible)}>
+        <Video
+          ref={videoRef}
+          source={{ uri: source.includes('/signed-stream/') ? `${source}?token=${token}` : source }}
+          style={styles.video}
+          resizeMode="contain"
+          paused={paused}
+          onLoad={data => {
+            setDuration(data.duration);
+            setLoading(false);
+          }}
+          onProgress={data => setCurrentTime(data.currentTime)}
+        />
+      </TouchableWithoutFeedback>
 
-			<Video
-				source={{
-					uri: videoSource.includes('/signed-stream/')
-						? `${videoSource}?token=${token}`
-						: videoSource
-				}}
-				style={styles.video}
-				resizeMode="contain"
-				onLoadStart={() => console.log('📥 Loading started:', videoSource)}
-				onBuffer={handleBuffer}
-				onLoad={handleLoad}
-				onError={handleError}
-				paused={paused}
-				controls
-				allowsExternalPlayback={false}
-				playWhenInactive={false}
-				playInBackground={false}
-			/>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#9346D2" />
+          <Text style={{ color: 'white', marginTop: 10 }}>Loading video...</Text>
+        </View>
+      )}
 
+      {controlsVisible && (
+        <>
+          {/* Top Controls */}
+          <View style={styles.topControls}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon name="arrow-back" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
-			{loading && !error && (
-				<View style={styles.loading}>
-					<ActivityIndicator size="large" color="#9346D2" />
-					<Text style={styles.loadingText}>Loading video...</Text>
-				</View>
-			)}
+          {/* Progress Bar */}
+          <View style={styles.progressContainer}>
+            <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={duration}
+              value={currentTime}
+              onSlidingComplete={onSeek}
+              minimumTrackTintColor="#FFFFFF"
+              maximumTrackTintColor="#888888"
+              thumbTintColor="#FFFFFF"
+            />
+            <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          </View>
 
-			{error && (
-				<View style={styles.errorContainer}>
-					<Icon name="error" size={50} color="#ff6b6b" />
-					<Text style={styles.errorText}>Failed to load video</Text>
-					<TouchableOpacity
-						style={styles.retryButton}
-						onPress={() => {
-							setError(false);
-							setLoading(true);
-						}}
-					>
-						<Text style={styles.retryText}>Retry</Text>
-					</TouchableOpacity>
-				</View>
-			)}
-		</View>
-	);
+          {/* Bottom Controls */}
+          <View style={styles.controls}>
+            <TouchableOpacity onPress={() => onSeek(Math.max(currentTime - 10, 0))}>
+              <Icon name="replay-10" size={32} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setPaused(!paused)}>
+              <Icon name={paused ? 'play-arrow' : 'pause'} size={40} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => onSeek(Math.min(currentTime + 10, duration))}>
+              <Icon name="forward-10" size={32} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={toggleFullscreen}>
+              <Icon name="fullscreen" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: 'black',
-		justifyContent: 'center',
-	},
-	video: {
-		width: '100%',
-		height: '100%',
-	},
-	loading: {
-		...StyleSheet.absoluteFillObject,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'black',
-	},
-	loadingText: {
-		color: '#fff',
-		marginTop: 10,
-		fontSize: 16,
-	},
-	backButton: {
-		position: 'absolute',
-		top: 40,
-		left: 20,
-		zIndex: 10,
-		padding: 10,
-		backgroundColor: '#00000080',
-		borderRadius: 20,
-	},
-	errorContainer: {
-		...StyleSheet.absoluteFillObject,
-		justifyContent: 'center',
-		alignItems: 'center',
-		padding: 20,
-		backgroundColor: '#000000AA',
-	},
-	errorText: {
-		color: '#fff',
-		fontSize: 18,
-		fontWeight: 'bold',
-		marginTop: 10,
-		textAlign: 'center',
-	},
-	retryButton: {
-		backgroundColor: '#9346D2',
-		paddingHorizontal: 20,
-		paddingVertical: 10,
-		borderRadius: 8,
-		marginTop: 20,
-	},
-	retryText: {
-		color: '#fff',
-		fontSize: 16,
-		fontWeight: 'bold',
-	},
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+  },
+  video: {
+    flex: 1,
+  },
+  topControls: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  progressContainer: {
+    position: 'absolute',
+    bottom: 80,
+    left: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  slider: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  timeText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  controls: {
+    position: 'absolute',
+    bottom: 20,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default VideoPlayerScreen;
