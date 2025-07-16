@@ -155,7 +155,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 												width: 20,
 												height: 20,
 											}}
-											zIndex={9999}
+											//zIndex={9999}
 											listMode="SCROLLVIEW"
 											scrollViewProps={{ nestedScrollEnabled: true }}
 											disabled={!isPaid}
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
 
 	dropdownWrapper: {
 		position: 'absolute',
-		top: -150, // approximately 15-18% of screen height
+		top: -screenHeight * 0.18, // approximately 15-18% of screen height
 		width: screenWidth * 0.5,  // 50% of screen width
 		left: -screenWidth * 0.35, // center align left
 		zIndex: 1000,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 		borderWidth: 0,
 		position: 'absolute',
 		top: -9999,
-		left: -9999,
+		left: -screenWidth * 0.35,
 		opacity: 0,
 		borderRadius: 5,
 	},
