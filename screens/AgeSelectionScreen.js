@@ -60,7 +60,7 @@ const AgeSelectionScreen = () => {
 	};
 
 	const handleNext = () => {
-		if(!selectedLevel || selectedLevel === null || selectedLevel === undefined) {
+		if(!selectedLevel || selectedLevel === 'null' || selectedLevel === undefined) {
 			setShowAlert(true);
 			return;
 		}

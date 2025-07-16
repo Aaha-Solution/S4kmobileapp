@@ -8,6 +8,7 @@ import {
   Dimensions,
   Text,
   BackHandler,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Video from 'react-native-video';
@@ -17,6 +18,7 @@ const { width } = Dimensions.get('window');
 
 const VideoPlayerScreen = ({ route, navigation }) => {
   const { videoUri } = route.params;
+  console.log('🎬 Received videoUri from route.params:', JSON.stringify(videoUri, null, 2));
 
   const [loading, setLoading] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -45,6 +47,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   };
 
   const videoSource = getVideoSource(videoUri);
+  console.log('📼 Extracted videoSource:', videoSource);
 
   const handleLoad = (data) => {
     setLoading(false);
@@ -75,6 +78,8 @@ const VideoPlayerScreen = ({ route, navigation }) => {
         }
       } catch (e) {
         console.error('❌ Failed to fetch token:', e);
+        console.log('🛂 Token fetched from AsyncStorage:', storedToken);
+
         setError(true);
       } finally {
         setTokenLoaded(true); // ✅ Mark as finished
@@ -105,6 +110,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   }
 
   if (!videoSource || !token) {
+    Alert.alert("Missing Video", `videoSource: ${videoSource}\ntoken: ${token}`);
     return (
       <View style={styles.container}>
         <StatusBar hidden />
