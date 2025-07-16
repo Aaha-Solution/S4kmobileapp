@@ -54,6 +54,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
+			//navigation.goBack();
       return true;
     });
     return () => backHandler.remove();

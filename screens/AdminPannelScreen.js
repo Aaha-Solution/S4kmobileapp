@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-  TextInput, TouchableOpacity, Alert, StatusBar
+  TextInput, TouchableOpacity, Alert, StatusBar,ScrollView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -361,7 +361,7 @@ const AdminPannel = () => {
                 <Text style={[styles.headerCell, styles.level]}>Ages</Text>
               </View>
 
-              <ScrollView horizontal>
+             
                 <FlatList
                   data={filtered}
                   keyExtractor={(_, i) => i.toString()}
@@ -371,9 +371,10 @@ const AdminPannel = () => {
                       <Text style={{ color: '#4682B4' }}>No users found</Text>
                     </View>
                   }
+                  //horizontal={true}
                   style={styles.tableList}
                 />
-              </ScrollView>
+              
               <PaginationControls />
             </>
           )}

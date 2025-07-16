@@ -10,7 +10,7 @@ import {
 	BackHandler,
 	Alert,
 	useWindowDimensions,
-	ScrollView ,
+	StatusBar,
 	SafeAreaView
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -46,13 +46,20 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
 
 	const backendLevel = getBackendLevel(selectedLevel);
-const { width, height } = useWindowDimensions();
-const isLandscape = width > height;
+	const { width, height } = useWindowDimensions();
+	const isLandscape = width > height;
 
 
 	// Fixed: Check if current combination is paid using the current state values
 	const isCurrentCombinationPaid = paidAccess.some(
 		item => item.language === language && item.level === backendLevel
+	);
+
+	// Restore status bar when returning from other screens
+	useFocusEffect(
+		useCallback(() => {
+			StatusBar.setHidden(false, 'fade');
+		}, [])
 	);
 
 	console.log("🧪 selectedLevel (UI):", selectedLevel);
@@ -70,20 +77,20 @@ const isLandscape = width > height;
 	}, [language, selectedLevel, paidAccess]);
 
 	// Add this useEffect to save preferences when they change
-useEffect(() => {
-  const savePreferences = async () => {
-    if (selectedLanguage && selectedLevel) {
-      const preferences = {
-        selectedLanguage,
-        selectedLevel,
-      };
-      await AsyncStorage.setItem('selectedPreferences', JSON.stringify(preferences));
-      console.log('✅ Preferences saved:', preferences);
-    }
-  };
-  
-  savePreferences();
-}, [selectedLanguage, selectedLevel]);
+	useEffect(() => {
+		const savePreferences = async () => {
+			if (selectedLanguage && selectedLevel) {
+				const preferences = {
+					selectedLanguage,
+					selectedLevel,
+				};
+				await AsyncStorage.setItem('selectedPreferences', JSON.stringify(preferences));
+				console.log('✅ Preferences saved:', preferences);
+			}
+		};
+
+		savePreferences();
+	}, [selectedLanguage, selectedLevel]);
 
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
@@ -93,6 +100,8 @@ useEffect(() => {
 		console.log("✅ current combo:", { language, selectedLevel });
 		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
 	}, [paidAccess, language, selectedLevel, isPaid]);
+
+
 
 	useFocusEffect(
 		useCallback(() => {
@@ -269,7 +278,7 @@ useEffect(() => {
 					selections: selections,
 				}),
 			});
-			
+
 			const rawText = await response.text();
 			console.log("🟠 Raw Response Text:", rawText);
 			let data;
@@ -313,85 +322,85 @@ useEffect(() => {
 
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
-		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
-			
-			<View style={styles.languageRow}>
-				{Object.keys(languageLabels).map((langKey) => (
-					<TouchableOpacity
-						key={langKey}
-						style={[
-							styles.languageButton,
-							language === langKey && styles.languageButtonActive,
-						]}
-						onPress={() => handleLanguageSelect(langKey)}
-					>
-						<Text style={styles.languageButtonText}>
-							{languageLabels[langKey]}
-						</Text>
-					</TouchableOpacity>
-				))}
-			</View>
-			{/*Selected Age Header*/}
-			<View style={styles.languageHeader}>
-					<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
-			</View>
+			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 
-			{/* Always show videos, but with lock icons if not paid */}
-			<FlatList
-				data={videos}
-				keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
-				contentContainerStyle={styles.listContainer}
-				renderItem={renderItem}
-				ListEmptyComponent={() => (
-					<View style={styles.emptyContainer}>
-						<Text style={styles.emptyText}>
-							{loading
-								? 'Loading videos...'
-								: 'No videos available for this selection'
-							}
-						</Text>
+				<View style={styles.languageRow}>
+					{Object.keys(languageLabels).map((langKey) => (
+						<TouchableOpacity
+							key={langKey}
+							style={[
+								styles.languageButton,
+								language === langKey && styles.languageButtonActive,
+							]}
+							onPress={() => handleLanguageSelect(langKey)}
+						>
+							<Text style={styles.languageButtonText}>
+								{languageLabels[langKey]}
+							</Text>
+						</TouchableOpacity>
+					))}
+				</View>
+				{/*Selected Age Header*/}
+				<View style={styles.languageHeader}>
+					<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
+				</View>
+
+				{/* Always show videos, but with lock icons if not paid */}
+				<FlatList
+					data={videos}
+					keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
+					contentContainerStyle={styles.listContainer}
+					renderItem={renderItem}
+					ListEmptyComponent={() => (
+						<View style={styles.emptyContainer}>
+							<Text style={styles.emptyText}>
+								{loading
+									? 'Loading videos...'
+									: 'No videos available for this selection'
+								}
+							</Text>
+						</View>
+					)}
+					extraData={[selectedLevel, language, loading, isCurrentCombinationPaid]}
+				/>
+
+				<CustomAlert
+					visible={showAlert}
+					title="Exit App"
+					message="Are you sure you want to exit the app?"
+					onConfirm={handleConfirmExit}
+					onCancel={handleCancelExit}
+				/>
+
+				{/* Show payment overlay only for first-time users who haven't paid anything yet */}
+				{!isCurrentCombinationPaid && initialVisitCompleted && paidAccess.length === 0 && (
+					<View style={styles.blurOverlay}>
+						<View style={styles.blurContent}>
+							<TouchableOpacity
+								style={styles.closeButton}
+								onPress={() => {
+									// Find the first paid combination and switch to it
+									const firstPaidCombo = paidAccess[0];
+									if (firstPaidCombo) {
+										setLanguage(firstPaidCombo.language);
+									}
+								}}
+							>
+							</TouchableOpacity>
+							<Text style={styles.blurTitle}>Unlock Videos</Text>
+							<Text style={styles.blurDescription}>
+								Pay £45 to access {languageLabels[language]} videos for {getDisplayLevel(selectedLevel)}
+							</Text>
+							<TouchableOpacity
+								onPress={HandlePay}
+								style={styles.payNowButton}
+							>
+								<Text style={styles.payNowText}>Pay £45</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
 				)}
-				extraData={[selectedLevel, language, loading, isCurrentCombinationPaid]}
-			/>
-
-			<CustomAlert
-				visible={showAlert}
-				title="Exit App"
-				message="Are you sure you want to exit the app?"
-				onConfirm={handleConfirmExit}
-				onCancel={handleCancelExit}
-			/>
-
-			{/* Show payment overlay only for first-time users who haven't paid anything yet */}
-			{!isCurrentCombinationPaid && initialVisitCompleted && paidAccess.length === 0 && (
-				<View style={styles.blurOverlay}>
-					<View style={styles.blurContent}>
-						<TouchableOpacity 
-							style={styles.closeButton}
-							onPress={() => {
-								// Find the first paid combination and switch to it
-								const firstPaidCombo = paidAccess[0];
-								if (firstPaidCombo) {
-									setLanguage(firstPaidCombo.language);
-								}
-							}}
-						>
-						</TouchableOpacity>
-						<Text style={styles.blurTitle}>Unlock Videos</Text>
-						<Text style={styles.blurDescription}>
-							Pay £45 to access {languageLabels[language]} videos for {getDisplayLevel(selectedLevel)}
-						</Text>
-						<TouchableOpacity
-							onPress={HandlePay}
-							style={styles.payNowButton}
-						>
-							<Text style={styles.payNowText}>Pay £45</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			)}
-		</LinearGradient>
+			</LinearGradient>
 		</SafeAreaView>
 	);
 };

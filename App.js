@@ -63,7 +63,7 @@ const App = () => {
 								<Stack.Screen name="AdminPannel" component={AdminPannel} />
 								<Stack.Screen name="Login" component={LoginScreen} />
 								<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen}  options={{ headerShown: false }}/>
+								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
 								<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
 								<Stack.Screen
 									name="LanguageSelectionScreen"
@@ -159,7 +159,7 @@ const App = () => {
 										headerTitle: 'Signup',
 										headerTitleAlign: 'center',
 										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' ,color: '#4B0082',},
+										headerStyle: { backgroundColor: '#87CEEB', color: '#4B0082', },
 										headerLeft: () => (
 											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('Login')} />
 										)
@@ -172,9 +172,9 @@ const App = () => {
 				</Provider>
 			</StripeProvider>
 		);
-	}catch(err) {
+	} catch (err) {
 		console.error("Error in App component:", err);
-		return ; // Or you can return a fallback UI
+		return; // Or you can return a fallback UI
 	}
 }
 

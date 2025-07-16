@@ -65,8 +65,11 @@ const ChangePasswordScreen = ({ navigation }) => {
 				return;
 			}
 
-
 			const data = await response.json();
+			if(currentPassword === newPassword) {
+				Alert.alert('Invalid', 'Old password and new password cannot be same.');
+				return;
+			}
 			if (data.message === "Password changed successfully") {
 				Alert.alert('Success', data.message);
 				navigation.navigate("AccountScreen");
