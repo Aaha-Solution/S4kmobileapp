@@ -134,7 +134,7 @@ const AdminPannel = () => {
     setCurrentPage(1); // Reset to first page when applying filters
     setShowFilters(false); // ✅ Hide filters after applying
   }, []);
-  
+
 
   const clearFilters = () => {
     setSearch('');
@@ -145,12 +145,14 @@ const AdminPannel = () => {
     //updatePaginatedData();
   };
 
-  const renderItem = ({ item, index }) => (
+  const renderItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={[styles.cell, styles.name, { color: '#000' }]} numberOfLines={1}>{item.username}</Text>
-      <Text style={[styles.cell, styles.email, { color: '#000' }]} numberOfLines={1}>{item.email_id}</Text>
-      <Text style={[styles.cell, styles.lang, { color: '#000' }]}>{item.language}</Text>
-      <Text style={[styles.cell, styles.level, { color: '#000' }]}>{item.level === 'Pre_Junior' ? 'Preschool' : item.level}</Text>
+      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.username}</Text>
+      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.email_id}</Text>
+      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.language}</Text>
+      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">
+        {item.level === 'Pre_Junior' ? 'Preschool' : item.level}
+      </Text>
     </View>
   );
 
@@ -359,18 +361,19 @@ const AdminPannel = () => {
                 <Text style={[styles.headerCell, styles.level]}>Ages</Text>
               </View>
 
-              <FlatList
-                data={filtered}
-                keyExtractor={(_, i) => i.toString()}
-                renderItem={renderItem}
-                ListEmptyComponent={
-                  <View style={{ padding: 20, alignItems: 'center' }}>
-                    <Text style={{ color: '#4682B4' }}>No users found</Text>
-                  </View>
-                }
-                style={styles.tableList}
-              />
-
+              <ScrollView horizontal>
+                <FlatList
+                  data={filtered}
+                  keyExtractor={(_, i) => i.toString()}
+                  renderItem={renderItem}
+                  ListEmptyComponent={
+                    <View style={{ padding: 20, alignItems: 'center' }}>
+                      <Text style={{ color: '#4682B4' }}>No users found</Text>
+                    </View>
+                  }
+                  style={styles.tableList}
+                />
+              </ScrollView>
               <PaginationControls />
             </>
           )}
@@ -510,7 +513,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ADD8E6',
     backgroundColor: '#ffffff', // ← ✅ Uniform color for all rows
   },
-  
+
   cell: { flex: 1, textAlign: 'center' },
   name: { flex: 1.5 },
   email: { flex: 2 },
