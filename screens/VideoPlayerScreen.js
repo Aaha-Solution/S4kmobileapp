@@ -8,6 +8,7 @@ import {
   BackHandler,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  InteractionManager
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Video from 'react-native-video';
@@ -28,6 +29,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [token, setToken] = useState(null);
+  const [shouldGoBack, setShouldGoBack] = useState(false);
 
   const getVideoSource = (videoData) => {
     if (typeof videoData === 'string') return videoData;
@@ -53,13 +55,61 @@ const VideoPlayerScreen = ({ route, navigation }) => {
     loadToken();
   }, []);
 
+  // Function to handle safe back navigation
+  const goBackSafely = () => {
+    setControlsVisible(false);
+  
+    Orientation.getOrientation((orientation) => {
+      if (orientation === 'PORTRAIT') {
+        navigation.goBack(); // Immediate back if already portrait
+      } else {
+        Orientation.lockToPortrait();
+        setShouldGoBack(true); // Wait for orientation listener
+      }
+    });
+  };
+  
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      navigation.goBack();
+      goBackSafely();
       return true;
     });
+
     return () => backHandler.remove();
   }, []);
+
+  useEffect(() => {
+    const handleDeviceOrientation = (orientation) => {
+      if (orientation === 'PORTRAIT' && shouldGoBack) {
+        setShouldGoBack(false);
+  
+        // Delay just enough for screen to settle fully
+        setTimeout(() => {
+          InteractionManager.runAfterInteractions(() => {
+            navigation.goBack();
+          });
+        }, 700); // You can increase this if glitch still occurs
+      }
+    };
+  
+    Orientation.addDeviceOrientationListener(handleDeviceOrientation);
+  
+    return () => {
+      Orientation.removeDeviceOrientationListener(handleDeviceOrientation);
+    };
+  }, [shouldGoBack]);
+  
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      Orientation.lockToPortrait();
+    });
+
+    return () => {
+      unsubscribe();
+      Orientation.lockToPortrait();
+    };
+  }, [navigation]);
 
   // Auto-hide controls after 3 seconds
   useEffect(() => {
@@ -71,8 +121,11 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   }, [controlsVisible]);
 
   const toggleFullscreen = () => {
-    if (fullscreen) Orientation.unlockAllOrientations();
-    else Orientation.lockToLandscape();
+    if (fullscreen) {
+      Orientation.lockToPortrait();
+    } else {
+      Orientation.lockToLandscape();
+    }
     setFullscreen(!fullscreen);
   };
 
@@ -117,9 +170,10 @@ const VideoPlayerScreen = ({ route, navigation }) => {
         <>
           {/* Top Controls */}
           <View style={styles.topControls}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="arrow-back" size={28} color="#fff" />
+            <TouchableOpacity onPress={goBackSafely}>
+              <Icon name="arrow-back" size={30} color="#fff" />
             </TouchableOpacity>
+
           </View>
 
           {/* Progress Bar */}

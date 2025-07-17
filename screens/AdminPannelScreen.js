@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-  TextInput, TouchableOpacity, Alert, StatusBar,ScrollView
+  TextInput, TouchableOpacity, Alert, StatusBar, Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+const { width } = Dimensions.get('window');
 
 const AdminPannel = () => {
   const navigation = useNavigation();
@@ -26,15 +28,19 @@ const AdminPannel = () => {
   const [selectedLevel, setSelectedLevel] = useState('');
   const languages = ['Hindi', 'Panjabi', 'Gujarati'];
   const levels = ['Pre_Junior', 'Junior'];
-  // const pageSizeOptions = [5, 10, 15, 20];
+
+  // Fixed column widths that add up to 100% with proper spacing
+  const tableWidth = width - 32; // Account for container padding
+  const columnWidths = {
+    name: tableWidth * 0.18,     // 18% of table width
+    email: tableWidth * 0.38,    // 38% of table width
+    language: tableWidth * 0.22, // 22% of table width
+    level: tableWidth * 0.22,    // 22% of table width
+  };
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  // useEffect(() => {
-  //   updatePaginatedData();
-  // }, [currentPage, pageSize, users, search, selectedLanguage, selectedLevel]);
 
   const fetchUsers = async () => {
     try {
@@ -57,7 +63,7 @@ const AdminPannel = () => {
       if (res.status === 401 || res.status === 403) {
         Alert.alert('Session Expired', 'Please login again.');
         await AsyncStorage.clear();
-        navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] });
+        navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
         return;
       }
 
@@ -68,7 +74,7 @@ const AdminPannel = () => {
 
         const unpaid = data.filter(u => !u.has_paid);
 
-        setUsers([...sorted, ...unpaid]); // ✅ Paid + newest first
+        setUsers([...sorted, ...unpaid]);
         setCurrentPage(1);
       } else {
         Alert.alert('Error', 'Unexpected response from server.');
@@ -79,6 +85,7 @@ const AdminPannel = () => {
       setLoading(false);
     }
   };
+
   const logout = () => {
     Alert.alert('Logout', 'Confirm logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -106,18 +113,10 @@ const AdminPannel = () => {
     return result;
   }, [users, search, selectedLanguage, selectedLevel]);
 
-  // const updatePaginatedData = () => {
-  //   const filteredUsers = getFilteredUsers();
-  //   const startIndex = (currentPage - 1) * pageSize;
-  //   const endIndex = startIndex + pageSize;
-  //   setFiltered(filteredUsers.slice(startIndex, endIndex));
-  // };
-  // ✅ Reset current page when filters/search change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedLanguage, selectedLevel, pageSize]);
 
-  // ✅ Update paginated data based on filters and currentPage
   useEffect(() => {
     const filteredUsers = getFilteredUsers();
     const startIndex = (currentPage - 1) * pageSize;
@@ -127,14 +126,13 @@ const AdminPannel = () => {
 
   const handleSearch = (text) => {
     setSearch(text);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const applyFilters = useCallback(() => {
-    setCurrentPage(1); // Reset to first page when applying filters
-    setShowFilters(false); // ✅ Hide filters after applying
+    setCurrentPage(1);
+    setShowFilters(false);
   }, []);
-
 
   const clearFilters = () => {
     setSearch('');
@@ -142,17 +140,30 @@ const AdminPannel = () => {
     setSelectedLevel('');
     setCurrentPage(1);
     setShowFilters(false);
-    //updatePaginatedData();
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.username}</Text>
-      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.email_id}</Text>
-      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item.language}</Text>
-      <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">
-        {item.level === 'Pre_Junior' ? 'Preschool' : item.level}
-      </Text>
+      <View style={[styles.cell, { width: columnWidths.name }]}>
+        <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+          {item.username || 'N/A'}
+        </Text>
+      </View>
+      <View style={[styles.cell, { width: columnWidths.email }]}>
+        <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+          {item.email_id || 'N/A'}
+        </Text>
+      </View>
+      <View style={[styles.cell, { width: columnWidths.language }]}>
+        <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+          {item.language || 'N/A'}
+        </Text>
+      </View>
+      <View style={[styles.cell, { width: columnWidths.level }]}>
+        <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+          {item.level === 'Pre_Junior' ? 'Preschool' : (item.level || 'N/A')}
+        </Text>
+      </View>
     </View>
   );
 
@@ -221,14 +232,11 @@ const AdminPannel = () => {
 
     return (
       <View style={styles.paginationContainer}>
-        {/* Results Info */}
         <Text style={styles.resultsInfo}>
           Showing {startIndex}-{endIndex} of {totalUsers} users
         </Text>
 
-        {/* Pagination Controls */}
         <View style={styles.paginationControls}>
-          {/* Previous Button */}
           <TouchableOpacity
             style={[
               styles.paginationButton,
@@ -244,7 +252,6 @@ const AdminPannel = () => {
             />
           </TouchableOpacity>
 
-          {/* Page Numbers */}
           <View style={styles.pageNumbers}>
             {getPageNumbers().map((page, index) => (
               <TouchableOpacity
@@ -271,7 +278,6 @@ const AdminPannel = () => {
             ))}
           </View>
 
-          {/* Next Button */}
           <TouchableOpacity
             style={[
               styles.paginationButton,
@@ -314,7 +320,6 @@ const AdminPannel = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Search Bar */}
         {showSearch && (
           <View style={styles.searchBar}>
             <TextInput
@@ -333,7 +338,7 @@ const AdminPannel = () => {
             </TouchableOpacity>
           </View>
         )}
-        {/* Filter Panel */}
+
         {showFilters && (
           <View style={styles.filterPanel}>
             <FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
@@ -348,32 +353,40 @@ const AdminPannel = () => {
             </View>
           </View>
         )}
-        {/* Table */}
+
         <View style={styles.tableContainer}>
           {loading ? (
             <ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
           ) : (
             <>
+              {/* Fixed Table Header */}
               <View style={styles.tableHeader}>
-                <Text style={[styles.headerCell, styles.name]}>Name</Text>
-                <Text style={[styles.headerCell, styles.email]}>Email</Text>
-                <Text style={[styles.headerCell, styles.lang]}>Language</Text>
-                <Text style={[styles.headerCell, styles.level]}>Ages</Text>
+                <View style={[styles.headerCell, { width: columnWidths.name }]}>
+                  <Text style={styles.headerText}>Name</Text>
+                </View>
+                <View style={[styles.headerCell, { width: columnWidths.email }]}>
+                  <Text style={styles.headerText}>Email</Text>
+                </View>
+                <View style={[styles.headerCell, { width: columnWidths.language }]}>
+                  <Text style={styles.headerText}>Language</Text>
+                </View>
+                <View style={[styles.headerCell, { width: columnWidths.level }]}>
+                  <Text style={styles.headerText}>Ages</Text>
+                </View>
               </View>
 
-             
-                <FlatList
-                  data={filtered}
-                  keyExtractor={(_, i) => i.toString()}
-                  renderItem={renderItem}
-                  ListEmptyComponent={
-                    <View style={{ padding: 20, alignItems: 'center' }}>
-                      <Text style={{ color: '#4682B4' }}>No users found</Text>
-                    </View>
-                  }
-                  //horizontal={true}
-                  style={styles.tableList}
-                />
+              <FlatList
+                data={filtered}
+                keyExtractor={(_, i) => i.toString()}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>No users found</Text>
+                  </View>
+                }
+                style={styles.tableList}
+                showsVerticalScrollIndicator={false}
+              />
               
               <PaginationControls />
             </>
@@ -488,19 +501,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FF',
     borderRadius: 10,
-    //paddingBottom: 10,
   },
   tableHeader: {
     flexDirection: 'row',
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     backgroundColor: '#D6EAF8',
     borderBottomWidth: 1,
     borderBottomColor: '#ADD8E6',
   },
   headerCell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  headerText: {
     fontWeight: '700',
     color: '#1f2937',
-    flex: 1,
+    fontSize: 12,
     textAlign: 'center',
   },
   tableList: {
@@ -508,18 +526,31 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ADD8E6',
-    backgroundColor: '#ffffff', // ← ✅ Uniform color for all rows
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
   },
-
-  cell: { flex: 1, textAlign: 'center' },
-  name: { flex: 1.5 },
-  email: { flex: 2 },
-  lang: { flex: 1 },
-  level: { flex: 1 },
+  cell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  cellText: {
+    fontSize: 12,
+    color: '#1f2937',
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#4682B4',
+    fontSize: 16,
+  },
 
   // Pagination Styles
   paginationContainer: {
@@ -527,39 +558,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ADD8E6',
-  },
-  pageSizeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  pageSizeLabel: {
-    fontSize: 14,
-    color: '#1f2937',
-    marginRight: 8,
-  },
-  pageSizeOptions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  pageSizeOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#f3f4f6',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  selectedPageSize: {
-    backgroundColor: '#4682B4',
-    borderColor: '#4682B4',
-  },
-  pageSizeText: {
-    fontSize: 12,
-    color: '#1f2937',
-  },
-  selectedPageSizeText: {
-    color: '#fff',
   },
   resultsInfo: {
     fontSize: 14,
