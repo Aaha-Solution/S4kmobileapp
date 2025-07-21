@@ -58,7 +58,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
   // Function to handle safe back navigation
   const goBackSafely = () => {
     setControlsVisible(false);
-  
+
     Orientation.getOrientation((orientation) => {
       if (orientation === 'PORTRAIT') {
         navigation.goBack(); // Immediate back if already portrait
@@ -68,7 +68,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
       }
     });
   };
-  
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       goBackSafely();
@@ -82,7 +82,6 @@ const VideoPlayerScreen = ({ route, navigation }) => {
     const handleDeviceOrientation = (orientation) => {
       if (orientation === 'PORTRAIT' && shouldGoBack) {
         setShouldGoBack(false);
-  
         // Delay just enough for screen to settle fully
         setTimeout(() => {
           InteractionManager.runAfterInteractions(() => {
@@ -91,14 +90,12 @@ const VideoPlayerScreen = ({ route, navigation }) => {
         }, 700); // You can increase this if glitch still occurs
       }
     };
-  
     Orientation.addDeviceOrientationListener(handleDeviceOrientation);
-  
     return () => {
       Orientation.removeDeviceOrientationListener(handleDeviceOrientation);
     };
   }, [shouldGoBack]);
-  
+
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -139,6 +136,10 @@ const VideoPlayerScreen = ({ route, navigation }) => {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' + secs : secs}`;
   };
+  const handleVideoEnd = () => {
+    Orientation.lockToPortrait();
+    navigation.goBack(); // Or use navigation.navigate('Home') if needed
+  };
 
   return (
     <View style={styles.container}>
@@ -156,6 +157,7 @@ const VideoPlayerScreen = ({ route, navigation }) => {
             setLoading(false);
           }}
           onProgress={data => setCurrentTime(data.currentTime)}
+          onEnd={handleVideoEnd}
         />
       </TouchableWithoutFeedback>
 
