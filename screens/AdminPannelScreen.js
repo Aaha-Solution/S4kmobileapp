@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-  TextInput, TouchableOpacity, Alert, StatusBar, Dimensions
+  TextInput, TouchableOpacity, Alert, StatusBar, Dimensions,ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -150,9 +150,11 @@ const AdminPannel = () => {
         </Text>
       </View>
       <View style={[styles.cell, { width: columnWidths.email }]}>
-        <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
-          {item.email_id || 'N/A'}
-        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <Text style={styles.cellText}>
+            {item.email_id || 'N/A'}
+          </Text>
+        </ScrollView>
       </View>
       <View style={[styles.cell, { width: columnWidths.language }]}>
         <Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
