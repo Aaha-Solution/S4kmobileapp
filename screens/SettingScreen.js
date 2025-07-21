@@ -19,7 +19,7 @@ import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Dimensions,width } from 'react-native';
+import { Dimensions, width } from 'react-native';
 const SettingsScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const email = useSelector((state) => state.user.email) || '';
@@ -27,6 +27,8 @@ const SettingsScreen = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [showAlert, setShowAlert] = useState(false);
+	const [loading, setLoading] = useState(false);
+
 	const width = Dimensions.get('window').width;
 	const height = Dimensions.get('window').height;
 	// ✅ Load avatar from AsyncStorage
@@ -65,7 +67,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	// ✅ Confirm logout and reset state/storage
 	const handleConfirmLogout = async () => {
 		try {
-			
+
 			await AsyncStorage.multiRemove([
 				'token',
 				'savedEmail',
@@ -78,15 +80,15 @@ const SettingsScreen = ({ route, navigation }) => {
 				'userLevel'
 			]);
 			await AsyncStorage.setItem('rememberMe', 'false');
-            setShowAlert(false);
+			setShowAlert(false);
 			dispatch(logout());
 			setTimeout(() => {
-			navigation.dispatch(
-				CommonActions.reset({
-					index: 0,
-					routes: [{ name: 'Login' }],
-				})
-			);
+				navigation.dispatch(
+					CommonActions.reset({
+						index: 0,
+						routes: [{ name: 'Login' }],
+					})
+				);
 			}, 100);
 		} catch (error) {
 			console.error('Logout failed:', error);
@@ -165,7 +167,9 @@ const SettingsScreen = ({ route, navigation }) => {
 						visible={showAlert}
 						title="Logout"
 						message="Are you sure you want to logout?"
-						onConfirm={handleConfirmLogout}
+						onConfirm={loading ? (
+							<ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
+						) : (handleConfirmLogout)}
 						onCancel={handleCancelLogout}
 					/>
 				</SafeAreaView>
@@ -213,7 +217,7 @@ const styles = StyleSheet.create({
 	email: {
 		color: 'black',
 		fontSize: 14,
-		fontWeight:'bold',
+		fontWeight: 'bold',
 	},
 	menuContainer: {
 		marginTop: 5,
@@ -246,6 +250,9 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: 'black',
 	},
+	loadingIndicator: {
+        paddingVertical: 18,
+    },
 });
 
 export default SettingsScreen;

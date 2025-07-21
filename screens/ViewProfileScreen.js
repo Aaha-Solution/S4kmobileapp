@@ -19,8 +19,8 @@ const ViewProfileScreen = ({ navigation }) => {
 
 	const [avatarSource, setAvatarSource] = useState(profile_avatar);
 
-	useFocusEffect(
-		useCallback(() => {
+useFocusEffect(
+	useCallback(() => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
@@ -42,9 +42,9 @@ const ViewProfileScreen = ({ navigation }) => {
 			};
 			loadSelectedAvatar();
 		}, [selectedAvatar])
-	);
+);
 
-	useEffect(() => {
+useEffect(() => {
 		const fetchProfileUpdate = async () => {
 			try {
 				if (!profile?.users_id || !email) return;
@@ -77,10 +77,9 @@ const ViewProfileScreen = ({ navigation }) => {
 		};
 
 		fetchProfileUpdate();
-	}, [profile?.users_id]);
+}, [profile?.users_id]);
 
-
-	useEffect(() => {
+useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('AccountScreen');
 			return true;
@@ -98,8 +97,6 @@ const ViewProfileScreen = ({ navigation }) => {
 			selectedAvatar: profile.selectedAvatar,
 		});
 	};
-
-
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -122,7 +119,6 @@ const ViewProfileScreen = ({ navigation }) => {
 									/>
 								)}
 							</View>
-
 						</View>
 
 						<Text style={styles.name}>{profile?.username || 'No Name'}</Text>
@@ -141,7 +137,6 @@ const ViewProfileScreen = ({ navigation }) => {
 									</Text>
 								</View>
 							))}
-
 							<PressableButton
 								style={styles.saveButton}
 								title="Edit"

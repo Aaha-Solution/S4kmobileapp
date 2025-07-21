@@ -8,6 +8,7 @@ import {
     Alert,
     Image,
     Dimensions,
+    BackHandler,
     ActivityIndicator
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -128,6 +129,14 @@ const ForgotPasswordScreen = ({ navigation }) => {
         inputRange: [0, 1],
         outputRange: [0, -10],
     });
+
+    useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('Login');
+			return true;
+		});
+		return () => backHandler.remove();
+	}, [navigation]);
 
     return (
         <LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>

@@ -12,6 +12,7 @@ import CustomAlert from '../component/CustomAlertMessage';
 import { setProfile } from '../Store/userSlice';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import { Dimensions } from 'react-native';
+
 const { width, height } = Dimensions.get('window');
 const EditProfileScreen = ({ route, navigation }) => {
     const dispatch = useDispatch();
@@ -148,22 +149,25 @@ const EditProfileScreen = ({ route, navigation }) => {
         return `${year}-${month}-${day}`;
     };
 
+    //Phone number validation
     const HandlePhonenumber = (number) => {
-        const cleanedNumber = number.replace(/\D/g, ''); // keep only digits
-        const ukMobileRegex = /^07\d{9}$/;
-
+        // Allow digits and optional leading +
+        const cleanedNumber = number.replace(/[^\d+]/g, '');
+    
         setPhone(number); // still show original input
-
+    
+        // E.164 format: optional +, followed by 10 to 15 digits
+        const internationalRegex = /^\+?[1-9]\d{9,14}$/;
+    
         if (!cleanedNumber) {
             setPhoneError('Phone number is required');
-        } else if (!ukMobileRegex.test(cleanedNumber)) {
-            setPhoneError('Enter a valid UK mobile number (11 digits starting with 07)');
+        } else if (!internationalRegex.test(cleanedNumber)) {
+            setPhoneError('Enter a valid international phone number');
         } else {
             setPhoneError('');
         }
     };
-
-
+    
     const handleSave = async () => {
         if (!email || !phone || !address) {
             setAlertTitle('Validation Error');
@@ -313,7 +317,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 value={phone}
                                 onChangeText={HandlePhonenumber}
                                 keyboardType="phone-pad"
-                                maxLength={11}
+                                maxLength={15}
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
                         </View>
