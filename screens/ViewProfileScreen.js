@@ -24,15 +24,20 @@ const ViewProfileScreen = ({ navigation }) => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+					let uri = null;
 					if (savedAvatar) {
-						setAvatarSource({ uri: JSON.parse(savedAvatar) });
+						uri = JSON.parse(savedAvatar);
 					} else if (typeof selectedAvatar === 'string') {
-						setAvatarSource({ uri: selectedAvatar });
+						uri = selectedAvatar;
+					}
+					if (uri && typeof uri === 'string' && uri.startsWith('http')) {
+						setAvatarSource({ uri });
 					} else {
-						setAvatarSource(profile_avatar);
+						setAvatarSource(profile_avatar); // fallback to default
 					}
 				} catch (error) {
 					console.log('Error loading avatar:', error);
+					setAvatarSource(profile_avatar);
 				}
 			};
 			loadSelectedAvatar();
@@ -42,6 +47,7 @@ const ViewProfileScreen = ({ navigation }) => {
 	useEffect(() => {
 		const fetchProfileUpdate = async () => {
 			try {
+				if (!profile?.users_id || !email) return;
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
 					`https://smile4kidsbackend-production-2970.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
@@ -53,7 +59,6 @@ const ViewProfileScreen = ({ navigation }) => {
 						},
 					}
 				);
-				console.log("Profile data:", response);
 				const data = await response.json();
 				console.log("Profile data:", data);
 				if (data?.users_id) {
@@ -72,7 +77,8 @@ const ViewProfileScreen = ({ navigation }) => {
 		};
 
 		fetchProfileUpdate();
-	}, []);
+	}, [profile?.users_id]);
+
 
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -93,16 +99,7 @@ const ViewProfileScreen = ({ navigation }) => {
 		});
 	};
 
-	const formatDate = (dateString) => {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return isNaN(date) ? 'Invalid Date' :
-			date.toLocaleDateString('en-GB', {
-				year: 'numeric',
-				month: 'short',
-				day: '2-digit',
-			});
-	};
+
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -111,15 +108,24 @@ const ViewProfileScreen = ({ navigation }) => {
 					<ScrollView>
 						<View style={styles.header}>
 							<View style={styles.profileContainer}>
-								<Image
-									source={avatarSource}
-									style={styles.avatar}
-									resizeMode="cover"
-								/>
+								{avatarSource ? (
+									<Image
+										source={avatarSource}
+										style={styles.avatar}
+										resizeMode="cover"
+									/>
+								) : (
+									<Image
+										source={require('../assets/image/profile_avatar.png')} // fallback image
+										style={styles.avatar}
+										resizeMode="cover"
+									/>
+								)}
 							</View>
+
 						</View>
 
-						<Text style={styles.name}>{profile.username}</Text>
+						<Text style={styles.name}>{profile?.username || 'No Name'}</Text>
 
 						<View style={styles.formContainer}>
 							{[
@@ -200,7 +206,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderRadius: 8,
 		alignItems: 'center',
-		alignContent:'center',
+		alignContent: 'center',
 		alignSelf: 'center',
 		marginTop: 20,
 	},
