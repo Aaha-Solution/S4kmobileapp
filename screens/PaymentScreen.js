@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
 	View,
 	Text,
@@ -280,14 +281,22 @@ const PaymentScreen = ({ navigation }) => {
 	})();
 
 	// Handle back button
-		useEffect(() => {
-			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+		useFocusEffect(
+	useCallback(() => {
+		const onBackPress = () => {
+			if (navigation.canGoBack()) {
+				navigation.goBack();
+			} else {
 				navigation.navigate('MainTabs');
-				//navigation.goBack();
-				return true;
-			});
-			return () => backHandler.remove();
-		}, []);
+			}
+			return true;
+		};
+
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+		return () => backHandler.remove(); // cleanup
+	}, [navigation])
+);
 
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.gradientContainer}>
