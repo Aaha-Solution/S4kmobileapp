@@ -61,7 +61,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 console.log('Avatar data:', data);
 
                 const imageUrls = Array.isArray(data)
-                    ? data.map(file => `${BASE_URL}${file.path}`) // ✅ KEEP THE LEADING SLASH
+                    ? data.map(file => `${BASE_URL}${file.path}`) 
                     : [];
 
 

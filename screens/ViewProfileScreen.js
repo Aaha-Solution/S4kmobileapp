@@ -20,64 +20,64 @@ const ViewProfileScreen = ({ navigation }) => {
 	const [avatarSource, setAvatarSource] = useState(profile_avatar);
 
 	useFocusEffect(
-	useCallback(() => {
-		const loadSelectedAvatar = async () => {
-			try {
-				const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-				let uri = null;
-				if (savedAvatar) {
-					uri = JSON.parse(savedAvatar);
-				} else if (typeof selectedAvatar === 'string') {
-					uri = selectedAvatar;
+		useCallback(() => {
+			const loadSelectedAvatar = async () => {
+				try {
+					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+					let uri = null;
+					if (savedAvatar) {
+						uri = JSON.parse(savedAvatar);
+					} else if (typeof selectedAvatar === 'string') {
+						uri = selectedAvatar;
+					}
+					if (uri && typeof uri === 'string' && uri.startsWith('http')) {
+						setAvatarSource({ uri });
+					} else {
+						setAvatarSource(profile_avatar); // fallback to default
+					}
+				} catch (error) {
+					console.log('Error loading avatar:', error);
+					setAvatarSource(profile_avatar);
 				}
-				if (uri && typeof uri === 'string' && uri.startsWith('http')) {
-					setAvatarSource({ uri });
-				} else {
-					setAvatarSource(profile_avatar); // fallback to default
-				}
-			} catch (error) {
-				console.log('Error loading avatar:', error);
-				setAvatarSource(profile_avatar);
-			}
-		};
-		loadSelectedAvatar();
-	}, [selectedAvatar])
-);
+			};
+			loadSelectedAvatar();
+		}, [selectedAvatar])
+	);
 
 	useEffect(() => {
-	const fetchProfileUpdate = async () => {
-		try {
-			if (!profile?.users_id || !email) return;
-			const token = await AsyncStorage.getItem('token');
-			const response = await fetch(
-				`https://smile4kidsbackend-production-2970.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
+		const fetchProfileUpdate = async () => {
+			try {
+				if (!profile?.users_id || !email) return;
+				const token = await AsyncStorage.getItem('token');
+				const response = await fetch(
+					`https://smile4kidsbackend-production-2970.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				const data = await response.json();
+				console.log("Profile data:", data);
+				if (data?.users_id) {
+					dispatch(updateProfile({
+						email: data.email_id,
+						username: data.username,
+						address: data.address,
+						dateOfBirth: data.dob,
+						phone: data.ph_no,
+						selectedAvatar: data.avatar,
+					}));
 				}
-			);
-			const data = await response.json();
-			console.log("Profile data:", data);
-			if (data?.users_id) {
-				dispatch(updateProfile({
-					email: data.email_id,
-					username: data.username,
-					address: data.address,
-					dateOfBirth: data.dob,
-					phone: data.ph_no,
-					selectedAvatar: data.avatar,
-				}));
+			} catch (error) {
+				console.log("Error fetching profile:", error);
 			}
-		} catch (error) {
-			console.log("Error fetching profile:", error);
-		}
-	};
+		};
 
-	fetchProfileUpdate();
-}, [profile?.users_id]);
+		fetchProfileUpdate();
+	}, [profile?.users_id]);
 
 
 	useEffect(() => {
@@ -108,12 +108,21 @@ const ViewProfileScreen = ({ navigation }) => {
 					<ScrollView>
 						<View style={styles.header}>
 							<View style={styles.profileContainer}>
-								<Image
-									source={avatarSource}
-									style={styles.avatar}
-									resizeMode="cover"
-								/>
+								{avatarSource ? (
+									<Image
+										source={avatarSource}
+										style={styles.avatar}
+										resizeMode="cover"
+									/>
+								) : (
+									<Image
+										source={require('../assets/image/profile_avatar.png')} // fallback image
+										style={styles.avatar}
+										resizeMode="cover"
+									/>
+								)}
 							</View>
+
 						</View>
 
 						<Text style={styles.name}>{profile?.username || 'No Name'}</Text>
@@ -197,7 +206,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderRadius: 8,
 		alignItems: 'center',
-		alignContent:'center',
+		alignContent: 'center',
 		alignSelf: 'center',
 		marginTop: 20,
 	},
