@@ -171,15 +171,15 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     const handleSave = async () => {
         if (!email || !phone || !address) {
-            setAlertTitle('Validation Error');
+            setAlertTitle('Alert');
             setAlertMessage('Please fill in all required fields.');
             setShowAlert(true);
             return;
         }
 
         if (dateError || phoneError) {
-            setAlertTitle('Validation Error');
-            setAlertMessage('Please fix the errors before saving.');
+            setAlertTitle('Alert');
+            setAlertMessage('Please fill all fields before saving.');
             setShowAlert(true);
             return;
         }
