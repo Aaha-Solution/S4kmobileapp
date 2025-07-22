@@ -1,6 +1,8 @@
-// component/PressableButton.js
 import React from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text, StyleSheet, Dimensions, Platform } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
+const isTablet = screenWidth >= 768;
 
 const PressableButton = ({ title, onPress, style }) => {
   return (
@@ -16,17 +18,17 @@ const PressableButton = ({ title, onPress, style }) => {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#FF8C00',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: isTablet ? 16 : 12,
+    paddingHorizontal: isTablet ? 32 : 24,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 180, // ✅ fixed good-looking width
+    minWidth: isTablet ? 220 : 160,
     alignSelf: 'center',
   },
   text: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isTablet ? 18 : 16,
     fontWeight: '600',
     textAlign: 'center',
   },
