@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
 	View, StyleSheet, Text, Pressable, Image, Alert, ActivityIndicator,
 	Dimensions, TouchableOpacity, KeyboardAvoidingView, Platform,
-	TouchableWithoutFeedback, Keyboard, ScrollView
+	TouchableWithoutFeedback, Keyboard, ScrollView,BackHandler
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
@@ -144,6 +144,13 @@ const SignupScreen = ({ navigation }) => {
 		};
 	}, []);
 
+useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('Login');
+			return true;
+		});
+		return () => backHandler.remove();
+	}, [navigation]);
 
 	return (
 		<KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

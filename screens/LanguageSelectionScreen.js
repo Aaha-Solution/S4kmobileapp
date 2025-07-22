@@ -57,10 +57,11 @@ const LanguageSelectionScreen = ({ navigation }) => {
 
 	const handleNextPress = () => {
 		if (selectedLanguage) {
-			navigation.reset({
-				index: 0,
-				routes: [{ name: 'AgeSelectionScreen' }],
-			});
+			// navigation.reset({
+			// 	index: 0,
+			// 	routes: [{ name: 'AgeSelectionScreen' }],
+			// });
+			navigation.navigate('AgeSelectionScreen');
 		} else {
 			setShowAlert(true);
 		}
@@ -70,6 +71,7 @@ const LanguageSelectionScreen = ({ navigation }) => {
 		setShowAlert(false);
 	};
 
+	
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>

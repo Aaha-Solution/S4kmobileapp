@@ -64,9 +64,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
         ).start();
     }, []);
 
-    const handleConfirmLogout = () => {
-        setShowAlert(false);
-    };
+    // const handleConfirmLogout = () => {
+    //     setShowAlert(false);
+    // };
 
     const isValidEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

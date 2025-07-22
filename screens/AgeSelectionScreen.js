@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -8,6 +8,7 @@ import {
 	Image,
 	ScrollView,
 	Dimensions,
+	BackHandler
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -75,6 +76,14 @@ const AgeSelectionScreen = () => {
 	const handleConfirmAlert = () => {
 		setShowAlert(false);
 	};
+
+	useEffect(() => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+				navigation.navigate('LanguageSelectionScreen');
+				return true;
+			});
+			return () => backHandler.remove();
+		}, [navigation]);
 
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>

@@ -7,7 +7,7 @@ import {
 	Alert,
 	KeyboardAvoidingView,
 	Platform,
-	Pressable
+	Pressable,BackHandler
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -75,6 +75,14 @@ const OTPVerificationScreen = ({ navigation }) => {
 			setShowAlert(true);
 		}
 	};
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			navigation.navigate('ForgotPassword');
+			return true;
+		});
+		return () => backHandler.remove();
+	}, [navigation]);
+
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			{/* Header */}
