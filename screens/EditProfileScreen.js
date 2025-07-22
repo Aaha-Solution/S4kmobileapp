@@ -151,18 +151,15 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     //Phone number validation
     const HandlePhonenumber = (number) => {
-        // Allow digits and optional leading +
-        const cleanedNumber = number.replace(/[^\d+]/g, '');
-    
+        const cleanedNumber = number.replace(/\D/g, ''); // keep only digits
+        const ukMobileRegex = /^07\d{9}$/;
+
         setPhone(number); // still show original input
-    
-        // E.164 format: optional +, followed by 10 to 15 digits
-        const internationalRegex = /^\+?[1-9]\d{9,14}$/;
-    
+
         if (!cleanedNumber) {
             setPhoneError('Phone number is required');
-        } else if (!internationalRegex.test(cleanedNumber)) {
-            setPhoneError('Enter a valid international phone number');
+        } else if (!ukMobileRegex.test(cleanedNumber)) {
+            setPhoneError('Enter a valid UK mobile number (11 digits starting with 07)');
         } else {
             setPhoneError('');
         }
@@ -317,7 +314,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 value={phone}
                                 onChangeText={HandlePhonenumber}
                                 keyboardType="phone-pad"
-                                maxLength={15}
+                                maxLength={11}
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
                         </View>

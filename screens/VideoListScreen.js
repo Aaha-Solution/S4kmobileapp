@@ -48,6 +48,8 @@ const VideoListScreen = ({ navigation, route }) => {
 	const backendLevel = getBackendLevel(selectedLevel);
 	const { width, height } = useWindowDimensions();
 	const isLandscape = width > height;
+	const isTablet = width >= 700; // Consider tablet if width >= 700px
+	const headerWidth = isTablet ? Math.min(width * 0.5, 500) : 200;
 
 
 	// Fixed: Check if current combination is paid using the current state values
@@ -321,16 +323,18 @@ const VideoListScreen = ({ navigation, route }) => {
 	};
 
 	return (
-		<SafeAreaView style={{ flex: 1 }}>
+		<SafeAreaView style={[{ flex: 1 }]}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 
-				<View style={styles.languageRow}>
-					{Object.keys(languageLabels).map((langKey) => (
+				<View style={[styles.languageRow, isTablet && styles.languageRowTablet, isTablet && { marginTop: 24 }]}>
+					{Object.keys(languageLabels).map((langKey, idx) => (
 						<TouchableOpacity
 							key={langKey}
 							style={[
 								styles.languageButton,
 								language === langKey && styles.languageButtonActive,
+								isTablet && styles.languageButtonTablet,
+								idx !== 0 && isTablet && { marginLeft: 32 }, // More gap between buttons on tablet
 							]}
 							onPress={() => handleLanguageSelect(langKey)}
 						>
@@ -341,7 +345,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					))}
 				</View>
 				{/*Selected Age Header*/}
-				<View style={styles.languageHeader}>
+				<View style={[styles.languageHeader, isTablet && styles.languageHeaderTablet, { width: headerWidth, alignSelf: 'center', marginTop: isTablet ? 32 : 20 }]}>
 					<Text style={styles.ageGroupText}>{getDisplayLevel(selectedLevel)}</Text>
 				</View>
 
@@ -415,6 +419,11 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 10,
 	},
+	languageRowTablet: {
+		maxWidth: 900,
+		alignSelf: 'center',
+		paddingHorizontal: 0,
+	},
 	languageButton: {
 		backgroundColor: '#FF8C00',
 		paddingVertical: 10,
@@ -422,6 +431,13 @@ const styles = StyleSheet.create({
 		flex: 1,
 		marginHorizontal: 5,
 		alignItems: 'center',
+		minWidth: 0,
+	},
+	languageButtonTablet: {
+		marginHorizontal: 0,
+		paddingVertical: 18,
+		flex: 1,
+		maxWidth: undefined,
 	},
 	languageButtonActive: {
 		backgroundColor: 'rgba(76, 175, 80, 0.9)',
@@ -447,6 +463,11 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	languageHeaderTablet: {
+		marginTop: 0,
+		paddingVertical: 22,
+		borderRadius: 30,
 	},
 	ageGroupText: {
 		fontSize: 16,
