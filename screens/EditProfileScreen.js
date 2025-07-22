@@ -233,18 +233,17 @@ const EditProfileScreen = ({ route, navigation }) => {
                     <View style={styles.header}>
                         <View style={styles.profileContainer}>
                             <View style={styles.avatarWrapper}>
-                                <Image
+                            <Image
                                     source={
-                                        selectedAvatar
-                                            ? typeof selectedAvatar === 'string'
-                                                ? { uri: selectedAvatar }
-                                                : selectedAvatar
+                                        typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')
+                                            ? { uri: selectedAvatar }
                                             : profile_avatar
                                     }
-                                    onError={(e) => console.log('❌ Image load failed', selectedAvatar, e.nativeEvent)}
+                                    onError={() => setSelectedAvatar(profile_avatar)}
                                     style={styles.avatar}
                                     resizeMode="contain"
                                 />
+
 
                             </View>
                             <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>

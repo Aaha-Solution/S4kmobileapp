@@ -31,6 +31,20 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	const width = Dimensions.get('window').width;
 	const height = Dimensions.get('window').height;
+	const resolveAvatar = (avatar) => {
+		if (typeof avatar === 'string') {
+		  if (avatar.startsWith('http') || avatar.startsWith('file')) {
+			return { uri: avatar };
+		  }
+		  return profile_avatar; // fallback if it's like "1"
+		} else if (avatar && typeof avatar === 'object' && avatar.uri) {
+		  return avatar;
+		} else {
+		  return profile_avatar;
+		}
+	  };
+	  
+
 	// ✅ Load avatar from AsyncStorage
 	const loadAvatar = async () => {
 		try {
@@ -53,10 +67,20 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	useEffect(() => {
 		if (selectedAvatar) {
-			setTempSelectedAvatar(selectedAvatar);
+		  setTempSelectedAvatar(selectedAvatar);
+	  
+		  // only save if it's a string or uri object
+		  if (
+			(typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')) ||
+			(typeof selectedAvatar === 'object' && selectedAvatar.uri)
+		  ) {
 			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
+		  } else {
+			AsyncStorage.removeItem('selectedAvatar'); // clean invalid old ones
+		  }
 		}
-	}, [selectedAvatar]);
+	  }, [selectedAvatar]);
+	  
 
 	// ✅ Reload avatar when screen comes into focus
 	useEffect(() => {
@@ -124,15 +148,12 @@ const SettingsScreen = ({ route, navigation }) => {
 					<View style={styles.header}>
 						<View style={styles.profileContainer}>
 							<Image
-								source={
-									typeof selectedAvatar === 'string'
-										? { uri: selectedAvatar }
-										: selectedAvatar || profile_avatar
-								}
+								source={resolveAvatar(tempSelectedAvatar)}
 								style={styles.avatar}
 								resizeMode="cover"
 								onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
 							/>
+
 							<View>
 								<Text style={styles.name}>{username}</Text>
 								<Text style={styles.email}>{email}</Text>

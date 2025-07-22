@@ -14,35 +14,50 @@ import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+const BASE_URL = 'https://smile4kidsbackend-production-2970.up.railway.app';
 const AccountScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const { email } = route.params || { email: 'Guest User' };
 	const [name, setName] = useState(email);
 	const [avatarImage, setAvatarImage] = useState(profile_avatar);
 
-
 	useFocusEffect(
 		useCallback(() => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-					if (savedAvatar) {
-						const parsed = JSON.parse(savedAvatar);
-						setAvatarImage(typeof parsed === 'string' ? { uri: parsed } : parsed);
-					} else if (selectedAvatar) {
-						setAvatarImage(typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar);
+					console.log('savedAvatar from AsyncStorage:', savedAvatar);
+					console.log('selectedAvatar from Redux:', selectedAvatar);
+	
+					let avatarValue = savedAvatar
+						? JSON.parse(savedAvatar)
+						: selectedAvatar;
+	
+					if (typeof avatarValue === 'number') {
+						avatarValue = avatarValue.toString(); // convert to string
+					}
+	
+					if (typeof avatarValue === 'string') {
+						const isFullUrl = avatarValue.startsWith('http');
+						const fullUrl = isFullUrl
+							? avatarValue
+							: `${BASE_URL}/uploads/avatar${avatarValue}.png`;
+
+	
+						setAvatarImage({ uri: fullUrl });
 					} else {
-						setAvatarImage(profile_avatar);
+						setAvatarImage(profile_avatar); // fallback
 					}
 				} catch (error) {
 					console.log('Error loading avatar:', error);
 					setAvatarImage(profile_avatar);
 				}
 			};
+	
 			loadSelectedAvatar();
 		}, [selectedAvatar])
 	);
-
+	
 
 	const menuItems = [
 		{ icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { email: name } },
@@ -66,7 +81,16 @@ const AccountScreen = ({ route, navigation }) => {
 				<ScrollView style={styles.container}>
 					<View style={styles.header}>
 						<View style={styles.profileContainer}>
-							<Image source={avatarImage} style={styles.avatar} resizeMode="cover" />
+							<Image
+								source={avatarImage}
+								onError={() => {
+									//console.log('Avatar image failed to load, reverting to default');
+									setAvatarImage(profile_avatar);
+								}}
+								style={styles.avatar}
+								resizeMode="cover"
+							/>
+
 							<Text style={styles.name}>
 								<Text style={{ color: '#FF8C00' }}>My </Text>
 								<Text style={{ color: 'black' }}>Account</Text>
