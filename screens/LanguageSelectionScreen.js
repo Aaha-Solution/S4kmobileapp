@@ -6,9 +6,9 @@ import {
 	StyleSheet,
 	Animated,
 	Image,
-	ScrollView,
 	Dimensions,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../Store/userSlice';
 import PressableButton from '../component/PressableButton';

@@ -156,8 +156,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 												height: 20,
 											}}
 											//zIndex={9999}
-											listMode="SCROLLVIEW"
-											scrollViewProps={{ nestedScrollEnabled: true }}
+											//listMode="SCROLLVIEW"
+											//scrollViewProps={{ nestedScrollEnabled: true }}
 											disabled={!isPaid}
 
 										/>

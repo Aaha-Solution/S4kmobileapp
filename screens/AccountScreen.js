@@ -5,9 +5,9 @@ import {
 	Text,
 	Pressable,
 	Image,
-	ScrollView,
 	BackHandler,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,19 +18,27 @@ const AccountScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const { email } = route.params || { email: 'Guest User' };
 	const [name, setName] = useState(email);
-	const [avatarImage, setAvatarImage] = useState(profile_avatar);
+	const [avatarImage, setAvatarImage] = useState(require('../assets/image/profile_avatar.png'));
 
+	console.log("Avatar used:", avatarImage);
 
 	useFocusEffect(
 		useCallback(() => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+
 					if (savedAvatar) {
 						const parsed = JSON.parse(savedAvatar);
-						setAvatarImage(typeof parsed === 'string' ? { uri: parsed } : parsed);
-					} else if (selectedAvatar) {
-						setAvatarImage(typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar);
+
+						// Validate parsed value
+						if (parsed && typeof parsed === 'string' && parsed.startsWith('http')) {
+							setAvatarImage({ uri: parsed });
+						} else {
+							setAvatarImage(profile_avatar);
+						}
+					} else if (selectedAvatar && typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')) {
+						setAvatarImage({ uri: selectedAvatar });
 					} else {
 						setAvatarImage(profile_avatar);
 					}

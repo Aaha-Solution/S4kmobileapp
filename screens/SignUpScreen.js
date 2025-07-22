@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
 	View, StyleSheet, Text, Pressable, Image, Alert, ActivityIndicator,
 	Dimensions, TouchableOpacity, KeyboardAvoidingView, Platform,
-	TouchableWithoutFeedback, Keyboard, ScrollView,BackHandler
+	TouchableWithoutFeedback, Keyboard,BackHandler
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';

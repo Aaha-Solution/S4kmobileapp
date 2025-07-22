@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './Store';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import Toast from 'react-native-toast-message';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Screens (imported as before)
 import SplashScreen from './screens/SplashScreen';
@@ -53,7 +54,7 @@ const App = () => {
 	if (!isConnected) return <NoInternetScreen />;
 	try {
 		return (
-
+			<GestureHandlerRootView style={{ flex: 1 }}>
 			<StripeProvider publishableKey="pk_test_51RbK6IH6OK1hLW4ieNUI38Hdxs9DdFOaBJ7XkqLH8vqTT5oGlbRKColi1J3SgPhMZNrBIvNA3MQj7sV0IjDta54V00W3f5HIXg">
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
@@ -171,6 +172,7 @@ const App = () => {
 					</PersistGate>
 				</Provider>
 			</StripeProvider>
+			</GestureHandlerRootView>
 		);
 	} catch (err) {
 		console.error("Error in App component:", err);

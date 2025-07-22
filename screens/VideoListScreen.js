@@ -13,6 +13,7 @@ import {
 	StatusBar,
 	SafeAreaView
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';

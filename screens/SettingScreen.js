@@ -4,13 +4,13 @@ import {
 	Text,
 	StyleSheet,
 	Pressable,
-	ScrollView,
 	Image,
 	SafeAreaView,
 	Alert,
 	Platform,
 	BackHandler
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -19,7 +19,7 @@ import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Dimensions, width } from 'react-native';
+import { Dimensions } from 'react-native';
 const SettingsScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const email = useSelector((state) => state.user.email) || '';
@@ -116,22 +116,27 @@ const SettingsScreen = ({ route, navigation }) => {
 		{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
 		{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 	];
-
+console.log('profile_avatar:', profile_avatar);
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 				<SafeAreaView style={styles.safeArea}>
 					<View style={styles.header}>
 						<View style={styles.profileContainer}>
+							
 							<Image
 								source={
-									typeof selectedAvatar === 'string'
-										? { uri: selectedAvatar }
-										: selectedAvatar || profile_avatar
+									selectedAvatar
+										? (typeof selectedAvatar === 'string'
+											? { uri: selectedAvatar }
+											: selectedAvatar)
+										: profile_avatar
 								}
 								style={styles.avatar}
 								resizeMode="cover"
-								onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
+								onError={(e) => {
+									 setTempSelectedAvatar(profile_avatar)
+								}}
 							/>
 							<View>
 								<Text style={styles.name}>{username}</Text>
@@ -251,8 +256,8 @@ const styles = StyleSheet.create({
 		color: 'black',
 	},
 	loadingIndicator: {
-        paddingVertical: 18,
-    },
+		paddingVertical: 18,
+	},
 });
 
 export default SettingsScreen;

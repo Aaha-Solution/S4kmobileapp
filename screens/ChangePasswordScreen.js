@@ -1,5 +1,6 @@
 import React, { useState,useEffect } from 'react';
-import { View, StyleSheet, Text, TextInput, Alert, ScrollView, Pressable,BackHandler } from 'react-native';
+import { View, StyleSheet, Text, TextInput, Alert,Pressable,BackHandler } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import PressableButton from '../component/PressableButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-	View, StyleSheet, Text, SafeAreaView, Image,
-	ScrollView, BackHandler
+	View, StyleSheet, Text, SafeAreaView, Image, BackHandler
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import PressableButton from '../component/PressableButton';
@@ -19,8 +19,8 @@ const ViewProfileScreen = ({ navigation }) => {
 
 	const [avatarSource, setAvatarSource] = useState(profile_avatar);
 
-useFocusEffect(
-	useCallback(() => {
+	useFocusEffect(
+		useCallback(() => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
@@ -30,10 +30,13 @@ useFocusEffect(
 					} else if (typeof selectedAvatar === 'string') {
 						uri = selectedAvatar;
 					}
+
+					// ✅ Only use remote URI if it is valid
 					if (uri && typeof uri === 'string' && uri.startsWith('http')) {
 						setAvatarSource({ uri });
 					} else {
-						setAvatarSource(profile_avatar); // fallback to default
+						// 👇 Always fall back to local image
+						setAvatarSource(profile_avatar);
 					}
 				} catch (error) {
 					console.log('Error loading avatar:', error);
@@ -42,9 +45,9 @@ useFocusEffect(
 			};
 			loadSelectedAvatar();
 		}, [selectedAvatar])
-);
+	);
 
-useEffect(() => {
+	useEffect(() => {
 		const fetchProfileUpdate = async () => {
 			try {
 				if (!profile?.users_id || !email) return;
@@ -77,9 +80,9 @@ useEffect(() => {
 		};
 
 		fetchProfileUpdate();
-}, [profile?.users_id]);
+	}, [profile?.users_id]);
 
-useEffect(() => {
+	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('AccountScreen');
 			return true;
