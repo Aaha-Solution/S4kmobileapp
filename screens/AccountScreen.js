@@ -5,9 +5,9 @@ import {
 	Text,
 	Pressable,
 	Image,
-	ScrollView,
 	BackHandler,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import profile_avatar from '../assets/image/profile_avatar.png';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,25 +26,11 @@ const AccountScreen = ({ route, navigation }) => {
 			const loadSelectedAvatar = async () => {
 				try {
 					const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-					console.log('savedAvatar from AsyncStorage:', savedAvatar);
-					console.log('selectedAvatar from Redux:', selectedAvatar);
-	
-					let avatarValue = savedAvatar
-						? JSON.parse(savedAvatar)
-						: selectedAvatar;
-	
-					if (typeof avatarValue === 'number') {
-						avatarValue = avatarValue.toString(); // convert to string
-					}
-	
-					if (typeof avatarValue === 'string') {
-						const isFullUrl = avatarValue.startsWith('http');
-						const fullUrl = isFullUrl
-							? avatarValue
-							: `${BASE_URL}/uploads/avatar${avatarValue}.png`;
-
-	
-						setAvatarImage({ uri: fullUrl });
+					if (savedAvatar) {
+						const parsed = JSON.parse(savedAvatar);
+						setAvatarImage(typeof parsed === 'string' ? { uri: parsed } : parsed);
+					} else if (selectedAvatar) {
+						setAvatarImage(typeof selectedAvatar === 'string' ? { uri: selectedAvatar } : selectedAvatar);
 					} else {
 						setAvatarImage(profile_avatar); // fallback
 					}

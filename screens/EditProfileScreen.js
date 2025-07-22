@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-    View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image,
-    ScrollView, Modal, TouchableOpacity, BackHandler
+    View, TextInput, StyleSheet, Text, Pressable, SafeAreaView, Image, Modal, TouchableOpacity, BackHandler
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,7 +62,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 console.log('Avatar data:', data);
 
                 const imageUrls = Array.isArray(data)
-                    ? data.map(file => `${BASE_URL}${file.path}`) 
+                    ? data.map(file => `${BASE_URL}${file.path}`)
                     : [];
 
 
@@ -83,28 +83,32 @@ const EditProfileScreen = ({ route, navigation }) => {
     }, []);
     useEffect(() => {
         const loadAvatar = async () => {
-            if (routeAvatar) {
-                setSelectedAvatar(routeAvatar);
-                dispatch(setProfile({ ...currentProfile, selectedAvatar: routeAvatar }));
+            let avatarToUse = profile_avatar; // fallback
+
+            if (routeAvatar && typeof routeAvatar === 'string') {
+                avatarToUse = routeAvatar;
                 await AsyncStorage.setItem('selectedAvatar', JSON.stringify(routeAvatar));
             } else {
                 const storedAvatar = await AsyncStorage.getItem('selectedAvatar');
                 if (storedAvatar) {
-                    const parsed = JSON.parse(storedAvatar);
-                    if (typeof parsed === 'string') {
-                        setSelectedAvatar(parsed); // it's a URL
-                    } else if (parsed?.uri) {
-                        setSelectedAvatar(parsed.uri); // if stored as { uri: ... }
-                    } else {
-                        setSelectedAvatar(profile_avatar); // fallback to local
+                    try {
+                        const parsed = JSON.parse(storedAvatar);
+                        if (typeof parsed === 'string') {
+                            avatarToUse = parsed;
+                        }
+                    } catch (err) {
+                        console.warn('Invalid avatar format in storage:', storedAvatar);
                     }
-
-                    dispatch(setProfile({ ...currentProfile, selectedAvatar: parsed }));
                 }
             }
+
+            setSelectedAvatar(avatarToUse);
+            dispatch(setProfile({ ...currentProfile, selectedAvatar: avatarToUse }));
         };
+
         loadAvatar();
     }, []);
+
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             navigation.navigate('ViewProfile');
@@ -164,7 +168,7 @@ const EditProfileScreen = ({ route, navigation }) => {
             setPhoneError('');
         }
     };
-    
+
     const handleSave = async () => {
         if (!email || !phone || !address) {
             setAlertTitle('Alert');
@@ -303,7 +307,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
-                            <TextInput style={[styles.input,{backgroundColor: '#eee'}]} value={email} editable={false} keyboardType="email-address" />
+                            <TextInput style={[styles.input, { backgroundColor: '#eee' }]} value={email} editable={false} keyboardType="email-address" />
                         </View>
 
                         <View style={styles.inputGroup}>
@@ -360,7 +364,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'white',
         overflow: 'hidden',
-       
+
     },
     avatarWrapper: {
         width: 100,

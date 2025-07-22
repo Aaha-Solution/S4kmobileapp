@@ -1,0 +1,28 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    environment:
+      ios_signing:
+        distribution_type: app_store   # or: ad_hoc / development / enterprise
+        bundle_identifier: com.yourcompany.smile4kids
+      vars:
+        XCODE_WORKSPACE: "ios/smile4kids.xcworkspace"
+        XCODE_SCHEME: "smile4kids"
+      node: 18.16.0
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          cd ios
+          pod install
+          cd ..
+      - name: Bundle React Native code
+        script: |
+          npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com

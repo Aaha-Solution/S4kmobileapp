@@ -6,10 +6,10 @@ import {
 	StyleSheet,
 	Animated,
 	Image,
-	ScrollView,
 	Dimensions,
 	BackHandler
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLevel } from '../Store/userSlice';
