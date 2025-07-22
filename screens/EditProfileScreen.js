@@ -304,7 +304,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
-                            <TextInput style={styles.input} value={email} editable={false} keyboardType="email-address" />
+                            <TextInput style={[styles.input,{backgroundColor: '#eee'}]} value={email} editable={false} keyboardType="email-address" />
                         </View>
 
                         <View style={styles.inputGroup}>
