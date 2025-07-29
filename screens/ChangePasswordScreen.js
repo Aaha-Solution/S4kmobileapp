@@ -44,7 +44,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 		try {
 			const token = await AsyncStorage.getItem('token');
 			console.log('Token:', token);
-			const response = await fetch("https://smile4kidsbackend-production-2970.up.railway.app/forgot/change-password", {
+			const response = await fetch("http://92.205.29.164:3000/forgot/change-password", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

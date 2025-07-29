@@ -53,7 +53,7 @@ const AdminPannel = () => {
       }
 
       const res = await fetch(
-        'https://smile4kidsbackend-production-2970.up.railway.app/admin/users-with-purchases',
+        'http://92.205.29.164:3000/',
         {
           headers: { Authorization: `Bearer ${storedToken}` },
         }

@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 		}
 
 		try {
-			const response = await fetch("https://smile4kidsbackend-production-2970.up.railway.app/forgot/reset-password", {
+			const response = await fetch("http://92.205.29.164:3000/forgot/reset-password", {
 				method: "POST",
 				headers: {
 					"Content-type": "application/json"

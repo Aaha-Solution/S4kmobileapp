@@ -53,7 +53,7 @@ const ViewProfileScreen = ({ navigation }) => {
 				if (!profile?.users_id || !email) return;
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`https://smile4kidsbackend-production-2970.up.railway.app/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
+					`http://92.205.29.164:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
 					{
 						method: 'GET',
 						headers: {

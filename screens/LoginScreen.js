@@ -102,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/login', {
+            const response = await fetch('http://92.205.29.164:3000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

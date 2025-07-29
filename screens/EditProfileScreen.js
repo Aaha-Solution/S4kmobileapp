@@ -19,7 +19,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
-    const BASE_URL = 'https://smile4kidsbackend-production-2970.up.railway.app';
+    const BASE_URL = 'http://92.205.29.164:3000/';
 
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
@@ -57,7 +57,6 @@ const EditProfileScreen = ({ route, navigation }) => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-
                 const data = await response.json();
                 console.log('Avatar data:', data);
 

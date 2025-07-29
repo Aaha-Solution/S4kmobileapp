@@ -83,7 +83,7 @@ const SignupScreen = ({ navigation }) => {
 
 		setLoading(true);
 		try {
-			const response = await fetch('https://smile4kidsbackend-production-2970.up.railway.app/signup', {
+			const response = await fetch('http://92.205.29.164:3000/signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
