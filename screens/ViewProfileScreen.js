@@ -32,9 +32,9 @@ const ViewProfileScreen = ({ navigation }) => {
 					}
 
 					// ✅ Only use remote URI if it is valid
-					if (uri && typeof uri === 'string' && uri.startsWith('http')) {
+					if (uri && typeof uri === 'string' && uri.startsWith('https')) {
 						setAvatarSource({ uri });
-					} else {
+					}else {
 						// 👇 Always fall back to local image
 						setAvatarSource(profile_avatar);
 					}
@@ -53,7 +53,7 @@ const ViewProfileScreen = ({ navigation }) => {
 				if (!profile?.users_id || !email) return;
 				const token = await AsyncStorage.getItem('token');
 				const response = await fetch(
-					`http://92.205.29.164:3000/signup/profile?email_id=${email}&users_id=${profile.users_id}`,
+					`https://api.smile4kids.co.uk/signup/profile?email_id=${email}`,
 					{
 						method: 'GET',
 						headers: {
@@ -64,6 +64,8 @@ const ViewProfileScreen = ({ navigation }) => {
 				);
 				const data = await response.json();
 				console.log("Profile data:", data);
+				console.log("Fetched avatar URL:", data.avatar); // ✅ Add this line
+		
 				if (data?.users_id) {
 					dispatch(updateProfile({
 						email: data.email_id,
@@ -74,10 +76,12 @@ const ViewProfileScreen = ({ navigation }) => {
 						selectedAvatar: data.avatar,
 					}));
 				}
+			
 			} catch (error) {
 				console.log("Error fetching profile:", error);
 			}
 		};
+		
 
 		fetchProfileUpdate();
 	}, [profile?.users_id]);

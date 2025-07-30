@@ -102,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://92.205.29.164:3000/login', {
+            const response = await fetch('https://api.smile4kids.co.uk/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

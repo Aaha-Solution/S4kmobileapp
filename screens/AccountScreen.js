@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-const BASE_URL = 'http://92.205.29.164:3000/';
+const BASE_URL = 'https://api.smile4kids.co.uk/';
 const AccountScreen = ({ route, navigation }) => {
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const { email } = route.params || { email: 'Guest User' };

@@ -83,7 +83,7 @@ const SignupScreen = ({ navigation }) => {
 
 		setLoading(true);
 		try {
-			const response = await fetch('http://92.205.29.164:3000/signup', {
+			const response = await fetch('https://api.smile4kids.co.uk/signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

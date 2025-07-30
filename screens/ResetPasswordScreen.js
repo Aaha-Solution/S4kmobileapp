@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert,BackHandler } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -33,7 +33,7 @@ const ResetPasswordScreen = ({ route }) => {
 		}
 
 		try {
-			const response = await fetch("http://92.205.29.164:3000/forgot/reset-password", {
+			const response = await fetch("https://api.smile4kids.co.uk/forgot/reset-password", {
 				method: "POST",
 				headers: {
 					"Content-type": "application/json"

@@ -72,7 +72,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
-	const baseURL = 'http://92.205.29.164:3000/videos/by-category';
+	const baseURL = 'https://api.smile4kids.co.uk/videos/by-category/';
 
 	// Fixed: Always fetch videos when component mounts or dependencies change
 	useEffect(() => {
@@ -265,7 +265,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				level: cleanLevel
 			}];
 
-			const response = await fetch('http://92.205.29.164:3000/payment/create-payment-intent', {
+			const response = await fetch('https://api.smile4kids.co.uk/payment/create-payment-intent', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

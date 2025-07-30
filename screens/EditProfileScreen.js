@@ -19,7 +19,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const currentProfile = useSelector((state) => state.user.user);
     const profile = useSelector(state => state.user.user);
     const routeAvatar = route.params?.selectedAvatar;
-    const BASE_URL = 'http://92.205.29.164:3000/';
+    const BASE_URL = 'https://api.smile4kids.co.uk/';
 
     const [email, setemail] = useState('');
     const [address, setAddress] = useState('');
@@ -144,13 +144,13 @@ const EditProfileScreen = ({ route, navigation }) => {
     //     return formattedDate;
     // };
 
-    const toMySQLDate = (formattedDate) => {
-        if (!formattedDate) return null;
-        const parts = formattedDate.split('/');
-        if (parts.length !== 3) return null;
-        const [year, month, day] = parts;
-        return `${year}-${month}-${day}`;
-    };
+    // const toMySQLDate = (formattedDate) => {
+    //     if (!formattedDate) return null;
+    //     const parts = formattedDate.split('/');
+    //     if (parts.length !== 3) return null;
+    //     const [year, month, day] = parts;
+    //     return `${year}-${month}-${day}`;
+    // };
 
     //Phone number validation
     const HandlePhonenumber = (number) => {
@@ -185,7 +185,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}/signup/update-profile`, {
+            const response = await fetch("https://api.smile4kids.co.uk/signup/update-profile", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

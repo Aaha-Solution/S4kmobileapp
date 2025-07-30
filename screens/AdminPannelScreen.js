@@ -48,12 +48,12 @@ const AdminPannel = () => {
       const storedToken = await AsyncStorage.getItem('token');
       setToken(storedToken);
       if (!storedToken) {
-        Alert.alert('Error', 'Token not found. Please login again.');
+        Alert.alert('Alert', 'Token not found. Please login again.');
         return;
       }
 
       const res = await fetch(
-        'http://92.205.29.164:3000/',
+        'https://api.smile4kids.co.uk/admin/users-with-purchases',
         {
           headers: { Authorization: `Bearer ${storedToken}` },
         }
@@ -78,10 +78,10 @@ const AdminPannel = () => {
         setUsers([...sorted, ...unpaid]);
         setCurrentPage(1);
       } else {
-        Alert.alert('Error', 'Unexpected response from server.');
+        Alert.alert('Alert', 'Unexpected response from server.');
       }
     } catch (e) {
-      Alert.alert('Error', 'Failed to fetch users.');
+      Alert.alert('Alert', 'Failed to fetch users.');
     } finally {
       setLoading(false);
     }
