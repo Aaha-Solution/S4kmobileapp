@@ -55,7 +55,7 @@ const App = () => {
 	try {
 		return (
 			<GestureHandlerRootView style={{ flex: 1 }}>
-			<StripeProvider publishableKey="pk_test_51RbK6IH6OK1hLW4ieNUI38Hdxs9DdFOaBJ7XkqLH8vqTT5oGlbRKColi1J3SgPhMZNrBIvNA3MQj7sV0IjDta54V00W3f5HIXg">
+			<StripeProvider publishableKey="pk_live_51JzhXKAAJ57YL7qzDTPhXQavmRRa3SHmxPVdp7FHpAofZQS4m7nuGX1G2aZ8T3DaAsv03IGFujULJFEAonWHUljd00nYiGDigF">
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
 						<NavigationContainer>
