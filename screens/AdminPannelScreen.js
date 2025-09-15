@@ -33,11 +33,13 @@ const AdminPannel = () => {
   // Fixed column widths that add up to 100% with proper spacing
   const tableWidth = width - 32; // Account for container padding
   const columnWidths = {
-    name: tableWidth * 0.18,     // 18% of table width
-    email: tableWidth * 0.38,    // 38% of table width
-    language: tableWidth * 0.22, // 22% of table width
-    level: tableWidth * 0.22,    // 22% of table width
+    name: tableWidth * 0.16,     // 16%
+    email: tableWidth * 0.34,    // 34%
+    language: tableWidth * 0.18, // 18%
+    level: tableWidth * 0.18,    // 18%
+    action: tableWidth * 0.14,   // 14% reserved for delete
   };
+  
 
   useEffect(() => {
     fetchUsers();
@@ -167,8 +169,15 @@ const AdminPannel = () => {
           {item.level === 'Pre_Junior' ? 'Preschool' : (item.level || 'N/A')}
         </Text>
       </View>
-    </View>
-  );
+     {/* ✅ Delete Icon Button */}
+      <TouchableOpacity
+        style={[styles.cell, { width: columnWidths.action }]}
+        onPress={() => handleDelete(item.id)}
+      >
+        <Icon name="trash" size={20} color="red" />
+      </TouchableOpacity>
+  </View>
+);
 
   const FilterButton = ({ title, options, selected, onSelect }) => (
     <View style={styles.filterGroup}>
@@ -188,7 +197,36 @@ const AdminPannel = () => {
       </View>
     </View>
   );
-
+  const handleDelete = async (userId) => {
+    Alert.alert("Delete User", "Are you sure you want to delete this user?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const res = await fetch(
+              `https://api.smile4kids.co.uk/admin/users/${userId}`,
+              {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+  
+            if (res.ok) {
+              setUsers((prev) => prev.filter((u) => u.id !== userId));
+              Alert.alert("Success", "User deleted successfully.");
+            } else {
+              Alert.alert("Error", "Failed to delete user.");
+            }
+          } catch (error) {
+            Alert.alert("Error", "Something went wrong.");
+          }
+        },
+      },
+    ]);
+  };
+  
   const PaginationControls = () => {
     const filteredUsers = getFilteredUsers();
     const totalUsers = filteredUsers.length;
@@ -375,8 +413,12 @@ const AdminPannel = () => {
                 </View>
                 <View style={[styles.headerCell, { width: columnWidths.level }]}>
                   <Text style={styles.headerText}>Ages</Text>
+                  </View>
+                  {/* ✅ New Delete Column */}
+                  <View style={[styles.headerCell, { width: columnWidths.action }]}>
+                    <Text style={styles.headerText}>Action</Text>
+                  </View>
                 </View>
-              </View>
 
               <FlatList
                 data={filtered}
