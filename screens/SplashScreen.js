@@ -13,9 +13,9 @@ import {
 const SplashScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
 
-	// ✅ Moved out for clarity
+	// Fetch paid courses from backend and update Redux
 	const fetchPaidCourses = async (userId, token) => {
-		console.log("⏳ Fetching paid videos for user:", userId);
+		//console.log("⏳ Fetching paid videos for user:", userId);
 		try {
 			const response = await fetch(`https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${userId}`, {
 				method: 'GET',
@@ -26,22 +26,23 @@ const SplashScreen = ({ navigation }) => {
 			});
 
 			const data = await response.json();
-			console.log("📦 API response from /my-paid-videos:", data);
+			//console.log("📦 API response from /my-paid-videos:", data);
 
 			if (Array.isArray(data)) {
 				dispatch(setAllPaidAccess(data));
 				dispatch(setPaidStatus(true));
-				console.log("✅ Dispatched setAllPaidAccess and setPaidStatus");
+				//console.log("✅ Dispatched setAllPaidAccess and setPaidStatus");
 				return data;
 			} else {
-				console.log("⚠️ Invalid data received:", data);
+				//console.log("⚠️ Invalid data received:", data);
 			}
 		} catch (err) {
-			console.error("❌ Error fetching paid courses:", err);
+			//console.error("❌ Error fetching paid courses:", err);
 		}
 		return [];
 	};
 
+	// Check login status and navigate accordingly
 	useEffect(() => {
 		const checkLoginStatus = async () => {
 			try {
@@ -54,11 +55,11 @@ const SplashScreen = ({ navigation }) => {
 				if (token && userData) {
 					const parsedUser = JSON.parse(userData);
 					dispatch(login(parsedUser));
-					console.log("parseduser", parsedUser);
+					//console.log("parseduser", parsedUser);
 
 					// ✅ Admin check: if true, redirect to AdminPannel
 					if (parsedUser.is_admin === 1) {
-						console.log('👨‍💼 Admin detected. Redirecting to AdminPannel');
+						//console.log('👨‍💼 Admin detected. Redirecting to AdminPannel');
 						navigation.replace('AdminPannel');
 						return;
 					}
@@ -83,18 +84,18 @@ const SplashScreen = ({ navigation }) => {
 						) {
 							selectedLanguage = lastPaid.language;
 							selectedLevel = lastPaid.level;
-							console.log('✅ Using last paid selection from API:', lastPaid);
+							//console.log('✅ Using last paid selection from API:', lastPaid);
 						} else {
 							selectedLanguage = paidData[0].language;
 							selectedLevel = paidData[0].level;
-							console.log('✅ Using first paid course from API:', paidData[0]);
+							//console.log('✅ Using first paid course from API:', paidData[0]);
 						}
 					}
 
 					// ✅ Fallback: No valid language/level
 					if (!selectedLanguage || !selectedLevel) {
 						await AsyncStorage.removeItem('selectedPreferences');
-						console.log('⚠️ No valid language/level. Redirecting to LanguageSelectionScreen');
+						//console.log('⚠️ No valid language/level. Redirecting to LanguageSelectionScreen');
 						navigation.replace('LanguageSelectionScreen');
 						return;
 					}
@@ -102,8 +103,8 @@ const SplashScreen = ({ navigation }) => {
 					dispatch(setLanguage(selectedLanguage));
 					dispatch(setLevel(selectedLevel));
 
-					console.log('✅ Set language:', selectedLanguage);
-					console.log('✅ Set level:', selectedLevel);
+					//console.log('✅ Set language:', selectedLanguage);
+					//console.log('✅ Set level:', selectedLevel);
 
 					navigation.replace('MainTabs');
 
@@ -111,7 +112,7 @@ const SplashScreen = ({ navigation }) => {
 					navigation.replace('Login');
 				}
 			} catch (error) {
-				console.log('Error checking login status', error);
+				//console.log('Error checking login status', error);
 				navigation.replace('Login');
 			}
 		};

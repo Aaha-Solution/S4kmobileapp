@@ -35,16 +35,14 @@ const AccountScreen = ({ route, navigation }) => {
 						setAvatarImage(profile_avatar); // fallback
 					}
 				} catch (error) {
-					console.log('Error loading avatar:', error);
+					//console.log('Error loading avatar:', error);
 					setAvatarImage(profile_avatar);
 				}
 			};
-	
 			loadSelectedAvatar();
 		}, [selectedAvatar])
 	);
 	
-
 	const menuItems = [
 		{ icon: 'person-outline', label: 'Profile', screen: 'ViewProfile', params: { email: name } },
 		{ icon: 'lock-closed-outline', label: 'Change Password', screen: 'ChangePasswordScreen' },
@@ -57,7 +55,6 @@ const AccountScreen = ({ route, navigation }) => {
 			});
 			return true;
 		});
-
 		return () => backHandler.remove();
 	}, [navigation]);
 

@@ -22,17 +22,16 @@ const languagesData = [
 	{ id: '2', label: 'Panjabi', value: 'Panjabi' },
 	{ id: '3', label: 'Gujarati', value: 'Gujarati' },
 ];
-
 const LanguageSelectionScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
 	const selectedLanguage = useSelector((state) => state.user.selectedLanguage);
+	const [showAlert, setShowAlert] = useState(false);
 	const [animations] = useState(
 		languagesData.reduce((acc, lang) => {
 			acc[lang.id] = new Animated.Value(1);
 			return acc;
 		}, {})
 	);
-	const [showAlert, setShowAlert] = useState(false);
 
 	const animateSelection = (id) => {
 		const anim = animations[id];
@@ -71,7 +70,6 @@ const LanguageSelectionScreen = ({ navigation }) => {
 		setShowAlert(false);
 	};
 
-	
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
@@ -80,9 +78,7 @@ const LanguageSelectionScreen = ({ navigation }) => {
 					style={styles.image}
 					resizeMode="contain"
 				/>
-
 				<Text style={styles.title}>🎨 Let's Pick a Language!</Text>
-
 				<View style={styles.languageList}>
 					{languagesData.map((item) => {
 						const isSelected = selectedLanguage === item.value;
@@ -197,4 +193,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
+
 export default LanguageSelectionScreen;

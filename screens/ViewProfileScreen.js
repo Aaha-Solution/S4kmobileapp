@@ -12,13 +12,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { updateProfile } from '../Store/userSlice';
 
 const ViewProfileScreen = ({ navigation }) => {
+	const dispatch = useDispatch();
 	const profile = useSelector(state => state.user.user);
 	const email = useSelector(state => state.user.email) || '';
 	const selectedAvatar = useSelector(state => state.user.user.selectedAvatar);
-	const dispatch = useDispatch();
-
 	const [avatarSource, setAvatarSource] = useState(profile_avatar);
 
+	//---- Load selected avatar from AsyncStorage or Redux ----//
 	useFocusEffect(
 		useCallback(() => {
 			const loadSelectedAvatar = async () => {
@@ -31,15 +31,15 @@ const ViewProfileScreen = ({ navigation }) => {
 						uri = selectedAvatar;
 					}
 
-					// ✅ Only use remote URI if it is valid
+					//  Only use remote URI if it starts with 'https'
 					if (uri && typeof uri === 'string' && uri.startsWith('https')) {
 						setAvatarSource({ uri });
 					}else {
-						// 👇 Always fall back to local image
+						//  Always fall back to local image
 						setAvatarSource(profile_avatar);
 					}
 				} catch (error) {
-					console.log('Error loading avatar:', error);
+					//console.log('Error loading avatar:', error);
 					setAvatarSource(profile_avatar);
 				}
 			};
@@ -47,6 +47,7 @@ const ViewProfileScreen = ({ navigation }) => {
 		}, [selectedAvatar])
 	);
 
+	//---- Fetch profile data when screen is focused using api----//
 	useEffect(() => {
 		const fetchProfileUpdate = async () => {
 			try {
@@ -64,7 +65,7 @@ const ViewProfileScreen = ({ navigation }) => {
 				);
 				const data = await response.json();
 				console.log("Profile data:", data);
-				console.log("Fetched avatar URL:", data.avatar); // ✅ Add this line
+				//console.log("Fetched avatar URL:", data.avatar); // Add this line
 		
 				if (data?.users_id) {
 					dispatch(updateProfile({
@@ -74,18 +75,17 @@ const ViewProfileScreen = ({ navigation }) => {
 						dateOfBirth: data.dob,
 						phone: data.ph_no,
 						selectedAvatar: data.avatar,
-					}));
+					}));                       
 				}
-			
+		
 			} catch (error) {
-				console.log("Error fetching profile:", error);
+				//console.log("Error fetching profile:", error);
 			}
 		};
-		
-
 		fetchProfileUpdate();
 	}, [profile?.users_id]);
 
+	//---- Handle Android back button ----//
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('AccountScreen');
@@ -94,6 +94,7 @@ const ViewProfileScreen = ({ navigation }) => {
 		return () => backHandler.remove();
 	}, [navigation]);
 
+	//---- Navigate to Edit Profile Screen ----//
 	const handleEditPress = () => {
 		navigation.navigate('EditProfileScreen', {
 			email,

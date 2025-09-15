@@ -9,22 +9,30 @@ import {
 	BackHandler,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';  
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
-import { useStripe } from '@stripe/stripe-react-native';
+import * as RNIap from 'react-native-iap';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPaidStatus } from '../Store/userSlice';
 import { setAllPaidAccess } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
+
+	const productIdMap = [
+	 'video_hindi_junior',
+	 'video_hindi_pre_junior',
+	 'video_gujarati_junior',
+	 'video_gujarati_pre_junior',
+	 'video_panjabi_junior',
+	 'video_panjabi_pre_junior',
+];
+
 const PaymentScreen = ({ navigation }) => {
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
-	const [selectedItems, setSelectedItems] = useState({});
-	const [loading, setLoading] = useState(false);
+	
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [totalAmount, setTotalAmount] = useState(45);
 	const paidAccess = useSelector(state => state.user.paidAccess || []);
@@ -33,13 +41,30 @@ const PaymentScreen = ({ navigation }) => {
 	);
 
 	const dispatch = useDispatch();
-	const { initPaymentSheet, presentPaymentSheet } = useStripe();
+	//const { initPaymentSheet, presentPaymentSheet } = useStripe();
+	const [loading, setLoading] = useState(false);
+	const [selectedItems, setSelectedItems] = useState({});
+	const [iapProducts, setIapProducts] = useState([]);
 
 	const languages = ['Gujarati', 'Panjabi', 'Hindi'];
 	const ageOptions = ['PreSchool (4–6 years)', 'Junior (7 & above years)'];
 
+	// ------------------ IAP Initialization ------------------//
+  useEffect(() => {
+    async function initIAP() {
+      try {
+        await RNIap.initConnection();
+        const products = await RNIap.getProducts(productIdMap);
+        setIapProducts(products);
+      } catch (err) {
+        console.warn('IAP Init Error', err);
+      }
+      return () => RNIap.endConnection();
+    }  
+    initIAP();
+  }, []);
 
-	// 🧮 Total cost in £
+	// -------- Total cost in £ --------//
 	const calculateTotalFromBackend = async () => {
 		const token = await AsyncStorage.getItem('token');
 
@@ -76,12 +101,10 @@ const PaymentScreen = ({ navigation }) => {
 
 			// Calculation total amount For UI 
 			const Amount = 45
-			console.log("Amount", Amount);
+			//console.log("Amount", Amount);
 			const res = Amount * selections.length;
 			setTotalAmount(res)
-			console.log("res", res)
-
-
+			//console.log("res", res)
 			// if (response.ok && typeof data.amount === 'number') {
 			// 	setTotalAmount(data.amount); // 👈 Set total from backend
 			// } else {
@@ -89,35 +112,35 @@ const PaymentScreen = ({ navigation }) => {
 			// 	setTotalAmount(0);
 			// }
 		} catch (err) {
-			console.error("❌ Failed to calculate total from backend:", err);
+			//console.error("❌ Failed to calculate total from backend:", err);
 			setTotalAmount(0);
 		}
 	};
 
+	//------ Recalculate total when selectedItems change ------//
 	useEffect(() => {
 		calculateTotalFromBackend();
 	}, [selectedItems]);
 
-
+	//---------- Fetch paid courses from backend and update Redux ----------//
 	const fetchPaidCourses = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await fetch(`https://api.smile4kids.co.uk//payment/my-paid-videos?user_id=${users_id}`,
+			const response = await fetch(`https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
 				{
 					method: 'GET',
 					headers: {
 						'Authorization': `Bearer ${token}`,
 						'Content-Type': 'application/json',
 					},
-				}
-			);
+				});
 			const data = await response.json();
-console.log("data",data)
+			//console.log("data",data)
 			if (response.ok && Array.isArray(data)) {
-				dispatch(setAllPaidAccess(data)); // ✅ Save to Redux
-				console.log("🟢 Paid Access:", data);
+				dispatch(setAllPaidAccess(data)); //  Save to Redux
+				//console.log(" Paid Access:", data);
 
-				// ✅ Auto-check already paid items in the UI
+				//  Auto-check already paid items in the UI
 				const restoredItems = {};
 				data.forEach(({ language, level }) => {
 					const displayLevel = level === 'Pre_Junior'
@@ -128,13 +151,14 @@ console.log("data",data)
 				});
 				setSelectedItems(restoredItems);
 			} else {
-				console.warn('Failed to fetch paid videos:', data);
+				//console.warn('Failed to fetch paid videos:', data);
 			}
 		} catch (error) {
-			console.error('❌ Error fetching paid videos:', error);
+			console.error('Error fetching paid videos:', error);
 		}
 	};
 
+	//---- Fetch paid courses on mount and when users_id changes ----//
 	useEffect(() => {
 		fetchPaidCourses();
 	}, [users_id]);
@@ -153,116 +177,232 @@ console.log("data",data)
 		return 'Pre_Junior'; // fallback
 	};
 
+	// ------Payment handling-------//
+	
+	// const HandlePay = async () => {
+	// 	if (loading || totalAmount === 0 || isEverythingPaid) {
+	// 	return;
+	// }
+	// 	try {
+	// 		setLoading(true);
+	// 		const token = await AsyncStorage.getItem('token');
+
+	// 		const unpaidSelections = [];
+
+	// 		for (const lang in selectedItems) {
+	// 			const levels = selectedItems[lang] || [];
+	// 			for (const level of levels) {
+	// 				const backendLevel = getFormattedLevel(level); // e.g. "Pre_Junior"
+	// 				const key = `${lang}-${backendLevel}`;
+	// 				if (!paidSet.has(key)) {
+	// 					unpaidSelections.push({ language: lang, level: backendLevel });
+	// 				}
+	// 			}
+	// 		}
+
+	// 		if (unpaidSelections.length === 0) {
+	// 			Alert.alert("No courses is Selected", "Please select the course to purchase.");
+	// 			setLoading(false);
+	// 			return;
+	// 		}
+
+	// 		// Use the first unpaid item for payment type
+	// 		const firstSelection = unpaidSelections[0];
+	// 		const paymentType = `${firstSelection.language}-${firstSelection.level}`;
+
+	// 		const response = await fetch('https://api.smile4kids.co.uk/payment/create-payment-intent', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json',
+	// 				Authorization: `Bearer ${token}`,
+	// 			},
+	// 			body: JSON.stringify({
+	// 				type: paymentType,
+	// 				currency: 'gbp',
+	// 				user_id: users_id,
+	// 				language: firstSelection.language,
+	// 				level: firstSelection.level,
+	// 				courseType: paymentType,
+	// 				selections: unpaidSelections,
+	// 			}),
+	// 		});
+
+	// 		const rawText = await response.text();
+	// 		//console.log("🟠 Raw Response Text:", rawText);
+
+	// 		let data;
+	// 		try {
+	// 			data = JSON.parse(rawText);
+	// 		} catch (error) {
+	// 			//console.error("❌ Failed to parse JSON:", error);
+	// 			Alert.alert("Server Error", "Invalid response from payment server.");
+	// 			setLoading(false);
+	// 			return;
+	// 		}
+
+	// 		const clientSecret = data.clientSecret;
+	// 		if (!clientSecret) {
+	// 			Alert.alert("Payment Error", data.message || "No client secret received.");
+	// 			setLoading(false);
+	// 			return;
+	// 		}
+
+	// 		const { error: initError } = await initPaymentSheet({
+	// 			paymentIntentClientSecret: clientSecret,
+	// 			merchantDisplayName: 'Smile4Kids',
+	// 		});
+
+	// 		if (initError) {
+	// 			Alert.alert("Payment Error", initError.message);
+	// 			setLoading(false);
+	// 			return;
+	// 		}
+
+	// 		const { error: presentError } = await presentPaymentSheet();
+
+	// 		if (presentError) {
+	// 			Alert.alert("Payment Failed", presentError.message);
+	// 		} else {
+	// 			Alert.alert("Success", "Your payment was successful!");
+	// 			dispatch(setPaidStatus(true));
+
+	// 			// ✅ Refresh paid course access
+	// 			await fetchPaidCourses();
+	// 			//navigate to home
+	// 			navigation.navigate('MainTabs', {
+	// 				screen: 'Home',
+	// 			});
+	// 		}
+	// 	} catch (err) {
+	// 		//console.error("PaymentSheet Error:", err);
+	// 		Alert.alert("Unexpected Error", "Something went wrong during payment.");
+	// 	} finally {
+	// 		setLoading(false);
+	// 	}
+	// };
 	const HandlePay = async () => {
-		if (loading || totalAmount === 0 || isEverythingPaid) {
+  	if (loading || isEverythingPaid) return;
+
+	const unpaidSelections = [];
+	for (const lang in selectedItems) {
+		const levels = selectedItems[lang] || [];
+		for (const level of levels) {
+		const backendLevel = getFormattedLevel(level);
+		const key = `${lang}-${backendLevel}`;
+		if (!paidSet.has(key)) unpaidSelections.push({ language: lang, level: backendLevel });
+		}
+	}
+
+	if (unpaidSelections.length === 0) {
+		Alert.alert('No courses selected', 'Please select courses to purchase.');
 		return;
 	}
-		try {
-			setLoading(true);
-			const token = await AsyncStorage.getItem('token');
 
-			const unpaidSelections = [];
+	setLoading(true);
+	try {
+		const first = unpaidSelections[0];
+		const sku = `video_${first.language.toLowerCase()}_${first.level.toLowerCase()}`;
 
-			for (const lang in selectedItems) {
-				const levels = selectedItems[lang] || [];
-				for (const level of levels) {
-					const backendLevel = getFormattedLevel(level); // e.g. "Pre_Junior"
-					const key = `${lang}-${backendLevel}`;
-					if (!paidSet.has(key)) {
-						unpaidSelections.push({ language: lang, level: backendLevel });
-					}
-				}
-			}
+    // Request purchase
+    const purchase = await RNIap.requestPurchase({ sku });
 
-			if (unpaidSelections.length === 0) {
-				Alert.alert("No courses is Selected", "Please select the course to purchase.");
-				setLoading(false);
-				return;
-			}
+    if (purchase?.transactionReceipt) {
+      let purchaseToken = null;
+      try {
+        const receipt = JSON.parse(purchase.transactionReceipt);
+        purchaseToken = receipt.purchaseToken;
+      } catch (e) {
+        console.warn("Failed to parse purchase receipt:", e);
+      }
+	  //  enters only if receipt is valid
+      if (purchaseToken) {
+        const token = await AsyncStorage.getItem('token');
+        await fetch('https://api.smile4kids.co.uk/payment/verify-google-purchase', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            user_id: users_id,
+            productId: sku,
+            purchaseToken,
+          }),
+        });
 
-			// Use the first unpaid item for payment type
-			const firstSelection = unpaidSelections[0];
-			const paymentType = `${firstSelection.language}-${firstSelection.level}`;
+		//closes the purchase
+        await RNIap.finishTransaction(purchase);
 
-			const response = await fetch('https://api.smile4kids.co.uk/payment/create-payment-intent', {
+        dispatch(setPaidStatus(true));
+        await fetchPaidCourses();
+        Alert.alert('Success', 'Your purchase was successful!');
+        navigation.navigate('MainTabs', { screen: 'Home' });
+      } else {
+        Alert.alert('Purchase Failed', 'Invalid purchase receipt.');
+      }
+    }
+
+  } catch (err) {
+    console.warn('Purchase error', err);
+    Alert.alert('Payment Failed', err.message || 'Something went wrong.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+	// listener for purchase errors
+	useEffect(() => {
+		const purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+			if (purchase?.transactionReceipt) {
+			try {
+				const receipt = JSON.parse(purchase.transactionReceipt);
+				const purchaseToken = receipt.purchaseToken;
+				const token = await AsyncStorage.getItem('token');
+
+				await fetch('http://localhost:3000/verify-purchase', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+				headers: { 
+					'Content-Type': 'application/json', 
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					type: paymentType,
-					currency: 'gbp',
 					user_id: users_id,
-					language: firstSelection.language,
-					level: firstSelection.level,
-					courseType: paymentType,
-					selections: unpaidSelections,
+					productId: purchase.productId,
+					purchaseToken,
 				}),
-			});
-
-			const rawText = await response.text();
-			console.log("🟠 Raw Response Text:", rawText);
-
-			let data;
-			try {
-				data = JSON.parse(rawText);
-			} catch (error) {
-				console.error("❌ Failed to parse JSON:", error);
-				Alert.alert("Server Error", "Invalid response from payment server.");
-				setLoading(false);
-				return;
-			}
-
-			const clientSecret = data.clientSecret;
-			if (!clientSecret) {
-				Alert.alert("Payment Error", data.message || "No client secret received.");
-				setLoading(false);
-				return;
-			}
-
-			const { error: initError } = await initPaymentSheet({
-				paymentIntentClientSecret: clientSecret,
-				merchantDisplayName: 'Smile4Kids',
-			});
-
-			if (initError) {
-				Alert.alert("Payment Error", initError.message);
-				setLoading(false);
-				return;
-			}
-
-			const { error: presentError } = await presentPaymentSheet();
-
-			if (presentError) {
-				Alert.alert("Payment Failed", presentError.message);
-			} else {
-				Alert.alert("Success", "Your payment was successful!");
-				dispatch(setPaidStatus(true));
-
-				// ✅ Refresh paid course access
-				await fetchPaidCourses();
-				//navigate to home
-				navigation.navigate('MainTabs', {
-					screen: 'Home',
 				});
-			}
-		} catch (err) {
-			console.error("PaymentSheet Error:", err);
-			Alert.alert("Unexpected Error", "Something went wrong during payment.");
-		} finally {
-			setLoading(false);
-		}
-	};
 
+				//closes the purchase
+				await RNIap.finishTransaction(purchase);
+
+				dispatch(setPaidStatus(true));
+				await fetchPaidCourses();
+			} catch (err) {
+				console.warn("Listener verification error", err);
+			}
+			}
+		});
+
+		const purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+			console.warn('IAP purchase error', error);
+		});
+
+		return () => {
+			purchaseUpdateSubscription.remove();
+			purchaseErrorSubscription.remove();
+		};
+	}, [users_id]);
+
+
+
+	// ------- Handle item selection -------//
 	const handleToggle = (language, level) => {
 		const backendLevel = getFormattedLevel(level); // 'Junior' or 'Pre_Junior'
 		const key = `${language}-${backendLevel}`;
 
 		if (paidSet.has(key)) {
-			return; // 🔒 Don't allow changing paid courses
+			return; //  Don't allow changing paid courses
 		}
-
 		setSelectedItems(prev => {
 			const current = prev[language] || [];
 			const isSelected = current.includes(level);
@@ -273,6 +413,7 @@ console.log("data",data)
 		});
 	};
 
+	//------- Check if all courses are paid -------//
 	const isEverythingPaid = (() => {
 		const allCombos = languages.flatMap(
 			lang => ageOptions.map(age => `${lang}-${getFormattedLevel(age)}`)
@@ -280,8 +421,8 @@ console.log("data",data)
 		return allCombos.every(combo => paidSet.has(combo));
 	})();
 
-	// Handle back button
-		useFocusEffect(
+	//------ Handle back button -------//
+	useFocusEffect(
 	useCallback(() => {
 		const onBackPress = () => {
 			if (navigation.canGoBack()) {
@@ -319,7 +460,7 @@ console.log("data",data)
 										key={option}
 										style={[styles.ageOption, isPaid && styles.disabledOption]}
 										onPress={() => handleToggle(lang, option)}
-										disabled={isPaid} // 🔒 disables press
+										disabled={isPaid} // disables press
 									>
 										<Text style={[styles.ageText, isPaid && styles.disabledText]}>
 											{getDisplayLevel(option)}

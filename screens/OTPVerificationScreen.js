@@ -58,7 +58,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 			});
 			
 			const data = await response.json();
-			console.log("API response JSON:", data);
+			//console.log("API response JSON:", data);
 
 			if (data.message === 'OTP verified. You can now reset your password.') {
 				Alert.alert("Success", data.message);
@@ -69,7 +69,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 				setShowAlert(true);
 			}
 		} catch (error) {
-			console.log("OTP Verification Error:", error);
+			//console.log("OTP Verification Error:", error);
 			setAlertTitle("Network Error");
 			setAlertMessage("Unable to connect to server. Please try again.");
 			setShowAlert(true);

@@ -19,7 +19,7 @@ import CustomAlert from '../component/CustomAlertMessage';
 import { getBackendLevel } from '../utils/levelUtils';
 
 const { width, height } = Dimensions.get('window');
-
+ 
 const ageGroups = [
 	{ id: '1', name: 'PreSchool (4–6 years)' },
 	{ id: '2', name: 'Junior (7 & above years)' },
@@ -28,7 +28,7 @@ const ageGroups = [
 const AgeSelectionScreen = () => {
 	const dispatch = useDispatch();
 	const selectedLevel = useSelector((state) => state.user.selectedLevel);
-	console.log('Selected Level:', selectedLevel);
+	//console.log('Selected Level:', selectedLevel);
 	const [showAlert, setShowAlert] = useState(false);
 	const navigation = useNavigation();
 	const [animations] = useState(
@@ -120,7 +120,7 @@ const AgeSelectionScreen = () => {
 						);
 					})}
 				</View>
-
+				
 				<View style={styles.bottomButtonContainer}>
 					<PressableButton title="Next ➡️" onPress={handleNext} style={styles.nextButton} />
 				</View>

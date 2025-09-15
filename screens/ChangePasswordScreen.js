@@ -43,7 +43,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 
 		try {
 			const token = await AsyncStorage.getItem('token');
-			console.log('Token:', token);
+			//console.log('Token:', token);
 			const response = await fetch("https://api.smile4kids.co.uk/forgot/change-password", {
 				method: "POST",
 				headers: {
@@ -58,7 +58,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 					confirm_password: confirmPassword,
 				}),
 			});
-			console.log('Authorization Header:', token)
+			//console.log('Authorization Header:', token)
 
 			if (!token) {
 				Alert.alert('Error', 'No token found. Please log in again.');
@@ -79,7 +79,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 				//Alert.alert('Alert','Something went wrong. Please try again later.');
 			}
 		} catch (error) {
-			console.error('Error changing password:', error);
+		//console.error('Error changing password:', error);
 			Alert.alert('Error', 'Failed to change password. Please try again later.');
 		}
 	};

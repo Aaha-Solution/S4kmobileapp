@@ -46,22 +46,22 @@ const ResetPasswordScreen = ({ route }) => {
 				})
 
 			})
-			console.log("API response:", response);
-			console.log("conform pass", confirmPassword);
+			//console.log("API response:", response);
+			//console.log("conform pass", confirmPassword);
 			const data = await response.json();
-			console.log("data:", data);
+			//console.log("data:", data);
 
 			if (data.message === 'Password reset successful') {
-				console.log("success", data.message)
+				//console.log("success", data.message)
 				navigation.navigate("Login")
 			} else {
-				console.log("error", data.message)
+				//console.log("error", data.message)
 					setAlertTitle("Invalid")
 					setAlertMessage("Old password and new password cannot be same.")
 					setShowAlert(true)
 			}
 		} catch (error) {
-			console.log(error)
+			//console.log(error)
 		}
 	};
 

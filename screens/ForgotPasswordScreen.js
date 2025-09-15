@@ -25,7 +25,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
     const [error, setError] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const dispatch = useDispatch();
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const floatAnim = useRef(new Animated.Value(0)).current;
@@ -75,17 +74,14 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
     const handleSendOTP = async () => {
         setError('');
-
         if (!email.trim()) {
             setError('Please enter your email.');
             return;
         }
-
         if (!isValidEmail(email)) {
             setError('Please enter a valid email address.');
             return;
         }
-
         setLoading(true);
         try {
             const response = await fetch("https://api.smile4kids.co.uk/forgot/send-otp", {
@@ -95,14 +91,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 },
                 body: JSON.stringify({ email_id: email }),
             });
-
-            console.log("response:", response);
+           // console.log("response:", response);
             const contentType = response.headers.get("Content-Type") || "";
-            console.log("contentType:", contentType);
-
+           // console.log("contentType:", contentType);
             if (contentType.includes("application/json")) {
                 const data = await response.json();
-                console.log("Server response:", data);
+              //  console.log("Server response:", data);
                 if (response.ok) {
                     Alert.alert("Success", data.message || "OTP sent to your email.");
                     setError('');
@@ -110,21 +104,20 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     navigation.navigate('OTPVerification');
                 } else {
                     Alert.alert("Invalid", "This email is not registered. Please check or sign up.");
-                    console.error("Server error:", data);
+                   // console.error("Server error:", data);
                 }
             } else {
                 const text = await response.text();
-                console.error("Unexpected response (HTML?):", text);
+               // console.error("Unexpected response (HTML?):", text);
                 Alert.alert("Server Error", "Unexpected response from server.");
             }
         } catch (error) {
-            console.error("Forgot Password Error:", error);
+           // console.error("Forgot Password Error:", error);
             Alert.alert("Network Error", "Please try again later.");
         } finally {
             setLoading(false);
         }
     };
-
     const cloudTranslateY = floatAnim.interpolate({
         inputRange: [0, 1],
         outputRange: [0, -10],
@@ -147,7 +140,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     <Image source={require('../assets/image/cloud.png')} style={styles.cloud} />
                 </Animated.View>
             </View>
-
 
             {/* Main Content */}
             <View style={styles.mainContent}>

@@ -1,17 +1,17 @@
 # =========================
-# ✅ Stripe SDK - Required Rules
+#  Stripe SDK - Required Rules
 # =========================
--keep class com.stripe.android.** { *; }
--dontwarn com.stripe.android.**
+#-keep class com.stripe.android.** { *; }
+#-dontwarn com.stripe.android.**
 
--keep class com.reactnativestripesdk.** { *; }
--dontwarn com.reactnativestripesdk.**
+#-keep class com.reactnativestripesdk.** { *; }
+#-dontwarn com.reactnativestripesdk.**
 
--keep class com.stripe.android.pushProvisioning.** { *; }
--dontwarn com.stripe.android.pushProvisioning.**
+#-keep class com.stripe.android.pushProvisioning.** { *; }
+#-dontwarn com.stripe.android.pushProvisioning.**
 
 # =========================
-# ✅ Video Playback - Prevent ExoPlayer/OkHttp stripping
+#  Video Playback - Prevent ExoPlayer/OkHttp stripping
 # =========================
 -keep class com.google.android.exoplayer2.** { *; }
 -dontwarn com.google.android.exoplayer2.**

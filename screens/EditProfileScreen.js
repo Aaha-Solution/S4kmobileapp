@@ -47,6 +47,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    //---- Fetch available avatars from backend ----//
     useEffect(() => {
         const fetchAvatar = async () => {
             try {
@@ -58,28 +59,24 @@ const EditProfileScreen = ({ route, navigation }) => {
                     },
                 });
                 const data = await response.json();
-                console.log('Avatar data:', data);
-
+              //  console.log('Avatar data:', data);
                 const imageUrls = Array.isArray(data)
                     ? data.map(file => `${BASE_URL}${file.path}`)
                     : [];
-
-
-                console.log('First avatar object:', data[0]);
-                console.log('Avatar URLs:', imageUrls);
-
+              ///  console.log('First avatar object:', data[0]);
+               // console.log('Avatar URLs:', imageUrls);
                 setImages(imageUrls);
                 setLoading(false);
-
             } catch (error) {
-                console.error('Failed to fetch avatars:', error);
+               // console.error('Failed to fetch avatars:', error);
                 setImages([]);
                 setLoading(false);
             }
         };
-
         fetchAvatar();
     }, []);
+
+    //---- Load avatar from route params or AsyncStorage ----//
     useEffect(() => {
         const loadAvatar = async () => {
             let avatarToUse = profile_avatar; // fallback
@@ -96,18 +93,17 @@ const EditProfileScreen = ({ route, navigation }) => {
                             avatarToUse = parsed;
                         }
                     } catch (err) {
-                        console.warn('Invalid avatar format in storage:', storedAvatar);
+                       // console.warn('Invalid avatar format in storage:', storedAvatar);
                     }
                 }
             }
-
             setSelectedAvatar(avatarToUse);
             dispatch(setProfile({ ...currentProfile, selectedAvatar: avatarToUse }));
         };
-
         loadAvatar();
     }, []);
 
+    //---- Handle Android back button ----//
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             navigation.navigate('ViewProfile');
@@ -156,9 +152,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const HandlePhonenumber = (number) => {
         const cleanedNumber = number.replace(/\D/g, ''); // keep only digits
         const ukMobileRegex = /^07\d{9}$/;
-
         setPhone(number); // still show original input
-
         if (!cleanedNumber) {
             setPhoneError('Phone number is required');
         } else if (!ukMobileRegex.test(cleanedNumber)) {
@@ -175,14 +169,12 @@ const EditProfileScreen = ({ route, navigation }) => {
             setShowAlert(true);
             return;
         }
-
         if (dateError || phoneError) {
             setAlertTitle('Alert');
             setAlertMessage('Please fill all fields before saving.');
             setShowAlert(true);
             return;
         }
-
         try {
             const token = await AsyncStorage.getItem('token');
             const response = await fetch("https://api.smile4kids.co.uk/signup/update-profile", {
@@ -199,12 +191,12 @@ const EditProfileScreen = ({ route, navigation }) => {
                     avatar: selectedAvatar,
                 })
             });
-
             const text = await response.text();
-            console.log('Raw backend response:', text); // ✅ Add this
+            console.log('Raw backend response:', text); 
             let data;
             try {
                 data = JSON.parse(text);
+                console.log('Parsed response data:', data); 
             } catch {
                 throw new Error(text); // If not JSON, will show HTML error
             }
@@ -217,7 +209,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 throw new Error(data.message || 'Failed to update profile');
             }
         } catch (err) {
-            console.error('Profile update failed:', err.message);
+           // console.error('Profile update failed:', err.message);
             setAlertTitle('Error');
             setAlertMessage(err.message || 'Something went wrong.');
             setShowAlert(true);
@@ -246,15 +238,13 @@ const EditProfileScreen = ({ route, navigation }) => {
                                     style={styles.avatar}
                                     resizeMode="contain"
                                 />
-
-
                             </View>
                             <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
                                 <Ionicons name="camera" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-
                     </View>
+
                     <Modal animationType="slide" transparent={true} visible={modalVisible}>
                         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
                             <View style={styles.modalContent}>
@@ -280,7 +270,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                                         <Image
                                                             source={{ uri }}
                                                             style={[styles.avatar, isSelected && styles.selectedAvatar]}
-                                                            onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
+                                                           // onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
 
                                                         />
 
@@ -304,6 +294,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                     setUsername(cleaned);
                                 }} />
                         </View>
+
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Email</Text>
                             <TextInput style={[styles.input, { backgroundColor: '#eee' }]} value={email} editable={false} keyboardType="email-address" />
@@ -320,6 +311,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
                         </View>
+
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Address</Text>
                             <TextInput
@@ -330,6 +322,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                 numberOfLines={4}
                             />
                         </View>
+
                         <PressableButton title="Save" onPress={handleSave} style={{ marginTop: 20 }} />
                     </View>
                 </ScrollView>
@@ -340,6 +333,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     message={alertMessage}
                     onConfirm={() => setShowAlert(false)}
                 />
+                
             </SafeAreaView>
         </LinearGradient>
     );

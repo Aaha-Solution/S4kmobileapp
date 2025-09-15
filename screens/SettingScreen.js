@@ -21,10 +21,10 @@ import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dimensions } from 'react-native';
 const SettingsScreen = ({ route, navigation }) => {
+	const dispatch = useDispatch();
 	const selectedAvatar = useSelector((state) => state.user.user.selectedAvatar);
 	const email = useSelector((state) => state.user.email) || '';
 	const username = useSelector((state) => state.user.user.username) || 'Guest User';
-	const dispatch = useDispatch();
 	const [tempSelectedAvatar, setTempSelectedAvatar] = useState(profile_avatar);
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -43,9 +43,8 @@ const SettingsScreen = ({ route, navigation }) => {
 		  return profile_avatar;
 		}
 	  };
-	  
 
-	// ✅ Load avatar from AsyncStorage
+	//  Load avatar from AsyncStorage
 	const loadAvatar = async () => {
 		try {
 			const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
@@ -56,7 +55,7 @@ const SettingsScreen = ({ route, navigation }) => {
 				setTempSelectedAvatar(profile_avatar);
 			}
 		} catch (error) {
-			console.log('Error loading avatar:', error);
+			//console.log('Error loading avatar:', error);
 			setTempSelectedAvatar(profile_avatar);
 		}
 	};
@@ -82,13 +81,13 @@ const SettingsScreen = ({ route, navigation }) => {
 	  }, [selectedAvatar]);
 	  
 
-	// ✅ Reload avatar when screen comes into focus
+	//  Reload avatar when screen comes into focus
 	useEffect(() => {
 		const unsubscribe = navigation.addListener('focus', loadAvatar);
 		return unsubscribe;
 	}, [navigation]);
 
-	// ✅ Confirm logout and reset state/storage
+	//  Confirm logout and reset state/storage
 	const handleConfirmLogout = async () => {
 		try {
 
@@ -115,7 +114,7 @@ const SettingsScreen = ({ route, navigation }) => {
 				);
 			}, 100);
 		} catch (error) {
-			console.error('Logout failed:', error);
+			//console.error('Logout failed:', error);
 			setShowAlert(false);
 		}
 	};
@@ -140,7 +139,7 @@ const SettingsScreen = ({ route, navigation }) => {
 		{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
 		{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 	];
-console.log('profile_avatar:', profile_avatar);
+		//console.log('profile_avatar:', profile_avatar);
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>

@@ -6,7 +6,6 @@ const LevelSelectorScreen = (props) => {
   return <VideoListScreen {...props} />;
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

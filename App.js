@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import NoInternetScreen from './screens/NoInternetScreen'; // ✅
+import NoInternetScreen from './screens/NoInternetScreen'; 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './Store';
-import { StripeProvider } from '@stripe/stripe-react-native';
 import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// Screens (imported as before)
+// Screens 
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
@@ -36,14 +35,14 @@ const App = () => {
 
 	useEffect(() => {
 		const unsubscribe = NetInfo.addEventListener(state => {
-			console.log('Connection type:', state.type);
-			console.log('Is connected?', state.isConnected);
+			//console.log('Connection type:', state.type);
+			//console.log('Is connected?', state.isConnected);
 			setIsConnected(state.isConnected && state.isInternetReachable);
 		});
-
+   
 		NetInfo.fetch().then(state => {
 			setIsConnected(state.isConnected && state.isInternetReachable);
-			setIsChecking(false);
+			setIsChecking(false);   
 		});
 
 		return () => unsubscribe();
@@ -55,7 +54,7 @@ const App = () => {
 	try {
 		return (
 			<GestureHandlerRootView style={{ flex: 1 }}>
-			<StripeProvider publishableKey="pk_test_51RbK6IH6OK1hLW4ieNUI38Hdxs9DdFOaBJ7XkqLH8vqTT5oGlbRKColi1J3SgPhMZNrBIvNA3MQj7sV0IjDta54V00W3f5HIXg">
+			
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
 						<NavigationContainer>
@@ -89,7 +88,6 @@ const App = () => {
 										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
 									}}
 								/>
-
 								<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 								<Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
 								<Stack.Screen
@@ -171,11 +169,11 @@ const App = () => {
 						<Toast />
 					</PersistGate>
 				</Provider>
-			</StripeProvider>
+			
 			</GestureHandlerRootView>
 		);
 	} catch (err) {
-		console.error("Error in App component:", err);
+		//console.error("Error in App component:", err);
 		return; // Or you can return a fallback UI
 	}
 }

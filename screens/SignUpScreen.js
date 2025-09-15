@@ -44,7 +44,7 @@ const SignupScreen = ({ navigation }) => {
 		return regex.test(password);
 	};
 
-	// Replace the handleLogin function with this fixed version
+	//  the handleLogin function to handle user login
 
 	const handleSignUp = async () => {
 		setemailError('');
@@ -145,13 +145,13 @@ const SignupScreen = ({ navigation }) => {
 		};
 	}, []);
 
-useEffect(() => {
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-			navigation.navigate('Login');
-			return true;
-		});
-		return () => backHandler.remove();
-	}, [navigation]);
+	useEffect(() => {
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+				navigation.navigate('Login');
+				return true;
+			});
+			return () => backHandler.remove();
+		}, [navigation]);
 
 	return (
 		<KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -338,7 +338,6 @@ const styles = StyleSheet.create({
 		marginTop: RFValue(-6),           // Adjusted to avoid overlap
 		marginBottom: RFValue(6),         // Responsive bottom spacing
 	},
-
 	buttonContainer: {
 		marginBottom: 20,
 	},

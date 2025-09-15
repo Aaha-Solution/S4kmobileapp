@@ -20,13 +20,13 @@ const initialState = {
 	paidAccess: [],
 	lastPaidSelection: null,
 };
-
+ 
 const userSlice = createSlice({
 	name: 'user',
 	initialState,
 	reducers: {
 		login: (state, action) => {
-			console.log('LOGIN PAYLOAD:', action.payload);
+			//console.log('LOGIN PAYLOAD:', action.payload);
 			const normalizedUser = {
 				email: action.payload.email_id || action.payload.email || 'Guest User',
 				username: action.payload.username || '',
@@ -52,7 +52,7 @@ const userSlice = createSlice({
 			}));
 
 
-			// ✅ Fallback to first paid combo if language/level not provided
+			// Fallback to first paid combo if language/level not provided
 			const fallback = paidCategories[0] || {};
 			state.selectedLanguage = action.payload.language || fallback.language || null;
 			state.selectedLevel = action.payload.level || fallback.level || null;
@@ -96,16 +96,16 @@ const userSlice = createSlice({
 		setAllPaidAccess: (state, action) => {
 			state.paidAccess = action.payload;
 		},
-		// ✅ NEW: Add paid combination
+		// NEW: Add paid combination
 		addPaidAccess: (state, action) => {
 			const { language, level } = action.payload;
 			const exists = state.paidAccess.some(
 				item => item.language === language && item.level === level
 			);
 			if (!exists) {
-				state.paidAccess.push({ language, level }); // ✅ store correctly
+				state.paidAccess.push({ language, level }); //  store correctly
 			}
-			state.lastPaidSelection = { language, level }; // ✅ Save last paid combo
+			state.lastPaidSelection = { language, level }; //  Save last paid combo
 		}
 
 	},

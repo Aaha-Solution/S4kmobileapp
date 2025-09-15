@@ -39,7 +39,7 @@ const LoginScreen = ({ navigation }) => {
                     setRememberMe(true);
                 }
             } catch (error) {
-                console.error('Keychain error:', error);
+              //  console.error('Keychain error:', error);
             }
         };
         checkRememberedUser();
@@ -52,19 +52,16 @@ const LoginScreen = ({ navigation }) => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 const userData = await AsyncStorage.getItem('user');
-
                 if (!token || !userData) return;
-
                 const user = JSON.parse(userData);
                 dispatch(login(user));
-
                 if (user.is_admin === 1) {
                     navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
                 } else {
                     navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
                 }
             } catch (error) {
-                console.error('Token check error:', error);
+               // console.error('Token check error:', error);
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -75,11 +72,9 @@ const LoginScreen = ({ navigation }) => {
         };
     }, [navigation]);
 
-
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    // Replace the handleLogin function with this fixed version
-
+    //  handleLogin function with admin check
     const handleLogin = async () => {
         setEmailError('');
         setPasswordError('');
@@ -121,7 +116,7 @@ const LoginScreen = ({ navigation }) => {
 
             await AsyncStorage.setItem('user', JSON.stringify(user));
             await AsyncStorage.setItem('token', token);
-            console.log("🧪 is_admin:", user.is_admin);
+           // console.log("🧪 is_admin:", user.is_admin);
 
             if (user.is_admin === 1) {
                 // ✅ Admin login: redirect to AdminPanel
@@ -173,20 +168,20 @@ const LoginScreen = ({ navigation }) => {
                 });
             }
         } catch (error) {
-            console.error('Login error:', error);
+           // console.error('Login error:', error);
             Alert.alert('Error', 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-useEffect(() => {
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-            BackHandler.exitApp();
-            return true;
-        });
-        return () => backHandler.remove();
-    }, [navigation]);
+    useEffect(() => {
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+                BackHandler.exitApp();
+                return true;
+            });
+            return () => backHandler.remove();
+        }, [navigation]);
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

@@ -36,10 +36,10 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const dispatch = useDispatch();
 	const isPaid = useSelector(state => state.user.isPaid);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
-	console.log("level", selectedLevel)
+	//console.log("level", selectedLevel)
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
-	console.log("value", value)
+	//console.log("value", value)
 	const [items, setItems] = useState(AGE_GROUP_ITEMS);
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
@@ -65,7 +65,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 				navigation.navigate('Home');
 			}
 		} catch (error) {
-			console.error('Error in handleAgeSelect:', error);
+			//console.error('Error in handleAgeSelect:', error);
 		}
 	};
 

@@ -21,7 +21,7 @@ import CustomAlert from '../component/CustomAlertMessage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { setPaidStatus, addPaidAccess } from '../Store/userSlice';
-import { useStripe } from '@stripe/stripe-react-native';
+import * as RNIap from 'react-native-iap';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 
@@ -36,7 +36,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const paidAccess = useSelector(state => state.user.paidAccess);
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
-	console.log("🌐 Redux selectedLanguage:", selectedLanguage);
+	//console.log("🌐 Redux selectedLanguage:", selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
 	const isPaid = useSelector(state => state.user.isPaid);
 
@@ -45,6 +45,20 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [initialVisitCompleted, setInitialVisitCompleted] = useState(false);
+
+	const productIdMap = {
+		'Hindi-Junior': 'video_hindi_junior',
+		'Hindi-Pre_Junior': 'video_hindi_pre_junior',
+		'Gujarati-Junior': 'video_gujarati_junior',
+		'Gujarati-Pre_Junior': 'video_gujarati_pre_junior',
+		'Panjabi-Junior': 'video_panjabi_junior',
+		'Panjabi-Pre_Junior': 'video_panjabi_pre_junior',
+	};
+
+	const selectedCategory = `${language}-${getBackendLevel(selectedLevel)}`;
+	const productId = productIdMap[selectedCategory];
+
+	const [productDetails, setProductDetails] = useState(null);
 
 	const backendLevel = getBackendLevel(selectedLevel);
 	const { width, height } = useWindowDimensions();
@@ -58,6 +72,36 @@ const VideoListScreen = ({ navigation, route }) => {
 		item => item.language === language && item.level === backendLevel
 	);
 
+	//----- checkIAPConnection in development ------//
+const checkIAPConnection = async () => {
+  try {
+    const result = await RNIap.initConnection();
+    console.log('IAP connection result:', result);
+
+    const isSupported = await RNIap.isBillingSupported();
+    console.log(' Billing supported:', isSupported);
+
+    const productIds = Object.values(productIdMap);
+    console.log(' Products fetched:', productIdMap);
+    
+    if (productIds.length === 0) {
+      console.warn(" No products found. Make sure the product IDs match your Play Console internal testing release.");
+    }
+    return true;
+  } catch (err) {
+    console.warn(' IAP init error (dev check):', err);
+    return false;
+  }
+};
+
+	//----- useEffect to run checkIAPConnection on mount in dev mode ------//
+	useEffect(() => {
+	if (__DEV__) {
+		checkIAPConnection();
+	}
+	}, []);
+
+
 	// Restore status bar when returning from other screens
 	useFocusEffect(
 		useCallback(() => {
@@ -65,21 +109,21 @@ const VideoListScreen = ({ navigation, route }) => {
 		}, [])
 	);
 
-	console.log("🧪 selectedLevel (UI):", selectedLevel);
-	console.log("🧪 backendLevel:", backendLevel);
-	console.log("🧪 language:", language);
-	console.log("🧪 isCurrentCombinationPaid:", isCurrentCombinationPaid);
+	//console.log("🧪 selectedLevel (UI):", selectedLevel);
+	//console.log("🧪 backendLevel:", backendLevel);
+	//console.log("🧪 language:", language);
+	//console.log("🧪 isCurrentCombinationPaid:", isCurrentCombinationPaid);
 
-	const { initPaymentSheet, presentPaymentSheet } = useStripe();
+	//const { initPaymentSheet, presentPaymentSheet } = useStripe();
 	const isHomeScreen = route.name === 'Home';
 	const baseURL = 'https://api.smile4kids.co.uk/videos/by-category/';
 
-	// Fixed: Always fetch videos when component mounts or dependencies change
+	//------ videos when component mounts or dependencies change -----//
 	useEffect(() => {
 		fetchVideos();
 	}, [language, selectedLevel, paidAccess]);
 
-	// Add this useEffect to save preferences when they change
+	//---- save preferences when they change -------//
 	useEffect(() => {
 		const savePreferences = async () => {
 			if (selectedLanguage && selectedLevel) {
@@ -88,13 +132,14 @@ const VideoListScreen = ({ navigation, route }) => {
 					selectedLevel,
 				};
 				await AsyncStorage.setItem('selectedPreferences', JSON.stringify(preferences));
-				console.log('✅ Preferences saved:', preferences);
+				//console.log('✅ Preferences saved:', preferences);
 			}
 		};
-
 		savePreferences();
 	}, [selectedLanguage, selectedLevel]);
 
+
+	//--- Debugging logs ----//
 	useEffect(() => {
 		console.log('Redux Selected Age Group:', selectedLevel);
 		console.log('Redux Selected Language:', selectedLanguage);
@@ -104,8 +149,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		console.log("✅ isCurrentCombinationPaid:", isCurrentCombinationPaid);
 	}, [paidAccess, language, selectedLevel, isPaid]);
 
-
-
+	//---- Handle Android back button on home screen -------//
 	useFocusEffect(
 		useCallback(() => {
 			if (!isHomeScreen) return;
@@ -117,12 +161,14 @@ const VideoListScreen = ({ navigation, route }) => {
 		}, [isHomeScreen])
 	);
 
+	//----- Exit Alert handlers -------//
 	const handleConfirmExit = () => {
 		setShowAlert(false);
 		BackHandler.exitApp();
 	};
 	const handleCancelExit = () => setShowAlert(false);
 
+	//----- Fetch videos based on current language and level ------//
 	const fetchVideos = useCallback(async () => {
 		if (!selectedLevel || !language) {
 			setVideos([]);
@@ -131,7 +177,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		setLoading(true);
 		setVideos([]);
 		const url = `${baseURL}?language=${language}&level=${backendLevel}`;
-		console.log("url", url);
+		//console.log("url", url);
 
 		try {
 			const token = await AsyncStorage.getItem('token');
@@ -141,26 +187,28 @@ const VideoListScreen = ({ navigation, route }) => {
 					'Content-Type': 'application/json',
 				},
 			});
-			console.log("API Response:", response.data);
+			//console.log("API Response:", response.data);
 			if (response.status === 200 && Array.isArray(response.data)) {
 				setVideos(response.data);
 			} else {
 				setVideos([]);
 			}
 		} catch (error) {
-			console.error('API fetch error:', error);
+			//console.error('API fetch error:', error);
 			setVideos([]);
 		} finally {
 			setLoading(false);
 		}
 	}, [language, selectedLevel, backendLevel]);
 
+	//---- Update language state if Redux selectedLanguage changes ----//
 	useEffect(() => {
 		if (selectedLanguage) {
 			setLanguage(selectedLanguage);
 		}
 	}, [selectedLanguage]);
 
+	//------ Refresh videos when screen is focused ------//
 	useEffect(() => {
 		const unsubscribe = navigation.addListener('focus', () => {
 			fetchVideos();
@@ -168,13 +216,28 @@ const VideoListScreen = ({ navigation, route }) => {
 		return unsubscribe;
 	}, [navigation, fetchVideos]);
 
+	//---- Handle video item press -------//
 	const handleVideoPress = useCallback((videoItem) => {
 		navigation.navigate('VideoPlayer', { videoUri: videoItem });
 	}, [navigation]);
 
-	// Fixed: Simplified language selection - just change the language
+	//----  Simplified language selection - just change the language -----//
 	const handleLanguageSelect = useCallback((langKey) => {
 		setLanguage(langKey);
+	}, []);
+
+	useEffect(() => {
+	const fetchProducts = async () => {
+		try {
+		const products = await RNIap.getProducts(productIds);
+		if (products.length > 0) {
+			setProductDetails(products[0]); // save product info
+		}
+		} catch (err) {
+		console.warn("fetchProducts error:", err);
+		}
+	};
+	fetchProducts();  
 	}, []);
 
 	const renderItem = ({ item, index }) => (
@@ -191,7 +254,7 @@ const VideoListScreen = ({ navigation, route }) => {
 					// You can add payment logic here or show a message
 					Alert.alert(
 						"Locked Content",
-						`Pay £45 to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
+						`Pay ${productDetails?.localizedPrice || "£45"} to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
 						[
 							{ text: "Cancel", style: "cancel" },
 							{ text: "Pay Now", onPress: HandlePay }
@@ -253,75 +316,172 @@ const VideoListScreen = ({ navigation, route }) => {
 		})();
 	}, []);
 
-	const HandlePay = async () => {
-		try {
-			const token = await AsyncStorage.getItem('token');
-			const cleanLevel = getBackendLevel(selectedLevel);
-			const paymentType = `${language}-${cleanLevel}`;
+	//----- Payment handling --------//
+	
+	// const HandlePay = async () => {
+	// 	try {
+	// 		const token = await AsyncStorage.getItem('token');
+	// 		const cleanLevel = getBackendLevel(selectedLevel);
+	// 		const paymentType = `${language}-${cleanLevel}`;
 
-			console.log("🟠 Payment Type:", paymentType);
-			const selections = [{
-				language: language,
-				level: cleanLevel
-			}];
+	// 		//console.log("🟠 Payment Type:", paymentType);
+	// 		const selections = [{
+	// 			language: language,
+	// 			level: cleanLevel
+	// 		}];
 
-			const response = await fetch('https://api.smile4kids.co.uk/payment/create-payment-intent', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					type: paymentType,
-					currency: 'gbp',
-					user_id: users_id,
-					language,
-					level: cleanLevel,
-					courseType: paymentType,
-					selections: selections,
-				}),
-			});
+	// 		const response = await fetch('https://api.smile4kids.co.uk/payment/create-payment-intent', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json',
+	// 				Authorization: `Bearer ${token}`,
+	// 			},
+	// 			body: JSON.stringify({
+	// 				type: paymentType,
+	// 				currency: 'gbp',
+	// 				user_id: users_id,
+	// 				language,
+	// 				level: cleanLevel,
+	// 				courseType: paymentType,
+	// 				selections: selections,
+	// 			}),
+	// 		});
 
-			const rawText = await response.text();
-			console.log("🟠 Raw Response Text:", rawText);
-			let data;
-			try {
-				data = JSON.parse(rawText);
-			} catch (error) {
-				console.error("❌ Failed to parse JSON:", error);
-				Alert.alert("Server Error", "Invalid response from payment server.");
-				return;
-			}
+	// 		const rawText = await response.text();
+	// 		//console.log("🟠 Raw Response Text:", rawText);
+	// 		let data;
+	// 		try {
+	// 			data = JSON.parse(rawText);
+	// 		} catch (error) {
+	// 			//console.error("❌ Failed to parse JSON:", error);
+	// 			Alert.alert("Server Error", "Invalid response from payment server.");
+	// 			return;
+	// 		}
 
-			const clientSecret = data.clientSecret;
-			if (!clientSecret) {
-				Alert.alert("Payment Error", data.message || "No client secret received.");
-				return;
-			}
+	// 		const clientSecret = data.clientSecret;
+	// 		if (!clientSecret) {
+	// 			Alert.alert("Payment Error", data.message || "No client secret received.");
+	// 			return;
+	// 		}
 
-			const { error: initError } = await initPaymentSheet({
-				paymentIntentClientSecret: clientSecret,
-				merchantDisplayName: 'Smile4Kids',
-			});
-			if (initError) {
-				Alert.alert("Payment Error", initError.message);
-				return;
-			}
+	// 		const { error: initError } = await initPaymentSheet({
+	// 			paymentIntentClientSecret: clientSecret,
+	// 			merchantDisplayName: 'Smile4Kids',
+	// 		});
+	// 		if (initError) {
+	// 			Alert.alert("Payment Error", initError.message);
+	// 			return;
+	// 		}
 
-			const { error: presentError } = await presentPaymentSheet();
-			if (presentError) {
-				Alert.alert("Payment Failed", presentError.message);
-			} else {
-				Alert.alert("Success", "Your payment was successful!");
-				dispatch(setPaidStatus(true));
-				dispatch(addPaidAccess({ language, level: cleanLevel }));
-				await fetchVideos();
-			}
-		} catch (err) {
-			console.error("PaymentSheet Error:", err);
-			Alert.alert("Unexpected Error", "Something went wrong during payment.");
-		}
-	};
+	// 		const { error: presentError } = await presentPaymentSheet();
+	// 		if (presentError) {
+	// 			Alert.alert("Payment Failed", presentError.message);
+	// 		} else {
+	// 			Alert.alert("Success", "Your payment was successful!");
+	// 			dispatch(setPaidStatus(true));
+	// 			dispatch(addPaidAccess({ language, level: cleanLevel }));
+	// 			await fetchVideos();
+	// 		}
+	// 	} catch (err) {
+	// 		//console.error("PaymentSheet Error:", err);
+	// 		Alert.alert("Unexpected Error", "Something went wrong during payment.");
+	// 	}
+	// };
+	
+
+useEffect(() => {
+  let purchaseUpdateSubscription;
+  let purchaseErrorSubscription;
+
+  const initIAP = async () => {
+    try {
+      await RNIap.initConnection();
+	console.log(" IAP connection initialized");
+      // Fetch product info (optional but useful for showing price)
+      const products = await RNIap.getProducts(productIds);
+      console.log("Available products:", products);
+    } catch (err) {
+      console.warn("IAP init error:", err);
+    }
+
+    // Listener: purchase success
+    purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+  	const { purchaseToken, productId, transactionReceipt } = purchase;
+
+  	if (transactionReceipt && purchaseToken) {
+    try {
+      // Send token to backend for verification
+      const token = await AsyncStorage.getItem('token'); // auth token  
+      const cleanLevel = getBackendLevel(selectedLevel);
+
+      const response = await axios.post(
+        'http://localhost:3000/verify-purchase', // <-- backend endpoint
+        {
+          user_id: users_id,
+          productId: productId,
+          purchaseToken: purchaseToken,
+          language,
+          level: cleanLevel,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        //  Acknowledge purchase
+        await RNIap.finishTransaction(purchase);
+
+        //  Unlock content in app
+        dispatch(setPaidStatus(true));
+        dispatch(addPaidAccess({ language, level: cleanLevel }));
+        await fetchVideos();
+
+        Alert.alert("Success", "Your payment was successful!");
+      } else {
+        console.warn("Purchase verification failed on backend:", response.data);
+        Alert.alert("Payment Error", "Purchase could not be verified. Contact support.");
+      }
+    } catch (err) {
+      console.warn("Error sending purchase token:", err);
+      Alert.alert("Payment Error", "Something went wrong during verification.");
+    }
+  }
+});
+
+
+    //  Listener: purchase error
+    purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+      console.warn("purchaseErrorListener", error);
+      Alert.alert("Payment Error", error.message);
+    });
+  };
+
+  initIAP();
+
+  return () => {
+    if (purchaseUpdateSubscription) purchaseUpdateSubscription.remove();
+    if (purchaseErrorSubscription) purchaseErrorSubscription.remove();
+    RNIap.endConnection();
+  };
+}, [dispatch, language, selectedLevel, fetchVideos]);
+
+//  HandlePay
+const HandlePay = async () => {
+  try {
+   const selectedCategory = `${language}-${getBackendLevel(selectedLevel)}`;
+    const productId = productIdMap[selectedCategory];
+    if (productId.length === 0) {
+      Alert.alert("Error", "No products available. Did you upload APK/AAB to Play Console?");
+      return;
+    }
+    await RNIap.requestPurchase(productId);
+  } catch (err) {
+    console.warn("Purchase error:", err);
+    Alert.alert("Payment Failed", "Something went wrong. Please try again.");
+  }
+};
+
 
 	return (
 		<SafeAreaView style={[{ flex: 1 }]}>
@@ -356,6 +516,8 @@ const VideoListScreen = ({ navigation, route }) => {
 					keyExtractor={(item) => item._id || item.id || item.videoUrl || Math.random().toString()}
 					contentContainerStyle={styles.listContainer}
 					renderItem={renderItem}
+					windowSize={10}
+					initialNumToRender={6}
 					ListEmptyComponent={() => (
 						<View style={styles.emptyContainer}>
 							<Text style={styles.emptyText}>
@@ -394,13 +556,13 @@ const VideoListScreen = ({ navigation, route }) => {
 							</TouchableOpacity>
 							<Text style={styles.blurTitle}>Unlock Videos</Text>
 							<Text style={styles.blurDescription}>
-								Pay £45 to access {languageLabels[language]} videos for {getDisplayLevel(selectedLevel)}
+								Pay {productDetails?.localizedPrice || "£45"} to access {languageLabels[language]} videos for {getDisplayLevel(selectedLevel)}
 							</Text>
 							<TouchableOpacity
 								onPress={HandlePay}
 								style={styles.payNowButton}
 							>
-								<Text style={styles.payNowText}>Pay £45</Text>
+								<Text style={styles.payNowText}>Pay {productDetails?.localizedPrice || "£45"}</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
