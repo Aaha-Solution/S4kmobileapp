@@ -263,11 +263,12 @@ const styles = StyleSheet.create({
 	},
 
 	dropdownWrapper: {
+		position: 'absolute',
 		top: -scaleSize(screenHeight * 0.18), // adjust for bigger screens
 		width: scaleSize(screenWidth * 0.5),
-		left: -scaleSize(screenWidth * 0.25), // center more properly on tablets
+		left: -scaleSize(screenWidth * 0.22), // center more properly on tablets
 		zIndex: 1000,
-		bottom:scaleSize(screenHeight*0.1)
+		bottom:scaleSize(screenHeight*0.10),
 	},
 
 	dropdown: {
