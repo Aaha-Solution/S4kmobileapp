@@ -3,6 +3,7 @@
     package="com.smile4kids">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <!-- Custom permission to restrict access to exported Stripe activities -->
     <permission android:name="com.smile4kids.stripe.SAFE"
@@ -16,7 +17,9 @@
         android:allowBackup="false"
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:extractNativeLibs="true">
+        <!-- ⭐ ADD THIS LINE ABOVE ⭐ -->
 
         <!-- Main activity -->
         <activity

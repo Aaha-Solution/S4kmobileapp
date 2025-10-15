@@ -116,10 +116,10 @@ const LoginScreen = ({ navigation }) => {
 
             await AsyncStorage.setItem('user', JSON.stringify(user));
             await AsyncStorage.setItem('token', token);
-           // console.log("🧪 is_admin:", user.is_admin);
+           // console.log(" is_admin:", user.is_admin);
 
             if (user.is_admin === 1) {
-                // ✅ Admin login: redirect to AdminPanel
+                //  Admin login: redirect to AdminPanel
                 dispatch(login(user));
                 navigation.reset({ index: 0, routes: [{ name: 'AdminPannel' }] });
                 return;

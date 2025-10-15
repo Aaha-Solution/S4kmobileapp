@@ -30,27 +30,37 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const Stack = createStackNavigator();
 
 const App = () => {
+	console.log("App component started");
+	console.log("App: Initializing network check");
 	const [isConnected, setIsConnected] = useState(true);
 	const [isChecking, setIsChecking] = useState(true);
 
 	useEffect(() => {
+		console.log("App: Setting up network listener");
 		const unsubscribe = NetInfo.addEventListener(state => {
-			//console.log('Connection type:', state.type);
-			//console.log('Is connected?', state.isConnected);
+			console.log('App: Network state changed - type:', state.type, 'connected:', state.isConnected, 'reachable:', state.isInternetReachable);
 			setIsConnected(state.isConnected && state.isInternetReachable);
 		});
-   
+
 		NetInfo.fetch().then(state => {
+			console.log('App: Initial network fetch - type:', state.type, 'connected:', state.isConnected, 'reachable:', state.isInternetReachable);
 			setIsConnected(state.isConnected && state.isInternetReachable);
-			setIsChecking(false);   
+			setIsChecking(false);
 		});
 
 		return () => unsubscribe();
 	}, []);
 
-	if (isChecking) return null; // Or splash screen
+	if (isChecking) {
+		console.log("App: Still checking network connection, showing null");
+		return null; //Splash screen
+	}
 
-	if (!isConnected) return <NoInternetScreen />;
+	if (!isConnected) {
+		console.log("App: No internet connection, showing NoInternetScreen");
+		return <NoInternetScreen />;
+	}
+	console.log("App: Network check passed, rendering main app");
 	try {
 		return (
 			<GestureHandlerRootView style={{ flex: 1 }}>

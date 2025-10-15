@@ -11,7 +11,7 @@ import {
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDownPicker from 'react-native-dropdown-picker';
-import Toast from 'react-native-toast-message';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
 import VideoListScreen from '../screens/VideoListScreen';
@@ -23,9 +23,18 @@ import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dimensions } from 'react-native';
+
 const Tab = createBottomTabNavigator();
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isTablet = Math.min(screenWidth, screenHeight) >= 600;
+const scaleSize = (phoneSize, tabletSize) => (isTablet ? tabletSize : phoneSize);
+
 const dynamicMargin = screenHeight * 0.025; // 2.5% of screen height (adjust as needed)
+
+export const ICON_SIZE = scaleSize(24, 32);
+export const FONT_SIZE = scaleSize(12, 16);
+
 const AGE_GROUP_ITEMS = [
 	{ label: 'PreSchool (4-6 years)', value: 'PreSchool (4-6 years)' },
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
@@ -43,6 +52,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	const [items, setItems] = useState(AGE_GROUP_ITEMS);
 	const currentRouteRef = useRef(state.routes[state.index].name);
 
+	//--- Sync value with selectedLevel from Redux store ---//
 	useEffect(() => {
 		if (selectedLevel) {
 			setValue(getDisplayLevel(selectedLevel));
@@ -120,7 +130,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 						return (
 							<View key={route.key} style={styles.ageTabContainer}>
 								<TouchableOpacity onPress={() => handleTabPress(route)} style={styles.tabButton}>
-									<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
+									<Icon name={iconName} size={ICON_SIZE} color={isFocused ? '#4CAF50' : 'gray'} />
 									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
 								</TouchableOpacity>
 								{open && (
@@ -138,9 +148,9 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 											style={styles.dropdown}
 											dropDownContainerStyle={styles.dropdownContainer}
 											arrowIconStyle={{ tintColor: '#4CAF50' }}
-											textStyle={{ fontSize: 14, fontWeight: '500', color: '#333' }}
-											labelStyle={{ color: '#333' }}
-											listItemLabelStyle={{ color: '#333' }}
+											textStyle={{ fontSize: FONT_SIZE, fontWeight: '500', color: '#333' }}
+											labelStyle={{ color: '#333'}}
+											listItemLabelStyle={{ color: '#333', fontSize: FONT_SIZE  }}
 											selectedItemContainerStyle={{
 												backgroundColor: '#E8F5E9',
 												borderLeftWidth: 4,
@@ -223,14 +233,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		backgroundColor: '#F0F8FF',
-		height: screenHeight * 0.08,
+		height: scaleSize(screenHeight * 0.08, screenHeight * 0.1), // taller on tablet
 		paddingVertical: screenHeight * 0.01,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		position: 'relative',
 		zIndex: 1,
 	},
-
 	ageTabContainer: {
 		alignItems: 'center',
 		position: 'relative',
@@ -249,16 +258,16 @@ const styles = StyleSheet.create({
 	},
 
 	tabLabel: {
-		fontSize: screenWidth * 0.03,
+		fontSize: FONT_SIZE,
 		marginTop: 2,
 	},
 
 	dropdownWrapper: {
-		position: 'absolute',
-		top: -screenHeight * 0.18, // approximately 15-18% of screen height
-		width: screenWidth * 0.5,  // 50% of screen width
-		left: -screenWidth * 0.35, // center align left
+		top: -scaleSize(screenHeight * 0.18), // adjust for bigger screens
+		width: scaleSize(screenWidth * 0.5),
+		left: -scaleSize(screenWidth * 0.25), // center more properly on tablets
 		zIndex: 1000,
+		bottom:scaleSize(screenHeight*0.1)
 	},
 
 	dropdown: {
@@ -268,7 +277,7 @@ const styles = StyleSheet.create({
 		borderWidth: 0,
 		position: 'absolute',
 		top: -9999,
-		left: -screenWidth * 0.35,
+		left: -scaleSize(screenWidth * 0.25),
 		opacity: 0,
 		borderRadius: 5,
 	},
@@ -277,9 +286,9 @@ const styles = StyleSheet.create({
 		borderColor: 'rgba(76, 175, 80, 0.9)',
 		borderWidth: 2,
 		borderRadius: 2,
-		marginLeft: screenWidth * 0.2,
-		minWidth: screenWidth * 0.4,
-		maxWidth: screenWidth * 0.7,
+		marginLeft: scaleSize(screenWidth * 0.2),
+		minWidth: scaleSize(screenWidth * 0.4),
+		maxWidth: scaleSize(screenWidth * 0.7),
 	},
 });
 export default BottomTabNavigator;

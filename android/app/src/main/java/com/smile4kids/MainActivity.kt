@@ -1,11 +1,14 @@
 package com.smile4kids
 
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+
+//import com.dooboolab.RNIap.RNIapActivityListener
 
 class MainActivity : ReactActivity() {
 
@@ -15,18 +18,19 @@ class MainActivity : ReactActivity() {
    */
   override fun getMainComponentName(): String = "smile4kids"
 
- 
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    Log.d("MainActivity", "onCreate called - app starting")
 
-    // ✅ Disable screenshots and screen recording
+    //RNIapActivityListener.getInstance().onCreate(this)
+
+    //  Disable screenshots and screen recording
     window.setFlags(
-      WindowManager.LayoutParams.FLAG_SECURE,
-      WindowManager.LayoutParams.FLAG_SECURE
-    )
-  }
-
-
+       WindowManager.LayoutParams.FLAG_SECURE,
+       WindowManager.LayoutParams.FLAG_SECURE
+     )
+   }
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]

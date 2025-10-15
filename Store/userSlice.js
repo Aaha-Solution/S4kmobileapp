@@ -20,7 +20,7 @@ const initialState = {
 	paidAccess: [],
 	lastPaidSelection: null,
 };
- 
+
 const userSlice = createSlice({
 	name: 'user',
 	initialState,
@@ -51,15 +51,12 @@ const userSlice = createSlice({
 				level: item.level,
 			}));
 
-
-			// Fallback to first paid combo if language/level not provided
+			//---- Fallback to first paid combo if language/level not provided ----//
 			const fallback = paidCategories[0] || {};
 			state.selectedLanguage = action.payload.language || fallback.language || null;
 			state.selectedLevel = action.payload.level || fallback.level || null;
-
 			state.paid_categories = paidCategories;
 		},
-
 		logout: (state) => {
 			state.isLoggedIn = false;
 			state.user = initialState.user;
@@ -96,7 +93,7 @@ const userSlice = createSlice({
 		setAllPaidAccess: (state, action) => {
 			state.paidAccess = action.payload;
 		},
-		// NEW: Add paid combination
+		//---- Add paid combination ----//
 		addPaidAccess: (state, action) => {
 			const { language, level } = action.payload;
 			const exists = state.paidAccess.some(
