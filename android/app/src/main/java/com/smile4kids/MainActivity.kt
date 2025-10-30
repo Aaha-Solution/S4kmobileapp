@@ -2,7 +2,7 @@ package com.smile4kids
 
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
+//import android.view.WindowManager
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -26,10 +26,10 @@ class MainActivity : ReactActivity() {
     //RNIapActivityListener.getInstance().onCreate(this)
 
     //  Disable screenshots and screen recording
-    window.setFlags(
-       WindowManager.LayoutParams.FLAG_SECURE,
-       WindowManager.LayoutParams.FLAG_SECURE
-     )
+   // window.setFlags(
+     //  WindowManager.LayoutParams.FLAG_SECURE,
+     //  WindowManager.LayoutParams.FLAG_SECURE
+     //)
    }
 
   /**

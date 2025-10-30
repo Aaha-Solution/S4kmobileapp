@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true">
-        <!-- ⭐ ADD THIS LINE ABOVE ⭐ -->
+        
 
         <!-- Main activity -->
         <activity

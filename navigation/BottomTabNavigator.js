@@ -264,9 +264,9 @@ const styles = StyleSheet.create({
 
 	dropdownWrapper: {
 		position: 'absolute',
-		top: -scaleSize(screenHeight * 0.18), // adjust for bigger screens
-		width: scaleSize(screenWidth * 0.5),
-		left: -scaleSize(screenWidth * 0.22), // center more properly on tablets
+		top: -scaleSize(screenHeight * 0.18, screenHeight * 0.12), // adjust for bigger screens
+		width: scaleSize(screenWidth * 0.5, screenWidth * 0.5),
+		left: -scaleSize(screenWidth * 0.22, screenWidth * 0.22), // center more properly on tablets
 		zIndex: 1000,
 		bottom:scaleSize(screenHeight*0.10),
 	},
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
 		borderWidth: 0,
 		position: 'absolute',
 		top: -9999,
-		left: -scaleSize(screenWidth * 0.25),
+		left: -scaleSize(screenWidth * 0.25, screenWidth * 0.25),
 		opacity: 0,
 		borderRadius: 5,
 	},

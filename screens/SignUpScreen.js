@@ -83,7 +83,7 @@ const SignupScreen = ({ navigation }) => {
 
 		setLoading(true);
 		try {
-			const response = await fetch('https://api.smile4kids.co.uk/signup', {
+			const response = await fetch('https://api.smile4kids.co.uk/signup/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -93,7 +93,7 @@ const SignupScreen = ({ navigation }) => {
 					confirm_password: confirmPassword
 				}),
 			});
-
+			console.log("Sign Up response status:", response.status);
 			const text = await response.text();
 			let data;
 			try {

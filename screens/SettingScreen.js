@@ -137,6 +137,7 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	const menuItems = [
 		{ icon: 'person-outline', label: 'Account', screen: 'AccountScreen' },
+		{ icon: 'document-text-outline', label: 'Privacy Policy', screen: 'Policy' },
 		{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 	];
 		//console.log('profile_avatar:', profile_avatar);
@@ -146,7 +147,6 @@ const SettingsScreen = ({ route, navigation }) => {
 				<SafeAreaView style={styles.safeArea}>
 					<View style={styles.header}>
 						<View style={styles.profileContainer}>
-							
 							<Image
 								source={resolveAvatar(tempSelectedAvatar)}
 								style={styles.avatar}

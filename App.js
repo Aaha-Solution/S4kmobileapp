@@ -25,6 +25,8 @@ import VideoPlayerScreen from './screens/VideoPlayerScreen.js';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SignupScreen from './screens/SignUpScreen.js';
 import AdminPannel from './screens/AdminPannelScreen.js';
+import Policy from './screens/Policy.js';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Stack = createStackNavigator();
@@ -68,13 +70,19 @@ const App = () => {
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
 						<NavigationContainer>
-							<Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
+							<Stack.Navigator initialRouteName="MainTabs" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
 								<Stack.Screen name="SplashScreen" component={SplashScreen} />
 								<Stack.Screen name="AdminPannel" component={AdminPannel} />
 								<Stack.Screen name="Login" component={LoginScreen} />
 								<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
 								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
 								<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+								<Stack.Screen name="Policy" component={Policy} 
+								options={{
+									headerStyle: { backgroundColor: '#87CEEB' },
+									headerLeft: ()=> (
+									<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('Setting')} />
+								)}}/>
 								<Stack.Screen
 									name="LanguageSelectionScreen"
 									component={LanguageSelectionScreen}

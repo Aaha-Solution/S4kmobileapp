@@ -104,9 +104,9 @@ const LoginScreen = ({ navigation }) => {
                 },
                 body: JSON.stringify({ email_id: email, password }),
             });
-
+            console.log("Login response status:", response.status);
             const data = await response.json();
-
+            console.log("Login response data:", data);
             if (!response.ok || !data?.user) {
                 Alert.alert('Login Failed', data?.message || 'Invalid credentials');
                 return;

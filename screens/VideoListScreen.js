@@ -66,22 +66,22 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [iapInitializing, setIapInitializing] = useState(true);
 	const [iapError, setIapError] = useState(null);
 
-	// Debug state logging
-	useEffect(() => {
-		console.log('🔍 SCREEN STATE:', {
-			selectedLevel,
-			selectedLanguage,
-			users_id,
-			videosCount: videos.length,
-			paidAccessCount: paidAccess.length,
-			language,
-			loading,
-			iapReady,
-			iapInitializing,
-			iapProductsCount: iapProducts.length,
-			iapError
-		});
-	}, [selectedLevel, selectedLanguage, users_id, videos, paidAccess, language, loading, iapReady, iapInitializing, iapProducts, iapError]);
+	// // Debug state logging
+	// useEffect(() => {
+	// 	console.log(' SCREEN STATE:', {
+	// 		selectedLevel,
+	// 		selectedLanguage,
+	// 		users_id,
+	// 		videosCount: videos.length,
+	// 		paidAccessCount: paidAccess.length,
+	// 		language,
+	// 		loading,
+	// 		iapReady,
+	// 		iapInitializing,
+	// 		iapProductsCount: iapProducts.length,
+	// 		iapError
+	// 	});
+	// }, [selectedLevel, selectedLanguage, users_id, videos, paidAccess, language, loading, iapReady, iapInitializing, iapProducts, iapError]);
 
 	const backendLevel = selectedLevel ? getBackendLevel(selectedLevel) : 'Junior';
 	const { width, height } = useWindowDimensions();
@@ -159,7 +159,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	// Fetch videos based on current language and level
 	const fetchVideos = useCallback(async () => {
 		if (!selectedLevel || !language) {
-			console.warn('⚠️ Missing selectedLevel or language');
+			console.warn(' Missing selectedLevel or language');
 			setVideos([]);
 			return;
 		}
@@ -169,12 +169,12 @@ const VideoListScreen = ({ navigation, route }) => {
 		setScreenError(null);
 		const url = `${baseURL}?language=${language}&level=${backendLevel}`;
 
-		console.log('📡 Fetching videos from:', url);
+		console.log(' Fetching videos from:', url);
 
 		try {
 			const token = await AsyncStorage.getItem('token');
 			if (!token) {
-				console.error('❌ No token found');
+				console.error(' No token found');
 				setScreenError('Authentication required. Please login again.');
 				Alert.alert('Authentication Error', 'No authentication token found. Please login again.');
 				setVideos([]);
@@ -189,19 +189,19 @@ const VideoListScreen = ({ navigation, route }) => {
 				},
 			});
 
-			console.log('✅ Response status:', response.status);
-			console.log('📦 Response data length:', response.data?.length);
+			console.log(' Response status:', response.status);
+			console.log(' Response data length:', response.data?.length);
 
 			if (response.status === 200 && Array.isArray(response.data)) {
 				setVideos(response.data);
-				console.log('✅ Videos loaded:', response.data.length);
+				console.log(' Videos loaded:', response.data.length);
 			} else {
-				console.error('❌ Invalid response:', response.status);
+				console.error(' Invalid response:', response.status);
 				setScreenError(`Server error: ${response.status}`);
 				setVideos([]);
 			}
 		} catch (error) {
-			console.error('❌ Fetch error:', error.message);
+			console.error(' Fetch error:', error.message);
 			setScreenError(`Network error: ${error.message}`);
 			setVideos([]);
 		} finally {
@@ -212,17 +212,17 @@ const VideoListScreen = ({ navigation, route }) => {
 	// Fetch paid courses from backend with proper validation
 	const fetchPaidCourses = async () => {
 		try {
-			console.log('💳 ============ FETCHING PAID COURSES ============');
-			console.log('💳 User ID:', users_id);
+			console.log(' ============ FETCHING PAID COURSES ============');
+			console.log(' User ID:', users_id);
 
 			if (!users_id) {
-				console.warn('⚠️ No user ID available');
+				console.warn(' No user ID available');
 				return;
 			}
 
 			const token = await AsyncStorage.getItem('token');
 			if (!token) {
-				console.warn('⚠️ No token available for fetching paid courses');
+				console.warn(' No token available for fetching paid courses');
 				return;
 			}
 
@@ -235,19 +235,19 @@ const VideoListScreen = ({ navigation, route }) => {
 				}
 			);
 
-			console.log('💳 Backend Response Status:', response.status);
-			console.log('💳 Backend Response Data:', JSON.stringify(response.data, null, 2));
+			console.log(' Backend Response Status:', response.status);
+			console.log(' Backend Response Data:', JSON.stringify(response.data, null, 2));
 
 			if (response.data && Array.isArray(response.data)) {
 				if (response.data.length === 0) {
-					console.log('💳 ============ NO PAID COURSES FOUND ============');
+					console.log(' ============ NO PAID COURSES FOUND ============');
 					dispatch(setPaidStatus(false));
 					return;
 				}
 
-				console.log('💳 ============ PROCESSING COURSES ============');
+				console.log(' ============ PROCESSING COURSES ============');
 				response.data.forEach((course, index) => {
-					console.log(`💳 Course ${index + 1}:`, {
+					console.log(` Course ${index + 1}:`, {
 						language: course.language,
 						level: course.level,
 					});
@@ -258,19 +258,19 @@ const VideoListScreen = ({ navigation, route }) => {
 							level: course.level
 						}));
 					} else {
-						console.warn('⚠️ INVALID COURSE:', course);
+						console.warn(' INVALID COURSE:', course);
 					}
 				});
 
 				dispatch(setPaidStatus(true));
-				console.log('💳 ============ DONE PROCESSING ============');
+				console.log(' ============ DONE PROCESSING ============');
 			} else {
-				console.warn('⚠️ Response is not an array:', typeof response.data);
+				console.warn(' Response is not an array:', typeof response.data);
 				dispatch(setPaidStatus(false));
 			}
 		} catch (error) {
-			console.error('❌ ============ ERROR FETCHING PAID COURSES ============');
-			console.error('❌ Error:', error.message);
+			console.error(' ============ ERROR FETCHING PAID COURSES ============');
+			console.error(' Error:', error.message);
 			dispatch(setPaidStatus(false));
 		}
 	};
@@ -328,7 +328,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 		const initIAP = async () => {
 			if (iapInitializedRef.current || initializationAttemptedRef.current) {
-				console.log('🛒 IAP already initialized or in progress');
+				console.log(' IAP already initialized or in progress');
 				return;
 			}
 
@@ -337,12 +337,12 @@ const VideoListScreen = ({ navigation, route }) => {
 			setIapError(null);
 
 			try {
-				console.log("🛒 ========== STARTING IAP INITIALIZATION (v13) ==========");
+				console.log(" ========== STARTING IAP INITIALIZATION (v13) ==========");
 
 				// Step 1: Initialize connection
-				console.log("🛒 Step 1: Initializing connection...");
+				console.log(" Step 1: Initializing connection...");
 				const connected = await RNIap.initConnection();
-				console.log("✅ Connection established:", connected);
+				console.log(" Connection established:", connected);
 
 				if (!connected) {
 					throw new Error("Failed to establish connection");
@@ -350,33 +350,33 @@ const VideoListScreen = ({ navigation, route }) => {
 
 				// Step 2: Clear pending purchases (Android only)
 				try {
-					console.log("🛒 Step 2: Clearing pending purchases...");
+					console.log(" Step 2: Clearing pending purchases...");
 					await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-					console.log("✅ Pending purchases cleared");
+					console.log(" Pending purchases cleared");
 				} catch (flushError) {
-					console.log("⚠️ Flush skipped:", flushError?.message);
+					console.log(" Flush skipped:", flushError?.message);
 				}
 
 				// Wait for billing to stabilize
 				await new Promise(resolve => setTimeout(resolve, 1500));
 
 				if (!isMounted) {
-					console.log('⚠️ Component unmounted, aborting');
+					console.log(' Component unmounted, aborting');
 					await RNIap.endConnection();
 					return;
 				}
 
 				// Step 3: Fetch products - V13 API uses getProducts with object parameter
-				console.log("🛒 Step 3: Fetching products...");
-				console.log("🛒 Product IDs:", newproductId);
+				console.log(" Step 3: Fetching products...");
+				console.log(" Product IDs:", newproductId);
 
 				let products;
 				try {
 					// V13 API: Use getProducts with skus parameter
 					products = await RNIap.getProducts({ skus: newproductId });
-					console.log("🛒 Products fetched:", products?.length || 0);
+					console.log(" Products fetched:", products?.length || 0);
 				} catch (productError) {
-					console.error("❌ Product fetch error:", productError);
+					console.error(" Product fetch error:", productError);
 					throw new Error(`Failed to load products: ${productError.message}`);
 				}
 
@@ -391,7 +391,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 				
 				products.forEach((p, i) => {
-					console.log(`🛒 Product ${i + 1}:`, {
+					console.log(` Product ${i + 1}:`, {
 						id: p.productId,
 						price: p.localizedPrice,
 						title: p.title?.substring(0, 40)
@@ -416,9 +416,9 @@ const VideoListScreen = ({ navigation, route }) => {
 
 				if (currentProduct) {
 					setProductDetails(currentProduct);
-					console.log("🛒 Current product set:", currentProduct.productId);
+					console.log(" Current product set:", currentProduct.productId);
 				} else {
-					console.warn(`⚠️ Product ${currentSKU} not found`);
+					console.warn(` Product ${currentSKU} not found`);
 					console.log('Available:', products.map(p => p.productId));
 				}
 
@@ -427,27 +427,27 @@ const VideoListScreen = ({ navigation, route }) => {
 
 				purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
 					async (purchase) => {
-						console.log("🛒 Purchase update:", purchase.productId);
+						console.log(" Purchase update:", purchase.productId);
 						try {
 							await handlePurchaseUpdate(purchase);
 						} catch (err) {
-							console.error("❌ Purchase handler error:", err);
+							console.error(" Purchase handler error:", err);
 						}
 					}
 				);
 
 				purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
-					console.error("❌ Purchase error:", error.code, error.message);
+					console.error(" Purchase error:", error.code, error.message);
 					if (error.code !== 'E_USER_CANCELLED') {
 						Alert.alert('Purchase Error', error.message || 'An error occurred');
 					}
 				});
 
-				console.log("✅ ========== IAP INITIALIZATION COMPLETE ==========");
+				console.log(" ========== IAP INITIALIZATION COMPLETE ==========");
 
 			} catch (err) {
-				console.error('❌ ========== IAP INIT FAILED ==========');
-				console.error('❌ Error:', {
+				console.error(' ========== IAP INIT FAILED ==========');
+				console.error(' Error:', {
 					message: err.message,
 					code: err.code,
 					stack: err.stack?.substring(0, 200)
@@ -490,10 +490,10 @@ const VideoListScreen = ({ navigation, route }) => {
 		// Handle purchase updates
 		const handlePurchaseUpdate = async (purchase) => {
 			try {
-				console.log("🛒 Processing purchase:", purchase.productId);
+				console.log(" Processing purchase:", purchase.productId);
 
 				if (!purchase?.transactionReceipt) {
-					console.error("❌ No receipt");
+					console.error(" No receipt");
 					return;
 				}
 
@@ -516,9 +516,9 @@ const VideoListScreen = ({ navigation, route }) => {
 					return;
 				}
 
-				console.log("🛒 Verifying with backend...");
+				console.log(" Verifying with backend...");
 				const response = await fetch(
-					'https://api.smile4kids.co.uk/payment/verify-google-purchase',
+					'https://api.smile4kids.co.uk/payment/purchase',
 					{
 						method: 'POST',
 						headers: {
@@ -539,19 +539,19 @@ const VideoListScreen = ({ navigation, route }) => {
 				const result = await response.json();
 
 				if (response.ok && result.success) {
-					console.log("✅ Verified");
-					// V13 API: finishTransaction takes purchase object and isConsumable boolean
+					console.log(" Verified");
+					// finishTransaction takes purchase object and isConsumable boolean
 					await RNIap.finishTransaction({ purchase, isConsumable: false });
 					await fetchPaidCourses();
 					Alert.alert('Success', 'Purchase successful!', [
 						{ text: 'OK', onPress: fetchVideos }
 					]);
 				} else {
-					console.error("❌ Verification failed");
+					console.error(" Verification failed");
 					Alert.alert('Verification Failed', 'Contact support with your order ID.');
 				}
 			} catch (err) {
-				console.error("❌ Purchase handler error:", err);
+				console.error(" Purchase handler error:", err);
 				Alert.alert('Error', 'Failed to process. Contact support if charged.');
 			}
 		};
@@ -561,7 +561,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 		// Cleanup
 		return () => {
-			console.log('🛒 Cleanup');
+			console.log(' Cleanup');
 			isMounted = false;
 			if (purchaseUpdateSubscription) {
 				purchaseUpdateSubscription.remove();
@@ -570,8 +570,8 @@ const VideoListScreen = ({ navigation, route }) => {
 				purchaseErrorSubscription.remove();
 			}
 			RNIap.endConnection()
-				.then(() => console.log('✅ Connection closed'))
-				.catch(e => console.log('⚠️ Cleanup error:', e?.message));
+				.then(() => console.log(' Connection closed'))
+				.catch(e => console.log(' Cleanup error:', e?.message));
 		};
 	}, []); // Empty dependency array - run only once
 
@@ -590,12 +590,12 @@ const VideoListScreen = ({ navigation, route }) => {
 			setProductDetails(prod);
 
 			if (prod) {
-				console.log('🛒 Updated product details:', {
+				console.log(' Updated product details:', {
 					id: prod.productId,
 					price: prod.localizedPrice
 				});
 			} else {
-				console.warn(`⚠️ Product not found for: ${currentProductId}`);
+				console.warn(` Product not found for: ${currentProductId}`);
 			}
 		}
 	}, [language, backendLevel, iapProducts]);
@@ -603,12 +603,12 @@ const VideoListScreen = ({ navigation, route }) => {
 	// HandlePay function - FIXED FOR V13.0.4
 	const handlePay = async () => {
 		try {
-			console.log("🛒 ========== INITIATING PURCHASE ==========");
+			console.log(" ========== INITIATING PURCHASE ==========");
 
 			const productId = generateSKU(language, backendLevel);
-			console.log("🛒 Target product:", productId);
-			console.log("🛒 IAP Ready:", iapReady);
-			console.log("🛒 IAP Initializing:", iapInitializing);
+			console.log(" Target product:", productId);
+			console.log(" IAP Ready:", iapReady);
+			console.log(" IAP Initializing:", iapInitializing);
 
 			// Check if IAP is still initializing
 			if (iapInitializing) {
@@ -664,7 +664,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			// Find the product
 			const product = iapProducts.find(p => p.productId === productId);
 			if (!product) {
-				console.error(`❌ Product not available: ${productId}`);
+				console.error(` Product not available: ${productId}`);
 				Alert.alert(
 					'Product Unavailable',
 					`Product "${productId}" is not available. Available: ${iapProducts.map(p => p.productId).join(', ')}`,
@@ -673,7 +673,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				return;
 			}
 
-			console.log("🛒 Product found:", {
+			console.log(" Product found:", {
 				id: product.productId,
 				price: product.localizedPrice
 			});
@@ -681,21 +681,21 @@ const VideoListScreen = ({ navigation, route }) => {
 			// Flush pending purchases
 			try {
 				await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-				console.log('✅ Flushed pending');
+				console.log(' Flushed pending');
 			} catch (flushErr) {
-				console.log('⚠️ Flush skipped:', flushErr?.message);
+				console.log(' Flush skipped:', flushErr?.message);
 			}
 
-			console.log("🛒 Requesting purchase...");
+			console.log(" Requesting purchase...");
 
 			// V13 API: Use requestPurchase with object parameter
 			await RNIap.requestPurchase({ skus: [productId] });
 
-			console.log('✅ Purchase request sent');
+			console.log(' Purchase request sent');
 
 		} catch (err) {
-			console.error("❌ ========== PURCHASE ERROR ==========");
-			console.error("❌ Error:", {
+			console.error(" ========== PURCHASE ERROR ==========");
+			console.error(" Error:", {
 				code: err?.code,
 				message: err?.message
 			});
@@ -705,7 +705,7 @@ const VideoListScreen = ({ navigation, route }) => {
 
 			// Handle user cancellation silently
 			if (errorCode === 'E_USER_CANCELLED') {
-				console.log('ℹ️ User cancelled');
+				console.log(' User cancelled');
 				return;
 			}
 
@@ -926,6 +926,8 @@ const VideoListScreen = ({ navigation, route }) => {
 									</Text>
 								</TouchableOpacity>
 							)}
+
+							{/*  need to remopve before production */}
 							
 							{iapError && (
 								<TouchableOpacity

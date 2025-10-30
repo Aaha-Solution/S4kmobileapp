@@ -21,7 +21,7 @@ const SplashScreen = ({ navigation }) => {
 			const response = await fetch(`https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${userId}`, {
 				method: 'GET',
 				headers: {
-					'Authorization': `Bearer ${token}`, // ✅ attach token here
+					'Authorization': `Bearer ${token}`,  
 					'Content-Type': 'application/json',
 				},
 			});
@@ -30,7 +30,7 @@ const SplashScreen = ({ navigation }) => {
 			//console.log(" API response from /my-paid-videos:", data);
 
 			if (Array.isArray(data)) {
-				dispatch(setAllPaidAccess(data));
+				dispatch(setAllPaidAccess(data)); 
 				dispatch(setPaidStatus(true));
 				//console.log(" Dispatched setAllPaidAccess and setPaidStatus");
 				return data;

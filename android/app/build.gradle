@@ -90,7 +90,7 @@ android {
         applicationId "com.smile4kids"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 74
+        versionCode 77
         versionName "1.0.4"
         missingDimensionStrategy 'store', 'play'
         
