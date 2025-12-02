@@ -8,9 +8,12 @@ import {
 	Alert,
 	BackHandler,
 	Platform,
+	Modal,
+	TextInput,
+	Pressable
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';  
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import * as RNIap from 'react-native-iap';
@@ -29,11 +32,13 @@ const productIdMap = [
 	'video_gujarati_junior',
 ];
 
+
+
 const PaymentScreen = ({ navigation }) => {
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);
 	const users_id = useSelector(state => state.user.user.users_id);
-	
+
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
 	const [totalAmount, setTotalAmount] = useState(45);
 	const paidAccess = useSelector(state => state.user.paidAccess || []);
@@ -50,207 +55,187 @@ const PaymentScreen = ({ navigation }) => {
 	const languages = ['Gujarati', 'Panjabi', 'Hindi'];
 	const ageOptions = ['PreSchool (4–6 years)', 'Junior (7 & above years)'];
 
+	const [num1, setnum1] = useState(0)
+	const [num2, setnum2] = useState(0)
+	const [useranswer, setuseranswer] = useState('')
+	const [ismodelvisible, setmodelvisible] = useState(false)
+
+
 	// ------------------ IAP Initialization ------------------
-	useEffect(() => {
-		let isMounted = true;
-		let purchaseUpdateSubscription;
-		let purchaseErrorSubscription;
-		
-		async function initIAP() {
-			try {
-				console.log(" Starting IAP initialization (v13)...");
-				console.log("Product IDs to fetch:", productIdMap);
-				
-				if (Platform.OS !== 'android') {
-					console.warn(' This code is designed for Android only');
-					Alert.alert('Platform Not Supported', 'Google Play Billing is only available on Android devices.');
-					return;
-				}
+	useFocusEffect(
+		useCallback(() => {
+			let isMounted = true;
+			let purchaseUpdateSubscription;
+			let purchaseErrorSubscription;
 
-				console.log(" Attempting to connect to Google Play Billing...");
-				
-				// V13 API: initConnection returns boolean
-				const connected = await RNIap.initConnection();
-				console.log(" IAP connection result:", connected);
-				
-				if (!connected) {
-					throw new Error("Failed to connect to Google Play Billing");
-				}
+			console.log("🔵 Screen focused → Initializing IAP (v13)…");
 
-				// Small delay to ensure connection is stable
-				await new Promise(resolve => setTimeout(resolve, 500));
-				
-				if (!isMounted) return;
+			// -----------------------------
+			// INIT IAP
+			// -----------------------------
+			async function initIAP() {
+				try {
+					console.log("Starting IAP initialization (v13)…");
+					console.log("Product IDs:", productIdMap);
 
-				console.log(" Fetching products from Google Play...");
-				
-				// V13 API: getProducts takes object with skus array
-				const products = await RNIap.getProducts({ skus: productIdMap });
-				
-				console.log(" Products received:", products.length);
-				console.log("Products details:", products.map(p => ({
-					id: p.productId,
-					price: p.localizedPrice,
-					title: p.title
-				})));
-				
-				if (products.length === 0) {
-					console.error(" No products found!");
-					Alert.alert(
-						'Setup Required',
-						'No products available for purchase.\n\nPlease ensure:\n' +
-						'1. Products are created in Google Play Console\n' +
-						'2. All products are ACTIVE\n' +
-						'3. App is published to internal testing\n' +
-						'4. You are signed in with a test account\n' +
-						'5. App is installed from Play Store',
-						[{ text: 'OK' }]
-					);
-				} else {
-					console.log(" Successfully loaded products:", products.map(p => p.productId));
-				}
-				
-				if (isMounted) {
+					if (Platform.OS !== "android") {
+						console.warn("Android only");
+						return;
+					}
+
+					const connected = await RNIap.initConnection();
+					console.log("IAP connected:", connected);
+
+					if (!connected) throw new Error("Failed to connect to Google Play Billing");
+
+					await new Promise(res => setTimeout(res, 400));
+
+					if (!isMounted) return;
+
+					console.log("Fetching products…");
+
+					const products = await RNIap.getProducts({ skus: productIdMap });
+
+					console.log("Products found:", products.length);
 					setIapProducts(products);
 					setIapReady(true);
-				}
 
-				// purchase listeners
-				purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
-					async (purchase) => {
-						console.log(" Purchase update received:", purchase);
-						await handlePurchaseUpdate(purchase);
-					}
-				);
-
-				purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
-					console.error(" IAP purchase error:", error);
-					if (error.code !== 'E_USER_CANCELLED') {
-						Alert.alert('Purchase Error', error.message || 'An error occurred during purchase.');
-					}
-				});
-
-			} catch (err) {
-				console.error(' IAP Init Error:', {
-					message: err.message,
-					code: err.code,
-					stack: err.stack
-				});
-				
-				let errorMessage = 'Failed to initialize in-app purchases.\n\n';
-				
-				if (err.message?.includes('BILLING_UNAVAILABLE')) {
-					errorMessage += 'Google Play Billing is not available.\n\nMake sure:\n• You are on a real Android device\n• Google Play Services is installed and updated\n• You are signed in to Google Play';
-				} else if (err.message?.includes('DEVELOPER_ERROR')) {
-					errorMessage += 'Configuration error.\n\nCheck:\n• App signing certificate matches Google Play\n• Package name is correct\n• Products are set up in Play Console';
-				} else if (err.message?.includes('ITEM_UNAVAILABLE')) {
-					errorMessage += 'Products not found.\n\nVerify:\n• All product IDs are created in Play Console\n• Products are ACTIVE (not draft)\n• Waited 24 hours after creating products';
-				} else if (err.message?.includes('SERVICE_UNAVAILABLE')) {
-					errorMessage += 'Google Play service temporarily unavailable. Please try again later.';
-				} else {
-					errorMessage += `Error: ${err.message || 'Unknown error'}`;
-				}
-				
-				console.error('IAP Error:', errorMessage);
-				Alert.alert('Billing Setup Error', errorMessage);
-			}
-		}
-
-		// Handle purchase updates from listener
-		const handlePurchaseUpdate = async (purchase) => {
-			try {
-				console.log(" Processing purchase update:", purchase);
-				
-				// V13: Check if purchase has transactionReceipt
-				if (!purchase?.transactionReceipt) {
-					console.error(" No transaction receipt in purchase update");
-					return;
-				}
-
-				// Parse the receipt to get purchase token
-				let purchaseToken;
-				try {
-					const receipt = JSON.parse(purchase.transactionReceipt);
-					purchaseToken = receipt.purchaseToken;
-				} catch (parseError) {
-					console.error(" Failed to parse receipt:", parseError);
-					// For some versions, purchaseToken might be directly on purchase object
-					purchaseToken = purchase.purchaseToken;
-				}
-				
-				if (!purchaseToken) {
-					console.error(" No purchase token found");
-					return;
-				}
-
-				console.log(" Verifying purchase with backend...");
-				const token = await AsyncStorage.getItem('token');
-
-				const response = await fetch(
-					'https://api.smile4kids.co.uk/payment/verify-google-purchase',
-					{
-						method: 'POST',
-						headers: { 
-							'Content-Type': 'application/json', 
-							Authorization: `Bearer ${token}`,
-						},
-						body: JSON.stringify({
-							user_id: users_id,
-							productId: purchase.productId,
-							purchaseToken: purchaseToken,
-							transactionReceipt: purchase.transactionReceipt,
-						}),
-					}
-				);
-
-				const result = await response.json();
-				
-				if (response.ok && result.success) {
-					console.log(" Purchase verified successfully");
-					
-					// V13: Finish the transaction
-					await RNIap.finishTransaction({ purchase, isConsumable: false });
-					
-					// Update Redux state
-					dispatch(setPaidStatus(true));
-					await fetchPaidCourses();
-					
-					Alert.alert('Success', 'Your purchase was successful!', [
-						{
-							text: 'OK',
-							onPress: () => navigation.navigate('MainTabs', { screen: 'Home' })
+					// ------------------------------------------------------------------
+					// PURCHASE UPDATE LISTENER
+					// ------------------------------------------------------------------
+					purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
+						async (purchase) => {
+							console.log("Purchase update received:", purchase);
+							await handlePurchaseUpdate(purchase);
 						}
-					]);
-				} else {
-					console.error(" Verification failed:", result);
-					Alert.alert(
-						'Verification Failed',
-						'Purchase could not be verified. Please contact support with your order ID.'
 					);
+
+					purchaseErrorSubscription = RNIap.purchaseErrorListener((err) => {
+						console.log("IAP Error:", err);
+						if (err.code !== "E_USER_CANCELLED") {
+							Alert.alert("Purchase Error", err.message || "Unknown error");
+						}
+					});
+
+				} catch (err) {
+					console.log("❌ IAP Init Error:", err);
+					Alert.alert("Billing Error", err.message);
 				}
-			} catch (err) {
-				console.error(" Error handling purchase update:", err);
-				Alert.alert(
-					'Error',
-					'Failed to process purchase. Please contact support if you were charged.'
-				);
 			}
-		};
-		
-		initIAP();
-		
-		return () => {
-			isMounted = false;
-			if (purchaseUpdateSubscription) {
-				purchaseUpdateSubscription.remove();
-			}
-			if (purchaseErrorSubscription) {
-				purchaseErrorSubscription.remove();
-			}
-			// V13: endConnection is synchronous
-			RNIap.endConnection();
-		};
-	}, [users_id, navigation, dispatch]);
+
+			// -----------------------------
+			// HANDLE PURCHASE UPDATE
+			// -----------------------------
+			const handlePurchaseUpdate = async (purchase) => {
+				try {
+					if (!purchase?.transactionReceipt) {
+						console.log("⚠ No receipt found");
+						return;
+					}
+
+					// Extract token
+					let purchaseToken = null;
+					try {
+						const receipt = JSON.parse(purchase.transactionReceipt);
+						purchaseToken = receipt.purchaseToken;
+					} catch {
+						purchaseToken = purchase.purchaseToken;
+					}
+
+					if (!purchaseToken) {
+						console.log("⚠ No purchaseToken found");
+						return;
+					}
+
+					// Parse product details
+					const parseProductId = (productId) => {
+						const parts = productId.split("_");
+						const language = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+						const levelPart = parts.slice(2).join("_");
+
+						return {
+							language,
+							level: levelPart.toLowerCase() === "junior" ? "Junior" : "Pre_Junior",
+						};
+					};
+
+					const { language, level } = parseProductId(purchase.productId);
+
+					console.log("Sending verification request to backend…");
+
+					const token = await AsyncStorage.getItem("token");
+					console.log("payloads in payment screen", {
+						user_id: users_id,
+						productId: purchase.productId,
+						purchaseToken,
+						transactionReceipt: purchase.transactionReceipt,
+						language,
+						level,
+					})
+					const response = await fetch(
+						"https://api.smile4kids.co.uk/payment/purchase",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								Authorization: `Bearer ${token}`,
+							},
+							body: JSON.stringify({
+								user_id: users_id,
+								productId: purchase.productId,
+								purchaseToken,
+								transactionReceipt: purchase.transactionReceipt,
+								language,
+								level,
+							}),
+						}
+					);
+
+					if (!response.ok) {
+						const text = await response.text();
+						console.log("❌ Backend verification failed:", text);
+						Alert.alert("Verification Failed", "Please contact support.");
+						return;
+					}
+
+					const result = await response.json();
+
+					if (result.success) {
+						console.log(" Purchase verified successfully");
+
+						await RNIap.finishTransaction({ purchase, isConsumable: false });
+
+						dispatch(setPaidStatus(true));
+						await fetchPaidCourses();
+
+						Alert.alert("Success", "Your purchase was successful!", [
+							{ text: "OK", onPress: () => navigation.navigate("Home") },
+						]);
+					} else {
+						console.log("❌ Verification rejected:", result);
+						Alert.alert("Verification Error", "Could not verify purchase.");
+					}
+
+				} catch (err) {
+					console.log("❌ Purchase update error:", err);
+				}
+			};
+
+			initIAP();
+
+			// 🔴 CLEANUP WHEN SCREEN UNFOCUSES
+			return () => {
+				console.log("🔴 Screen unfocused → cleaning IAP…");
+
+				isMounted = false;
+
+				if (purchaseUpdateSubscription) purchaseUpdateSubscription.remove();
+				if (purchaseErrorSubscription) purchaseErrorSubscription.remove();
+
+				RNIap.endConnection();
+			};
+		}, [users_id])
+	);
 
 	// -------- Total cost calculation --------
 	const calculateTotalFromBackend = async () => {
@@ -297,22 +282,22 @@ const PaymentScreen = ({ navigation }) => {
 					},
 				}
 			);
-			
+
 			if (!response.ok) {
 				console.error(' API Error:', response.status, response.statusText);
 				return;
 			}
-			
+
 			const responseText = await response.text();
-			
+
 			if (responseText.trim().startsWith('<')) {
 				console.error(' Received HTML instead of JSON - API might be down');
 				return;
 			}
-			
+
 			const data = JSON.parse(responseText);
 			console.log(" Paid courses loaded:", data);
-			
+
 			if (Array.isArray(data)) {
 				dispatch(setAllPaidAccess(data));
 
@@ -389,7 +374,7 @@ const PaymentScreen = ({ navigation }) => {
 		try {
 			const first = unpaidSelections[0];
 			const sku = generateSKU(first.language, first.level);
-			
+
 			console.log(" Attempting purchase:");
 			console.log("  Language:", first.language);
 			console.log("  Level:", first.level);
@@ -412,13 +397,13 @@ const PaymentScreen = ({ navigation }) => {
 			// Call requestPurchase with a single sku for Android
 			console.log('Calling RNIap.requestPurchase with sku:', sku);
 			await RNIap.requestPurchase({ skus: [sku] });
-			
+
 			console.log(' Purchase request sent successfully');
 			// Note: Actual verification happens in purchaseUpdatedListener
 
 		} catch (err) {
 			console.error(' Purchase error:', err);
-			
+
 			if (err.code === 'E_USER_CANCELLED') {
 				console.log(' User cancelled purchase');
 				// Don't show alert for user cancellation
@@ -464,7 +449,10 @@ const PaymentScreen = ({ navigation }) => {
 			const updated = isSelected
 				? current.filter(item => item !== level)
 				: [...current, level];
+
+			console.log(" Full selectedItems state:", { ...prev, [language]: updated });
 			return { ...prev, [language]: updated };
+
 		});
 	};
 
@@ -493,6 +481,44 @@ const PaymentScreen = ({ navigation }) => {
 		}, [navigation])
 	);
 
+// OPEN MATH PROTECTION MODAL
+	const openmodel = () => {
+		// Generate 2-digit numbers between 10–20
+		const n1 = Math.floor(Math.random() * 10) + 10;
+		const n2 = Math.floor(Math.random() * 10) + 10;
+
+		setnum1(n1);
+		setnum2(n2);
+		setuseranswer('');
+		setmodelvisible(true);
+	};
+
+	// VERIFY ANSWER THEN CALL handlePay()
+	const parentmodel = async () => {
+		const correct = num1 + num2;
+
+		// validate numeric input
+		const userInput = parseInt(useranswer.trim(), 10);
+
+		if (isNaN(userInput)) {
+			Alert.alert("Invalid Input", "Please enter a valid number.");
+			return;
+		}
+
+		if (userInput === correct) {
+			setmodelvisible(false);
+
+			// little delay to close modal smoothly
+			setTimeout(() => {
+				HandlePay();
+			}, 250);
+
+		} else {
+			Alert.alert("Incorrect Answer", "Please try again.");
+			setuseranswer('');
+		}
+	};
+
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.gradientContainer}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
@@ -500,13 +526,13 @@ const PaymentScreen = ({ navigation }) => {
 					<Icon name="cart-outline" size={36} color="#FF8C00" style={styles.icon} />
 					<Text style={styles.heading}>Order Summary</Text>
 				</View>
-
+{/* 
 				{!iapReady && (
 					<View style={styles.loadingBanner}>
 						<Icon name="information" size={20} color="#FF8C00" />
 						<Text style={styles.loadingText}>Setting up billing system...</Text>
 					</View>
-				)}
+				)} */}
 
 				{languages.map(lang => (
 					<View key={lang} style={styles.languageSection}>
@@ -554,15 +580,56 @@ const PaymentScreen = ({ navigation }) => {
 								? "Processing..."
 								: !iapReady
 									? "Setting up..."
-									: "Pay with Google Play"
+									: "Pay"
 					}
 					disabled={loading || totalAmount === 0 || isEverythingPaid || !iapReady}
-					onPress={HandlePay}
+					onPress={openmodel}
 					style={[
 						styles.payButton,
 						(isEverythingPaid || totalAmount === 0 || !iapReady) && { opacity: 0.5 },
 					]}
 				/>
+				<Modal
+					visible={ismodelvisible}
+					transparent={true}
+					animationType="fade"
+				>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalBox}>
+
+							{/* Close Button */}
+							<Pressable style={styles.closeIcon} onPress={() => setmodelvisible(false)}>
+								<Text style={styles.closeText}>✕</Text>
+							</Pressable>
+
+							{/* Title */}
+							<Text style={styles.modalTitle}>
+								Answer the Problem to proceed
+							</Text>
+
+							{/* Question */}
+							<Text style={styles.modalQuestion}>
+								What is {num1} + {num2} ?
+							</Text>
+
+							{/* Input */}
+							<TextInput
+								value={useranswer}
+								onChangeText={setuseranswer}
+								placeholder="Enter your answer"
+								placeholderTextColor="#888"
+								keyboardType="numeric"
+								style={styles.modalInput}
+							/>
+
+							{/* Submit Button */}
+							<Pressable style={styles.submitButton} onPress={parentmodel}>
+								<Text style={styles.submitText}>Submit</Text>
+							</Pressable>
+
+						</View>
+					</View>
+				</Modal>
 			</ScrollView>
 		</LinearGradient>
 	);
@@ -626,5 +693,82 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FF8C00',
 		paddingVertical: 14,
 		borderRadius: 8,
+	},
+	modalContainer: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+
+	modalBox: {
+		width: '85%',
+		backgroundColor: 'white',
+		borderRadius: 12,
+		paddingVertical: 25,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		elevation: 10,
+		shadowColor: '#000',
+		shadowOpacity: 0.25,
+		shadowRadius: 6,
+		shadowOffset: { width: 0, height: 2 },
+		position: 'relative',
+	},
+
+	closeIcon: {
+		position: 'absolute',
+		top: 10,
+		right: 10,
+		padding: 5,
+	},
+
+	closeText: {
+		fontSize: 22,
+		color: '#333',
+	},
+
+	modalTitle: {
+		color: '#FF8C00',
+		fontWeight: 'bold',
+		fontSize: 18,
+		marginTop: 10,
+		textAlign: 'center',
+	},
+
+	modalQuestion: {
+		marginTop: 12,
+		fontWeight: '600',
+		color: '#000',
+		fontSize: 16,
+		textAlign: 'center',
+	},
+
+	modalInput: {
+		width: '90%',
+		borderWidth: 1,
+		borderColor: '#ccc',
+		borderRadius: 8,
+		padding: 10,
+		marginTop: 18,
+		fontSize: 16,
+		color: 'black',
+		textAlign: 'center',
+	},
+
+	submitButton: {
+		marginTop: 20,
+		backgroundColor: '#FF8C00',
+		paddingVertical: 10,
+		paddingHorizontal: 25,
+		borderRadius: 8,
+		width: '90%',
+		alignItems: 'center',
+	},
+
+	submitText: {
+		color: 'white',
+		fontWeight: 'bold',
+		fontSize: 16,
 	},
 });

@@ -91,7 +91,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 },
                 body: JSON.stringify({ email_id: email }),
             });
-           // console.log("response:", response);
+            console.log("response:", response);
             const contentType = response.headers.get("Content-Type") || "";
            // console.log("contentType:", contentType);
             if (contentType.includes("application/json")) {

@@ -16,32 +16,52 @@ const SplashScreen = ({ navigation }) => {
 
 	// Fetch paid courses from backend and update Redux
 	const fetchPaidCourses = async (userId, token) => {
-		//console.log(" Fetching paid videos for user:", userId);
-		try {
-			const response = await fetch(`https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${userId}`, {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${token}`,  
-					'Content-Type': 'application/json',
-				},
-			});
+  try {
+    const response = await fetch(
+      `https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${userId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-			const data = await response.json();
-			//console.log(" API response from /my-paid-videos:", data);
+    const data = await response.json();
+    console.log("Splash paid videos response:", data);
 
-			if (Array.isArray(data)) {
-				dispatch(setAllPaidAccess(data)); 
-				dispatch(setPaidStatus(true));
-				//console.log(" Dispatched setAllPaidAccess and setPaidStatus");
-				return data;
-			} else {
-				//console.log(" Invalid data received:", data);
-			}
-		} catch (err) {
-			//console.error(" Error fetching paid courses:", err);
-		}
-		return [];
-	};
+    if (data.success && data.videos) {
+      const paidAccess = [];
+
+for (const language of Object.keys(data.videos)) {
+  const group = data.videos[language];
+
+  // If object → { Beginner: true }
+  if (!Array.isArray(group)) {
+    for (const level of Object.keys(group)) {
+      paidAccess.push({ language, level });
+    }
+  }
+
+  // If array → [ {level:"Beginner"} ]
+  else {
+    group.forEach(item => {
+      if (item?.level) {
+        paidAccess.push({ language, level: item.level });
+      }
+    });
+  }
+}
+
+      dispatch(setAllPaidAccess(paidAccess));
+      return paidAccess;
+    }
+  } catch (err) {
+    console.error("Error fetching paid courses:", err);
+  }
+  return [];
+};
 
 	// Check login status and navigate accordingly
 	useEffect(() => {
@@ -70,7 +90,9 @@ const SplashScreen = ({ navigation }) => {
 					// Fetch paid categories
 					let selectedLanguage = null;
 					let selectedLevel = null;
+
 					console.log("SplashScreen: Fetching paid courses for user:", parsedUser.users_id);
+					
 					const paidData = await fetchPaidCourses(parsedUser.users_id, token);
 					console.log("SplashScreen: Paid data received:", paidData?.length || 0, "items");
 

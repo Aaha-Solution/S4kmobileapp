@@ -89,7 +89,12 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 	};
 
 	const handleTabPress = (route) => {
-		handleOutsidePress();
+		//handleOutsidePress();
+		// 1. Close the dropdown if an active tab is pressed.
+		if (open && route.name !== 'level') {
+			setOpen(false);
+			// Do not return here, continue to navigate to the other tab
+		}
 		if (route.name === 'level') {
 			setOpen(prev => !prev);
 		} else {
@@ -239,12 +244,16 @@ const styles = StyleSheet.create({
 		borderTopRightRadius: 20,
 		position: 'relative',
 		zIndex: 1,
+		overflow: 'visible',   // <-- REQUIRED ON ANDROID 15
+   		elevation: 10,         // <-- REQUIRED FOR zIndex TO WORK
 	},
 	ageTabContainer: {
 		alignItems: 'center',
 		position: 'relative',
 		justifyContent: 'center',
 		zIndex: 2,
+	    overflow: 'visible',   // <-- prevents clipping
+    	elevation: 20, 
 		paddingHorizontal: screenWidth * 0.02,
 		paddingVertical: screenHeight * 0.01,
 		
@@ -267,7 +276,7 @@ const styles = StyleSheet.create({
 		top: -scaleSize(screenHeight * 0.18, screenHeight * 0.12), // adjust for bigger screens
 		width: scaleSize(screenWidth * 0.5, screenWidth * 0.5),
 		left: -scaleSize(screenWidth * 0.22, screenWidth * 0.22), // center more properly on tablets
-		zIndex: 1000,
+		zIndex: 9999,
 		bottom:scaleSize(screenHeight*0.10),
 	},
 

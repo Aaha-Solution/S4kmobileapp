@@ -85,12 +85,12 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.smile4kids"
-    
+
    defaultConfig {
         applicationId "com.smile4kids"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 77
+        versionCode 96
         versionName "1.0.4"
         missingDimensionStrategy 'store', 'play'
         
@@ -99,7 +99,7 @@ android {
             abiFilters "arm64-v8a", "armeabi-v7a"
         }
     }
-    
+
     // Keep splits but create universal APK for local testing
     splits {
         abi {
@@ -137,7 +137,7 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/*.kotlin_module'
     }
-    // CRITICAL: Disable ABI splits for AAB
+    // Disable ABI splits for AAB
     bundle {
         language {
             enableSplit = false
@@ -146,67 +146,66 @@ android {
             enableSplit = false
         }
         abi {
-            enableSplit = false  // Universal AAB for all devices
+            enableSplit = false  
         }
     }
-    signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
-        release {
-        // Path relative to android/app
-        storeFile file("my-release-key.keystore")
-        storePassword "abc123"
-        keyAlias "my-key-alias"
-        keyPassword "abc123"
+signingConfigs {
+    debug {
+        storeFile file('debug.keystore')
+        storePassword 'android'
+        keyAlias 'androiddebugkey'
+        keyPassword 'android'
     }
+    release {
+        storeFile file("new-upload-key.keystore")
+        storePassword "safrina@123"
+        keyAlias "upload"
+        keyPassword "safrina@123"
     }
-  buildTypes {
-      debug {
-          signingConfig signingConfigs.debug
-          matchingFallbacks = ['amazon']
-          minifyEnabled false
-          shrinkResources false
-          debuggable true
-      }
-   release {
-            signingConfig signingConfigs.release
-            minifyEnabled enableProguardInReleaseBuilds
-            shrinkResources true
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-            
-            // Add crash reporting and debugging symbols
-            ndk {
-                debugSymbolLevel 'FULL'
-            }
-            
-            // Ensure JavaScript is bundled
-            // bundleJsAndAssets = true  // Removed deprecated property
+}
+
+buildTypes {
+    debug {
+        signingConfig signingConfigs.debug
+        matchingFallbacks = ['amazon']
+        minifyEnabled false
+        shrinkResources false
+        debuggable true
+    }
+
+    release {
+        signingConfig signingConfigs.release
+        minifyEnabled enableProguardInReleaseBuilds
+        shrinkResources true
+        proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+
+        ndk {
+            debugSymbolLevel 'FULL'
         }
     }
+}
     flavorDimensions "store"
     productFlavors {
         play {
             dimension "store"
+            
         }
         amazon {
             dimension "store"
+            
         }
     }
-    
-    // Add this to ensure compatibility
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    
-    kotlinOptions {
-        jvmTarget = '17'
-    }
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
 }
+kotlinOptions {
+    jvmTarget = '17'
+}
+
+}
+
 
 dependencies {
     implementation("com.facebook.react:react-android")

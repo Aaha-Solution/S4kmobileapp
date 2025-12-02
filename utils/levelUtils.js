@@ -11,7 +11,7 @@ export const displayLevelMap = {
   'Junior': 'Junior (7 & above years)',
 };
 
-// Converts display level to backend level (e.g., for payment API, Redux)
+// Converts display level to backend level ( for payment API, Redux)
 export const getBackendLevel = (displayLevel) => {
   if (!displayLevel) return 'null';
 
@@ -22,7 +22,7 @@ export const getBackendLevel = (displayLevel) => {
 };
 
 
-// Converts backend level to display level (e.g., for UI labels)
+// Converts backend level to display level (, for UI labels)
 export const getDisplayLevel = (backendLevel) => {
   return displayLevelMap[backendLevel] || backendLevel;
 };

@@ -90,7 +90,6 @@ const SettingsScreen = ({ route, navigation }) => {
 	//  Confirm logout and reset state/storage
 	const handleConfirmLogout = async () => {
 		try {
-
 			await AsyncStorage.multiRemove([
 				'token',
 				'savedEmail',
@@ -126,7 +125,7 @@ const SettingsScreen = ({ route, navigation }) => {
 	const handleCancelLogout = () => {
 		setShowAlert(false);
 	};
-
+	//  Handle Android back button
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
 			navigation.navigate('Home');
@@ -155,7 +154,6 @@ const SettingsScreen = ({ route, navigation }) => {
 									 setTempSelectedAvatar(profile_avatar)
 								}}
 							/>
-
 							<View>
 								<Text style={styles.name}>{username}</Text>
 								<Text style={styles.email}>{email}</Text>

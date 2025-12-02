@@ -59,16 +59,16 @@ const EditProfileScreen = ({ route, navigation }) => {
                     },
                 });
                 const data = await response.json();
-              //  console.log('Avatar data:', data);
+                //  console.log('Avatar data:', data);
                 const imageUrls = Array.isArray(data)
                     ? data.map(file => `${BASE_URL}${file.path}`)
                     : [];
-              ///  console.log('First avatar object:', data[0]);
-               // console.log('Avatar URLs:', imageUrls);
+                ///  console.log('First avatar object:', data[0]);
+                // console.log('Avatar URLs:', imageUrls);
                 setImages(imageUrls);
                 setLoading(false);
             } catch (error) {
-               // console.error('Failed to fetch avatars:', error);
+                // console.error('Failed to fetch avatars:', error);
                 setImages([]);
                 setLoading(false);
             }
@@ -93,7 +93,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                             avatarToUse = parsed;
                         }
                     } catch (err) {
-                       // console.warn('Invalid avatar format in storage:', storedAvatar);
+                        // console.warn('Invalid avatar format in storage:', storedAvatar);
                     }
                 }
             }
@@ -192,11 +192,11 @@ const EditProfileScreen = ({ route, navigation }) => {
                 })
             });
             const text = await response.text();
-            console.log('Raw backend response:', text); 
+            console.log('Raw backend response:', text);
             let data;
             try {
                 data = JSON.parse(text);
-                console.log('Parsed response data:', data); 
+                console.log('Parsed response data:', data);
             } catch {
                 throw new Error(text); // If not JSON, will show HTML error
             }
@@ -209,7 +209,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                 throw new Error(data.message || 'Failed to update profile');
             }
         } catch (err) {
-           // console.error('Profile update failed:', err.message);
+            // console.error('Profile update failed:', err.message);
             setAlertTitle('Error');
             setAlertMessage(err.message || 'Something went wrong.');
             setShowAlert(true);
@@ -228,7 +228,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     <View style={styles.header}>
                         <View style={styles.profileContainer}>
                             <View style={styles.avatarWrapper}>
-                            <Image
+                                <Image
                                     source={
                                         typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')
                                             ? { uri: selectedAvatar }
@@ -270,7 +270,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                                                         <Image
                                                             source={{ uri }}
                                                             style={[styles.avatar, isSelected && styles.selectedAvatar]}
-                                                           // onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
+                                                        // onError={() => console.log('Failed to load image:', uri)}  // ✅ LOG BROKEN URLS
 
                                                         />
 
@@ -288,7 +288,9 @@ const EditProfileScreen = ({ route, navigation }) => {
                     <View style={styles.formContainer}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>UserName</Text>
-                            <TextInput style={styles.input} value={username}
+                            <TextInput style={styles.input}
+                                value={username}
+                                maxLength={6}
                                 onChangeText={(text) => {
                                     const cleaned = text.replace(/[^a-z]/g, '').slice(0, 6);
                                     setUsername(cleaned);
@@ -333,7 +335,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     message={alertMessage}
                     onConfirm={() => setShowAlert(false)}
                 />
-                
+
             </SafeAreaView>
         </LinearGradient>
     );

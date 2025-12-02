@@ -125,10 +125,15 @@ const LoginScreen = ({ navigation }) => {
                 return;
             }
 
-            // Normal user login logic
-            const firstPaid = user.paid_categories?.[0];
-            const userLang = firstPaid?.language;
-            const userLevel = getBackendLevel(firstPaid?.level);
+            const mappedUser = {
+                    ...user,
+                    paid_categories: user.paidAccess || [],
+                };
+
+                // Determine first paid combo for language/level
+                const firstPaid = user.paidAccess?.[0];
+                const userLang = firstPaid?.language;
+                const userLevel = getBackendLevel(firstPaid?.level);
 
             dispatch(setLanguage(userLang));
             dispatch(setLevel(userLevel));
@@ -141,22 +146,22 @@ const LoginScreen = ({ navigation }) => {
                 await AsyncStorage.removeItem('selectedPreferences');
             }
 
-            const formatted = (user.paid_categories || []).map(item => ({
+            const formatted = (user.paidAccess || []).map(item => ({
                 language: item.language,
                 level: item.level,
             }));
             dispatch(setAllPaidAccess(formatted));
 
             dispatch(login({
-                ...user,
+                ...mappedUser,
                 language: userLang,
                 level: userLevel,
             }));
 
-            dispatch(setProfile({ paid_categories: user.paid_categories }));
-            dispatch(setPaidStatus(Boolean(user.paid_categories?.length)));
+            dispatch(setProfile({ paid_categories: user.paidAccess }));
+            dispatch(setPaidStatus(Boolean(user.paidAccess?.length)));
 
-            if (user.paid_categories?.length) {
+            if (user.paidAccess?.length) {
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'MainTabs' }],

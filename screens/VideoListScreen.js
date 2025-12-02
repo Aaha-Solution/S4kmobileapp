@@ -12,7 +12,10 @@ import {
 	useWindowDimensions,
 	StatusBar,
 	SafeAreaView,
-	ActivityIndicator
+	ActivityIndicator,
+	Modal,
+	TextInput,
+	Pressable
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -65,6 +68,11 @@ const VideoListScreen = ({ navigation, route }) => {
 	const [screenError, setScreenError] = useState(null);
 	const [iapInitializing, setIapInitializing] = useState(true);
 	const [iapError, setIapError] = useState(null);
+
+	const [num1, setnum1] = useState(0)
+	const [num2, setnum2] = useState(0)
+	const [useranswer, setuseranswer] = useState('')
+	const [ismodelvisible, setmodelvisible] = useState(false)
 
 	// // Debug state logging
 	// useEffect(() => {
@@ -189,7 +197,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				},
 			});
 
-			console.log(' Response status:', response.status);
+			console.log(' Response status from fetch videos:', response.status);
 			console.log(' Response data length:', response.data?.length);
 
 			if (response.status === 200 && Array.isArray(response.data)) {
@@ -227,47 +235,43 @@ const VideoListScreen = ({ navigation, route }) => {
 			}
 
 			const response = await axios.get(
-				`https://api.smile4kids.co.uk/user/${users_id}/paid-courses`,
+				`http://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
 				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+					headers: { Authorization: `Bearer ${token}` },
 				}
 			);
 
-			console.log(' Backend Response Status:', response.status);
+			console.log(' Backend Response Status for paid videos in videolist:', response.status);
 			console.log(' Backend Response Data:', JSON.stringify(response.data, null, 2));
 
-			if (response.data && Array.isArray(response.data)) {
-				if (response.data.length === 0) {
-					console.log(' ============ NO PAID COURSES FOUND ============');
-					dispatch(setPaidStatus(false));
-					return;
-				}
+			const videos = response.data?.videos;
+			if (!videos || Object.keys(videos).length === 0) {
+				console.log(' ============ NO PAID COURSES FOUND ============');
+				dispatch(setPaidStatus(false));
+				return;
+			}
 
-				console.log(' ============ PROCESSING COURSES ============');
-				response.data.forEach((course, index) => {
-					console.log(` Course ${index + 1}:`, {
-						language: course.language,
-						level: course.level,
-					});
+			console.log(' ============ PROCESSING COURSES ============');
 
-					if (course.language && course.level) {
+			Object.entries(videos).forEach(([language, levels]) => {
+				Object.entries(levels).forEach(([level, courses]) => {
+					courses.forEach((course, index) => {
+						console.log(` Course ${language} - ${level} [${index + 1}]:`, {
+							id: course.id,
+							title: course.title,
+						});
+
+						// Add to Redux
 						dispatch(addPaidAccess({
 							language: course.language,
 							level: course.level
 						}));
-					} else {
-						console.warn(' INVALID COURSE:', course);
-					}
+					});
 				});
+			});
 
-				dispatch(setPaidStatus(true));
-				console.log(' ============ DONE PROCESSING ============');
-			} else {
-				console.warn(' Response is not an array:', typeof response.data);
-				dispatch(setPaidStatus(false));
-			}
+			dispatch(setPaidStatus(true));
+			console.log(' ============ DONE PROCESSING ============');
 		} catch (error) {
 			console.error(' ============ ERROR FETCHING PAID COURSES ============');
 			console.error(' Error:', error.message);
@@ -320,267 +324,13 @@ const VideoListScreen = ({ navigation, route }) => {
 		})();
 	}, []);
 
-	// IAP Initialization - FIXED FOR V13.0.4
-	useEffect(() => {
-		let isMounted = true;
-		let purchaseUpdateSubscription;
-		let purchaseErrorSubscription;
-
-		const initIAP = async () => {
-			if (iapInitializedRef.current || initializationAttemptedRef.current) {
-				console.log(' IAP already initialized or in progress');
-				return;
-			}
-
-			initializationAttemptedRef.current = true;
-			setIapInitializing(true);
-			setIapError(null);
-
-			try {
-				console.log(" ========== STARTING IAP INITIALIZATION (v13) ==========");
-
-				// Step 1: Initialize connection
-				console.log(" Step 1: Initializing connection...");
-				const connected = await RNIap.initConnection();
-				console.log(" Connection established:", connected);
-
-				if (!connected) {
-					throw new Error("Failed to establish connection");
-				}
-
-				// Step 2: Clear pending purchases (Android only)
-				try {
-					console.log(" Step 2: Clearing pending purchases...");
-					await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-					console.log(" Pending purchases cleared");
-				} catch (flushError) {
-					console.log(" Flush skipped:", flushError?.message);
-				}
-
-				// Wait for billing to stabilize
-				await new Promise(resolve => setTimeout(resolve, 1500));
-
-				if (!isMounted) {
-					console.log(' Component unmounted, aborting');
-					await RNIap.endConnection();
-					return;
-				}
-
-				// Step 3: Fetch products - V13 API uses getProducts with object parameter
-				console.log(" Step 3: Fetching products...");
-				console.log(" Product IDs:", newproductId);
-
-				let products;
-				try {
-					// V13 API: Use getProducts with skus parameter
-					products = await RNIap.getProducts({ skus: newproductId });
-					console.log(" Products fetched:", products?.length || 0);
-				} catch (productError) {
-					console.error(" Product fetch error:", productError);
-					throw new Error(`Failed to load products: ${productError.message}`);
-				}
-
-				// Validate products
-				if (!Array.isArray(products)) {
-					throw new Error(`Invalid products response: ${typeof products}`);
-				}
-
-				if (products.length === 0) {
-					throw new Error("No products available from Google Play Store");
-				}
-
-				
-				products.forEach((p, i) => {
-					console.log(` Product ${i + 1}:`, {
-						id: p.productId,
-						price: p.localizedPrice,
-						title: p.title?.substring(0, 40)
-					});
-				});
-
-				if (!isMounted) {
-					await RNIap.endConnection();
-					return;
-				}
-
-				// Step 4: Update state
-				setIapProducts(products);
-				setIapReady(true);
-				setIapInitializing(false);
-				iapInitializedRef.current = true;
-				setIapError(null);
-
-				// Set current product
-				const currentSKU = generateSKU(language, backendLevel);
-				const currentProduct = products.find(p => p.productId === currentSKU);
-
-				if (currentProduct) {
-					setProductDetails(currentProduct);
-					console.log(" Current product set:", currentProduct.productId);
-				} else {
-					console.warn(` Product ${currentSKU} not found`);
-					console.log('Available:', products.map(p => p.productId));
-				}
-
-				// Step 5: Setup listeners
-				console.log("🛒 Step 4: Setting up listeners...");
-
-				purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
-					async (purchase) => {
-						console.log(" Purchase update:", purchase.productId);
-						try {
-							await handlePurchaseUpdate(purchase);
-						} catch (err) {
-							console.error(" Purchase handler error:", err);
-						}
-					}
-				);
-
-				purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
-					console.error(" Purchase error:", error.code, error.message);
-					if (error.code !== 'E_USER_CANCELLED') {
-						Alert.alert('Purchase Error', error.message || 'An error occurred');
-					}
-				});
-
-				console.log(" ========== IAP INITIALIZATION COMPLETE ==========");
-
-			} catch (err) {
-				console.error(' ========== IAP INIT FAILED ==========');
-				console.error(' Error:', {
-					message: err.message,
-					code: err.code,
-					stack: err.stack?.substring(0, 200)
-				});
-
-				if (!isMounted) return;
-
-				setIapReady(false);
-				setIapInitializing(false);
-				setIapError(err.message || 'Unknown error');
-				initializationAttemptedRef.current = false;
-
-				// User-friendly error
-				let userMsg = 'Unable to initialize billing. ';
-
-				if (err.message?.includes('products')) {
-					userMsg = 'Products not configured in Google Play Console.';
-				} else if (err.message?.includes('connection')) {
-					userMsg = 'Network error. Check your internet connection.';
-				} else {
-					userMsg = 'Please try again later.';
-				}
-
-				Alert.alert('Billing Issue', userMsg, [
-					{
-						text: 'Retry',
-						onPress: () => {
-							iapInitializedRef.current = false;
-							initializationAttemptedRef.current = false;
-							setIapInitializing(true);
-							setIapError(null);
-							setTimeout(initIAP, 1000);
-						}
-					},
-					{ text: 'Cancel', style: 'cancel' }
-				]);
-			}
-		};
-
-		// Handle purchase updates
-		const handlePurchaseUpdate = async (purchase) => {
-			try {
-				console.log(" Processing purchase:", purchase.productId);
-
-				if (!purchase?.transactionReceipt) {
-					console.error(" No receipt");
-					return;
-				}
-
-				let purchaseToken;
-				try {
-					const receipt = JSON.parse(purchase.transactionReceipt);
-					purchaseToken = receipt.purchaseToken;
-				} catch (e) {
-					purchaseToken = purchase.purchaseToken;
-				}
-
-				if (!purchaseToken) {
-					Alert.alert('Error', 'Invalid purchase data');
-					return;
-				}
-
-				const token = await AsyncStorage.getItem('token');
-				if (!token) {
-					Alert.alert('Error', 'Please login again');
-					return;
-				}
-
-				console.log(" Verifying with backend...");
-				const response = await fetch(
-					'https://api.smile4kids.co.uk/payment/purchase',
-					{
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
-						body: JSON.stringify({
-							user_id: users_id,
-							productId: purchase.productId,
-							purchaseToken,
-							transactionReceipt: purchase.transactionReceipt,
-							language,
-							level: backendLevel,
-						}),
-					}
-				);
-
-				const result = await response.json();
-
-				if (response.ok && result.success) {
-					console.log(" Verified");
-					// finishTransaction takes purchase object and isConsumable boolean
-					await RNIap.finishTransaction({ purchase, isConsumable: false });
-					await fetchPaidCourses();
-					Alert.alert('Success', 'Purchase successful!', [
-						{ text: 'OK', onPress: fetchVideos }
-					]);
-				} else {
-					console.error(" Verification failed");
-					Alert.alert('Verification Failed', 'Contact support with your order ID.');
-				}
-			} catch (err) {
-				console.error(" Purchase handler error:", err);
-				Alert.alert('Error', 'Failed to process. Contact support if charged.');
-			}
-		};
-
-		// Initialize
-		initIAP();
-
-		// Cleanup
-		return () => {
-			console.log(' Cleanup');
-			isMounted = false;
-			if (purchaseUpdateSubscription) {
-				purchaseUpdateSubscription.remove();
-			}
-			if (purchaseErrorSubscription) {
-				purchaseErrorSubscription.remove();
-			}
-			RNIap.endConnection()
-				.then(() => console.log(' Connection closed'))
-				.catch(e => console.log(' Cleanup error:', e?.message));
-		};
-	}, []); // Empty dependency array - run only once
 
 	// Fetch paid courses
 	useEffect(() => {
 		if (users_id) {
 			fetchPaidCourses();
 		}
-	}, [users_id]);
+	}, [users_id, dispatch, language, backendLevel]);
 
 	// Update product details when language or level changes
 	useEffect(() => {
@@ -600,7 +350,207 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 	}, [language, backendLevel, iapProducts]);
 
-	// HandlePay function - FIXED FOR V13.0.4
+	// IAP Initialization - FIXED FOR V13.0.4
+	useFocusEffect(
+	useCallback(() => {
+		console.log("📌 VideoListScreen Focused — Initializing IAP…");
+
+		let isMounted = true;
+		let purchaseUpdateSubscription = null;
+		let purchaseErrorSubscription = null;
+
+		const initIAP = async () => {
+			// Avoid multiple re-initialization
+			if (iapInitializedRef.current || initializationAttemptedRef.current) {
+				console.log("⚠️ IAP already initialized for this session");
+				return;
+			}
+
+			initializationAttemptedRef.current = true;
+			setIapInitializing(true);
+			setIapError(null);
+
+			try {
+				console.log("========== IAP INIT START (v13) ==========");
+
+				// 1. INIT CONNECTION
+				const connected = await RNIap.initConnection();
+				console.log("🔌 Billing connected:", connected);
+
+				if (!connected) throw new Error("Billing connection failed");
+
+				// 2. CLEAR PENDING PURCHASES
+				try {
+					await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+				} catch (_) {}
+
+				await new Promise((res) => setTimeout(res, 1200)); // Let billing stabilize
+
+				if (!isMounted) return;
+
+				// 3. FETCH PRODUCTS (V13)
+				console.log("🛒 Fetching products:", newproductId);
+				const products = await RNIap.getProducts({ skus: newproductId });
+
+				if (!products?.length) {
+					throw new Error("No IAP products found in Play Console");
+				}
+
+				setIapProducts(products);
+				setIapReady(true);
+				setIapInitializing(false);
+				iapInitializedRef.current = true;
+
+				// Set current SKU
+				const sku = generateSKU(language, backendLevel);
+				setProductDetails(products.find(p => p.productId === sku) || null);
+
+				// 4. SETUP IAP LISTENERS
+				console.log("🔔 Setting up purchase listeners…");
+
+				purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+					try {
+						await handlePurchaseUpdate(purchase);
+					} catch (err) {
+						console.error("Purchase handler error:", err);
+					}
+				});
+
+				purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+					if (error.code !== 'E_USER_CANCELLED') {
+						Alert.alert('Purchase Error', error.message || "Unexpected error");
+					}
+				});
+
+				console.log("========== IAP INIT COMPLETE ==========");
+
+			} catch (err) {
+				console.error("❌ IAP INIT FAILED:", err);
+
+				setIapError(err.message);
+				setIapReady(false);
+				setIapInitializing(false);
+
+				initializationAttemptedRef.current = false;
+				iapInitializedRef.current = false;
+
+				Alert.alert("Billing Error", err.message, [
+					{
+						text: "Retry",
+						onPress: () => {
+							initializationAttemptedRef.current = false;
+							iapInitializedRef.current = false;
+							initIAP();
+						},
+					},
+					{ text: "Cancel", style: "cancel" },
+				]);
+			}
+		};
+
+		// ----------------------------
+		// PURCHASE HANDLER
+		// ----------------------------
+		const handlePurchaseUpdate = async (purchase) => {
+			console.log("🧾 Processing purchase:", purchase.productId);
+
+			if (!purchase.transactionReceipt && !purchase.purchaseToken) {
+				console.log("⚠️ No token yet, waiting for next event");
+				return;
+			}
+
+			let purchaseToken;
+			try {
+				const json = JSON.parse(purchase.transactionReceipt);
+				purchaseToken = json.purchaseToken;
+			} catch {
+				purchaseToken = purchase.purchaseToken;
+			}
+
+			if (!purchaseToken) return;
+
+			const token = await AsyncStorage.getItem("token");
+			if (!token) {
+				Alert.alert("Login Required", "Please login again");
+				return;
+			}
+			console.log("payloads in videolist screen",{
+					user_id: users_id,
+					productId: purchase.productId,
+					purchaseToken,
+					transactionReceipt: purchase.transactionReceipt,
+					
+				})
+			// VERIFY ON BACKEND
+			console.log("🌐 Verifying purchase…");
+
+			const response = await fetch("https://api.smile4kids.co.uk/payment/purchase", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					user_id: users_id,
+					productId: purchase.productId,
+					purchaseToken,
+					language,
+					level: backendLevel,
+				}),
+			});
+
+			let result;
+
+			try {
+				result = await response.json();
+			} catch {
+				console.log("⚠️ Backend not ready — skipping for next event");
+				return;
+			}
+
+			if (response.ok && result.success) {
+				console.log("✔ Verified by backend");
+
+				await RNIap.finishTransaction({ purchase, isConsumable: false });
+
+				dispatch(addPaidAccess({ language, level: backendLevel }));
+				dispatch(setPaidStatus(true));
+
+				await fetchPaidCourses();
+
+				Alert.alert("Success", "Purchase successful!", [
+					{ text: "OK", onPress: fetchVideos },
+				]);
+			} else {
+				console.log("❌ Verification FAILED");
+				Alert.alert("Verification Failed", "Contact support");
+			}
+		};
+
+		// RUN IAP INIT
+		initIAP();
+
+		// 🔥 CLEANUP WHEN SCREEN GOES OUT OF FOCUS
+		return () => {
+			console.log("📤 VideoListScreen Blurred — Cleaning up IAP");
+
+			isMounted = false;
+
+			if (purchaseUpdateSubscription) purchaseUpdateSubscription.remove();
+			if (purchaseErrorSubscription) purchaseErrorSubscription.remove();
+
+			RNIap.endConnection()
+				.then(() => console.log("🔌 Billing connection closed"))
+				.catch(() => {});
+		};
+	}, [
+		language,
+		backendLevel,
+		users_id,
+	] // re-init ONLY when these change
+));
+
+	// HandlePay function 
 	const handlePay = async () => {
 		try {
 			console.log(" ========== INITIATING PURCHASE ==========");
@@ -830,17 +780,57 @@ const VideoListScreen = ({ navigation, route }) => {
 		);
 	}
 
+
+	// OPEN MATH PROTECTION MODAL
+	const openmodel = () => {
+		// Generate 2-digit numbers between 10–20
+		const n1 = Math.floor(Math.random() * 10) + 10;
+		const n2 = Math.floor(Math.random() * 10) + 10;
+
+		setnum1(n1);
+		setnum2(n2);
+		setuseranswer('');
+		setmodelvisible(true);
+	};
+
+	// VERIFY ANSWER THEN CALL handlePay()
+	const parentmodel = async () => {
+		const correct = num1 + num2;
+
+		// validate numeric input
+		const userInput = parseInt(useranswer.trim(), 10);
+
+		if (isNaN(userInput)) {
+			Alert.alert("Invalid Input", "Please enter a valid number.");
+			return;
+		}
+
+		if (userInput === correct) {
+			setmodelvisible(false);
+
+			// little delay to close modal smoothly
+			setTimeout(() => {
+				handlePay();
+			}, 250);
+
+		} else {
+			Alert.alert("Incorrect Answer", "Please try again.");
+			setuseranswer('');
+		}
+	};
+
+
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 
 				{/* Show IAP loading indicator at top */}
-				{iapInitializing && (
+				{/* {iapInitializing && (
 					<View style={styles.iapLoadingBanner}>
 						<ActivityIndicator size="small" color="#FF8C00" />
 						<Text style={styles.iapLoadingText}>Setting up billing...</Text>
 					</View>
-				)}
+				)} */}
 
 				<View style={[styles.languageRow, isTablet && styles.languageRowTablet, isTablet && { marginTop: 24 }]}>
 					{Object.keys(languageLabels).map((langKey, idx) => (
@@ -909,7 +899,7 @@ const VideoListScreen = ({ navigation, route }) => {
 							<Text style={styles.blurDescription}>
 								Pay {productDetails?.localizedPrice || "£60"} to access {languageLabels[language]} videos for {selectedLevel ? getDisplayLevel(selectedLevel) : 'this level'}
 							</Text>
-							
+
 							{iapInitializing ? (
 								<View style={styles.payButtonLoading}>
 									<ActivityIndicator size="small" color="#FF8C00" />
@@ -917,7 +907,7 @@ const VideoListScreen = ({ navigation, route }) => {
 								</View>
 							) : (
 								<TouchableOpacity
-									onPress={handlePay}
+									onPress={openmodel}
 									style={[styles.payNowButton, !iapReady && styles.payNowButtonDisabled]}
 									disabled={!iapReady}
 								>
@@ -928,8 +918,8 @@ const VideoListScreen = ({ navigation, route }) => {
 							)}
 
 							{/*  need to remopve before production */}
-							
-							{iapError && (
+
+							{/* {iapError && (
 								<TouchableOpacity
 									onPress={() => {
 										iapInitializedRef.current = false;
@@ -941,10 +931,54 @@ const VideoListScreen = ({ navigation, route }) => {
 								>
 									<Text style={styles.retryBillingText}>Retry Billing Setup</Text>
 								</TouchableOpacity>
-							)}
+							)} */}
+
+
 						</View>
 					</View>
 				)}
+				<Modal
+					visible={ismodelvisible}
+					transparent={true}
+					animationType="fade"
+				>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalBox}>
+
+							{/* Close Button */}
+							<Pressable style={styles.closeIcon} onPress={() => setmodelvisible(false)}>
+								<Text style={styles.closeText}>✕</Text>
+							</Pressable>
+
+							{/* Title */}
+							<Text style={styles.modalTitle}>
+								Answer the Problem to proceed
+							</Text>
+
+							{/* Question */}
+							<Text style={styles.modalQuestion}>
+								What is {num1} + {num2} ?
+							</Text>
+
+							{/* Input */}
+							<TextInput
+								value={useranswer}
+								onChangeText={setuseranswer}
+								placeholder="Enter your answer"
+								placeholderTextColor="#888"
+								keyboardType="numeric"
+								style={styles.modalInput}
+							/>
+
+							{/* Submit Button */}
+							<Pressable style={styles.submitButton} onPress={parentmodel}>
+								<Text style={styles.submitText}>Submit</Text>
+							</Pressable>
+
+						</View>
+					</View>
+				</Modal>
+
 			</LinearGradient>
 		</SafeAreaView>
 	);
@@ -1176,6 +1210,83 @@ const styles = StyleSheet.create({
 		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
+	},
+	modalContainer: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+
+	modalBox: {
+		width: '85%',
+		backgroundColor: 'white',
+		borderRadius: 12,
+		paddingVertical: 25,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		elevation: 10,
+		shadowColor: '#000',
+		shadowOpacity: 0.25,
+		shadowRadius: 6,
+		shadowOffset: { width: 0, height: 2 },
+		position: 'relative',
+	},
+
+	closeIcon: {
+		position: 'absolute',
+		top: 10,
+		right: 10,
+		padding: 5,
+	},
+
+	closeText: {
+		fontSize: 22,
+		color: '#333',
+	},
+
+	modalTitle: {
+		color: '#FF8C00',
+		fontWeight: 'bold',
+		fontSize: 18,
+		marginTop: 10,
+		textAlign: 'center',
+	},
+
+	modalQuestion: {
+		marginTop: 12,
+		fontWeight: '600',
+		color: '#000',
+		fontSize: 16,
+		textAlign: 'center',
+	},
+
+	modalInput: {
+		width: '90%',
+		borderWidth: 1,
+		borderColor: '#ccc',
+		borderRadius: 8,
+		padding: 10,
+		marginTop: 18,
+		fontSize: 16,
+		color: 'black',
+		textAlign: 'center',
+	},
+
+	submitButton: {
+		marginTop: 20,
+		backgroundColor: '#FF8C00',
+		paddingVertical: 10,
+		paddingHorizontal: 25,
+		borderRadius: 8,
+		width: '90%',
+		alignItems: 'center',
+	},
+
+	submitText: {
+		color: 'white',
+		fontWeight: 'bold',
+		fontSize: 16,
 	},
 });
 

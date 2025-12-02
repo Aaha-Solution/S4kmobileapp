@@ -63,6 +63,7 @@ const ViewProfileScreen = ({ navigation }) => {
 						},
 					}
 				);
+				console.log("response",response.data)
 				const data = await response.json();
 				console.log("Profile data:", data);
 				//console.log("Fetched avatar URL:", data.avatar); // Add this line

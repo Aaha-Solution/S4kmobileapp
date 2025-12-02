@@ -28,6 +28,8 @@ import AdminPannel from './screens/AdminPannelScreen.js';
 import Policy from './screens/Policy.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Settings } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 
@@ -63,14 +65,15 @@ const App = () => {
 		return <NoInternetScreen />;
 	}
 	console.log("App: Network check passed, rendering main app");
+	
 	try {
 		return (
+			<SafeAreaView style={{ flex: 1 }}>
 			<GestureHandlerRootView style={{ flex: 1 }}>
-			
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
 						<NavigationContainer>
-							<Stack.Navigator initialRouteName="MainTabs" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
+							<Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
 								<Stack.Screen name="SplashScreen" component={SplashScreen} />
 								<Stack.Screen name="AdminPannel" component={AdminPannel} />
 								<Stack.Screen name="Login" component={LoginScreen} />
@@ -78,11 +81,19 @@ const App = () => {
 								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
 								<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
 								<Stack.Screen name="Policy" component={Policy} 
-								options={{
-									headerStyle: { backgroundColor: '#87CEEB' },
-									headerLeft: ()=> (
-									<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('Setting')} />
-								)}}/>
+									options={({ navigation }) => ({
+										headerShown: true,
+										headerTitle: 'Policy',
+										headerTitleAlign: 'center',
+										headerTransparent: true,
+										headerStyle: { backgroundColor: '#73c9ebff' },
+										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+										headerLeft: () => (
+											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }}
+											 onPress={() => navigation.navigate("MainTabs",screen='Setting')} />
+										)
+									})}
+								/>
 								<Stack.Screen
 									name="LanguageSelectionScreen"
 									component={LanguageSelectionScreen}
@@ -119,7 +130,8 @@ const App = () => {
 										headerStyle: { backgroundColor: '#87CEEB' },
 										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
 										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
+											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} 
+											onPress={() => navigation.navigate("AccountScreen")} />
 										)
 									})}
 								/>
@@ -189,6 +201,7 @@ const App = () => {
 				</Provider>
 			
 			</GestureHandlerRootView>
+			</SafeAreaView>
 		);
 	} catch (err) {
 		//console.error("Error in App component:", err);
