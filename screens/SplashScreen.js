@@ -44,7 +44,7 @@ for (const language of Object.keys(data.videos)) {
     }
   }
 
-  // If array → [ {level:"Beginner"} ]
+  
   else {
     group.forEach(item => {
       if (item?.level) {

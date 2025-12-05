@@ -18,7 +18,7 @@ import PressableButton from '../component/PressableButton';
 import LinearGradient from 'react-native-linear-gradient';
 import * as RNIap from 'react-native-iap';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPaidStatus, setAllPaidAccess } from '../Store/userSlice';
+import { setPaidStatus, setAllPaidAccess, addPaidAccess } from '../Store/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 
@@ -40,7 +40,7 @@ const PaymentScreen = ({ navigation }) => {
 	const users_id = useSelector(state => state.user.user.users_id);
 
 	const [language, setLanguage] = useState(selectedLanguage || 'Hindi');
-	const [totalAmount, setTotalAmount] = useState(45);
+	const [totalAmount, setTotalAmount] = useState(60);
 	const paidAccess = useSelector(state => state.user.paidAccess || []);
 	const paidSet = new Set(
 		paidAccess.map(({ language, level }) => `${language}-${level}`)
@@ -190,7 +190,8 @@ const PaymentScreen = ({ navigation }) => {
 							}),
 						}
 					);
-
+// console.log("Backend verification response status:", response.status);
+// console.log("Backend verification response headers:", response);
 					if (!response.ok) {
 						const text = await response.text();
 						console.log("❌ Backend verification failed:", text);
@@ -206,6 +207,9 @@ const PaymentScreen = ({ navigation }) => {
 						await RNIap.finishTransaction({ purchase, isConsumable: false });
 
 						dispatch(setPaidStatus(true));
+						dispatch(addPaidAccess({ language, level }));
+
+						// Refresh paid courses
 						await fetchPaidCourses();
 
 						Alert.alert("Success", "Your purchase was successful!", [
@@ -555,7 +559,7 @@ const PaymentScreen = ({ navigation }) => {
 										{isPaid ? (
 											<View style={styles.paidBadge}>
 												<Icon name="check-circle" size={20} color="#4CAF50" />
-												<Text style={styles.paidText}>Owned</Text>
+												{/* <Text style={styles.paidText}>Owned</Text> */}
 											</View>
 										) : selectedItems[lang]?.includes(option) ? (
 											<Icon name="check-circle" size={20} color="green" />

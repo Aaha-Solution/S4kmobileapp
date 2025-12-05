@@ -9,11 +9,14 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CustomAlert from '../component/CustomAlertMessage';
+import { useSelector } from 'react-redux';
 
 const { width } = Dimensions.get('window');
 
 const AdminPannel = () => {
 	const navigation = useNavigation();
+	const user_id = useSelector(state => state.user.user_id);
 
 	const [users, setUsers] = useState([]);
 	const [filtered, setFiltered] = useState([]);
@@ -24,7 +27,7 @@ const AdminPannel = () => {
 	const [showFilters, setShowFilters] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
 	const [token, setToken] = useState(null);
-
+	const [showalert, setShowAlert] = useState(false);
 	const [selectedLanguage, setSelectedLanguage] = useState('');
 	const [selectedLevel, setSelectedLevel] = useState('');
 	const languages = ['Hindi', 'Panjabi', 'Gujarati'];
@@ -33,6 +36,7 @@ const AdminPannel = () => {
 	// Fixed column widths that add up to 100% with proper spacing
 	const tableWidth = width - 32; // Account for container padding
 	const columnWidths = {
+		userId: tableWidth * 0.16,   // 16%
 		name: tableWidth * 0.16,     // 16%
 		email: tableWidth * 0.34,    // 34%
 		language: tableWidth * 0.18, // 18%
@@ -55,14 +59,15 @@ const AdminPannel = () => {
 			}
 
 			const res = await fetch(
-				'https://api.smile4kids.co.uk/admin/users-with-purchases',
+				'https://api.smile4kids.co.uk/admin/users',
 				{
 					headers: { Authorization: `Bearer ${storedToken}` },
 				}
 			);
-
+			console.log('Fetch users response status:', res.status);
 			const data = await res.json();
 			console.log('Fetched users:', data);
+
 			if (res.status === 401 || res.status === 403) {
 				Alert.alert('Session Expired', 'Please login again.');
 				await AsyncStorage.clear();
@@ -71,17 +76,44 @@ const AdminPannel = () => {
 			}
 
 			if (Array.isArray(data)) {
-				const sorted = data
+				const normalized = data.map(u => ({
+					...u,
+					has_paid: u.language != null && u.level != null
+				}));
+
+				const paid = normalized
 					.filter(u => u.has_paid)
-					.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+					.sort((a, b) => {
+						const dateA = new Date(a.created_at || 0);
+						const dateB = new Date(b.created_at || 0);
+						return dateB - dateA;
+					});
 
-				const unpaid = data.filter(u => !u.has_paid);
+				const unpaid = normalized.filter(u => !u.has_paid);
 
-				setUsers([...sorted, ...unpaid]);
-				setCurrentPage(1);
+				const allUsers = [...paid, ...unpaid]; // Prepare the array
+				setUsers(allUsers);                     // Update state
+				console.log('Users set in state:', allUsers); // Log the actual data
+
+			} if (data.success && Array.isArray(data.data)) {
+				const normalized = data.data.map(u => ({
+					...u,
+					has_paid: u.language != null && u.level != null
+				}));
+
+				const paid = normalized
+					.filter(u => u.has_paid)
+					.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+				//const unpaid = normalized.filter(u => !u.has_paid);
+
+				const allUsers = [...paid];
+				setUsers(allUsers);
+				console.log('Users set in state:', allUsers);
 			} else {
 				Alert.alert('Alert', 'Unexpected response from server.');
 			}
+
 		} catch (e) {
 			Alert.alert('Alert', 'Failed to fetch users.');
 		} finally {
@@ -90,29 +122,27 @@ const AdminPannel = () => {
 	};
 
 	const logout = () => {
-		Alert.alert('Logout', 'Confirm logout?', [
-			{ text: 'Cancel', style: 'cancel' },
-			{
-				text: 'Logout',
-				style: 'destructive',
-				onPress: async () => {
-					await AsyncStorage.clear();
-					navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-				},
-			},
-		]);
+		setShowAlert(true);
 	};
 
 	const getFilteredUsers = useCallback(() => {
 		let result = [...users];
-		if (selectedLanguage) result = result.filter(u => u.language === selectedLanguage);
-		if (selectedLevel) result = result.filter(u => u.level === selectedLevel);
+		if (selectedLanguage)
+			result = result.filter(u => (u.language || '').toLowerCase() === selectedLanguage.toLowerCase());
+
+		if (selectedLevel)
+			result = result.filter(u => (u.level || '').toLowerCase() === selectedLevel.toLowerCase());
+
 		if (search) {
+			const s = search.toLowerCase();
 			result = result.filter(u =>
-				u.username?.toLowerCase().includes(search.toLowerCase()) ||
-				u.email_id?.toLowerCase().includes(search.toLowerCase())
+				(u.username || '').toLowerCase().includes(s) ||
+				(u.email_id || '').toLowerCase().includes(s) ||
+				(u.language || '').toLowerCase().includes(s) ||
+				(u.level || '').toLowerCase().includes(s)
 			);
 		}
+
 		return result;
 	}, [users, search, selectedLanguage, selectedLevel]);
 
@@ -145,39 +175,56 @@ const AdminPannel = () => {
 		setShowFilters(false);
 	};
 
-	const renderItem = ({ item }) => (
-		<View style={styles.row}>
-			<View style={[styles.cell, { width: columnWidths.name }]}>
-				<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
-					{item.username || 'N/A'}
-				</Text>
-			</View>
-			<View style={[styles.cell, { width: columnWidths.email }]}>
-				<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-					<Text style={styles.cellText}>
-						{item.email_id || 'N/A'}
+	const renderItem = ({ item }) => {
+
+		//console.log("ITEM FULL DATA:", item);
+
+		return (
+			<View style={styles.row}>
+				<View style={[styles.cell, { width: columnWidths.userId }]}>
+					<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+						{item.users_id || 'N/A'}
 					</Text>
-				</ScrollView>
-			</View>
-			<View style={[styles.cell, { width: columnWidths.language }]}>
-				<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
-					{item.language || 'N/A'}
-				</Text>
-			</View>
-			<View style={[styles.cell, { width: columnWidths.level }]}>
-				<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
-					{item.level === 'Pre_Junior' ? 'Preschool' : (item.level || 'N/A')}
-				</Text>
-			</View>
-			{/* ✅ Delete Icon Button */}
-			<TouchableOpacity
+				</View>
+				<View style={[styles.cell, { width: columnWidths.name }]}>
+					<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+						{item.username || 'N/A'}
+					</Text>
+				</View>
+				<View style={[styles.cell, { width: columnWidths.email }]}>
+					<ScrollView horizontal showsHorizontalScrollIndicator={false}>
+						<Text style={styles.cellText}>
+							{item.email_id || 'N/A'}
+						</Text>
+					</ScrollView>
+				</View>
+				<View style={[styles.cell, { width: columnWidths.language }]}>
+					<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+						{item.language || 'N/A'}
+					</Text>
+				</View>
+				<View style={[styles.cell, { width: columnWidths.level }]}>
+					<Text style={styles.cellText} numberOfLines={1} ellipsizeMode="tail">
+						{item.level === 'Pre_Junior' ? 'Preschool' : (item.level || 'N/A')}
+					</Text>
+				</View>
+				{/* Edit Icon Button */}
+				{/*<TouchableOpacity
 				style={[styles.cell, { width: columnWidths.action }]}
-				onPress={() => handleDelete(item.id)}
+				onPress={() => handleedit(item.id)}
 			>
-				<Icon name="trash" size={20} color="red" />
-			</TouchableOpacity>
-		</View>
-	);
+				<Icon name="create" size={20} color="#FF8C00" />
+			</TouchableOpacity>*/}
+				{/*  Delete Icon Button */}
+				<TouchableOpacity
+					style={[styles.cell, { width: columnWidths.action }]}
+					onPress={() => handleDelete(item.users_id, item.language, item.level)}
+				>
+					<Icon name="trash" size={20} color="red" />
+				</TouchableOpacity>
+			</View>
+		);
+	};
 
 	const FilterButton = ({ title, options, selected, onSelect }) => (
 		<View style={styles.filterGroup}>
@@ -197,7 +244,7 @@ const AdminPannel = () => {
 			</View>
 		</View>
 	);
-	const handleDelete = async (userId) => {
+	const handleDelete = async (userId, language, level) => {
 		Alert.alert("Delete User", "Are you sure you want to delete this user?", [
 			{ text: "Cancel", style: "cancel" },
 			{
@@ -205,16 +252,30 @@ const AdminPannel = () => {
 				style: "destructive",
 				onPress: async () => {
 					try {
+						console.log("Deleting user with ID:", userId,language,level);
+						
 						const res = await fetch(
-							`https://api.smile4kids.co.uk/admin/users/${userId}`,
+							`https://api.smile4kids.co.uk/admin/user/category/delete/`,
 							{
 								method: "DELETE",
-								headers: { Authorization: `Bearer ${token}` },
-							}
-						);
+								headers: { 
+									"Content-Type": "application/json",
+									Authorization: `Bearer ${token}` },
+								body: JSON.stringify({
+									user_id: userId,
+									language,
+									level,
 
+								}),
+							}
+
+						);
+						console.log("Delete response status:", res.status);
+
+						const data = await res.json();
+						console.log("Delete response data:", data);
 						if (res.ok) {
-							setUsers((prev) => prev.filter((u) => u.id !== userId));
+							setUsers((prev) => prev.filter((u) => u.users_id !== userId));
 							Alert.alert("Success", "User deleted successfully.");
 						} else {
 							Alert.alert("Error", "Failed to delete user.");
@@ -338,16 +399,24 @@ const AdminPannel = () => {
 		);
 	};
 
+	const handleConfirmLogout = async () => {
+		await AsyncStorage.clear();
+		navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+	};
+	const handleCancelLogout = () => {
+		setShowAlert(false);
+	}
 	return (
 		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={{ flex: 1 }}>
 			<SafeAreaView style={styles.safeArea}>
 				<StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
 
-				<View style={styles.logoutRow}>
+				{/* <View style={styles.logoutRow}>
 					<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
 						<Text style={styles.logoutText}>Logout</Text>
 					</TouchableOpacity>
-				</View>
+
+				</View> */}
 
 				<View style={styles.header}>
 					<TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
@@ -395,48 +464,79 @@ const AdminPannel = () => {
 					</View>
 				)}
 
-				<View style={styles.tableContainer}>
-					{loading ? (
-						<ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
-					) : (
-						<>
-							{/* Fixed Table Header */}
-							<View style={styles.tableHeader}>
-								<View style={[styles.headerCell, { width: columnWidths.name }]}>
-									<Text style={styles.headerText}>Name</Text>
-								</View>
-								<View style={[styles.headerCell, { width: columnWidths.email }]}>
-									<Text style={styles.headerText}>Email</Text>
-								</View>
-								<View style={[styles.headerCell, { width: columnWidths.language }]}>
-									<Text style={styles.headerText}>Language</Text>
-								</View>
-								<View style={[styles.headerCell, { width: columnWidths.level }]}>
-									<Text style={styles.headerText}>Ages</Text>
-								</View>
-								{/* ✅ New Delete Column */}
-								<View style={[styles.headerCell, { width: columnWidths.action }]}>
-									<Text style={styles.headerText}>Action</Text>
-								</View>
-							</View>
+				<ScrollView horizontal showsHorizontalScrollIndicator={true}>
+					<View style={styles.tableContainer}>
+						{loading ? (
+							<ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
+						) : (
+							<>
+								{/* Fixed Table Header */}
+								<View style={styles.tableHeader}>
 
-							<FlatList
-								data={filtered}
-								keyExtractor={(_, i) => i.toString()}
-								renderItem={renderItem}
-								ListEmptyComponent={
-									<View style={styles.emptyContainer}>
-										<Text style={styles.emptyText}>No users found</Text>
+									<View style={[styles.headerCell, { width: columnWidths.userId }]}>
+										<Text style={styles.headerText}>User ID</Text>
 									</View>
-								}
-								style={styles.tableList}
-								showsVerticalScrollIndicator={false}
-							/>
+									<View style={[styles.headerCell, { width: columnWidths.name }]}>
+										<Text style={styles.headerText}>Name</Text>
+									</View>
+									<View style={[styles.headerCell, { width: columnWidths.email }]}>
+										<Text style={styles.headerText}>Email</Text>
+									</View>
+									<View style={[styles.headerCell, { width: columnWidths.language }]}>
+										<Text style={styles.headerText}>Language</Text>
+									</View>
+									<View style={[styles.headerCell, { width: columnWidths.level }]}>
+										<Text style={styles.headerText}>Ages</Text>
+									</View>
+									{/* <View  style={[styles.headerCell, { width: columnWidths.action }]}>
+										<Text style={styles.headerText}>Edit</Text>
+									</View> */}
+									<View style={[styles.headerCell, { width: columnWidths.action }]}>
+										<Text style={styles.headerText}>Delete</Text>
+									</View>
 
-							<PaginationControls />
-						</>
-					)}
+
+								</View>
+
+
+								<FlatList
+									data={filtered}
+									keyExtractor={(item, index) => `${item.users_id}-${index}`}
+									renderItem={renderItem}
+									ListEmptyComponent={
+										<View style={styles.emptyContainer}>
+											<Text style={styles.emptyText}>No users found</Text>
+										</View>
+									}
+									style={styles.tableList}
+									showsVerticalScrollIndicator={false}
+									onLayout={() => console.log("FlatList mounted")}
+									ListHeaderComponent={() => { console.log("ListHeader rendered"); return null; }}
+								/>
+
+
+							</>
+						)}
+					</View>
+				</ScrollView>
+				<View style={styles.logoutRow}>
+					<View style={styles.topRow}>
+						<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+							<Text style={styles.logoutText}>Logout</Text>
+						</TouchableOpacity>
+
+					</View>
 				</View>
+				<PaginationControls />
+				<CustomAlert
+					visible={showalert}
+					title="Logout"
+					message="Are you sure you want to logout?"
+					onConfirm={loading ? (
+						<ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
+					) : (handleConfirmLogout)}
+					onCancel={handleCancelLogout}
+				/>
 			</SafeAreaView>
 		</LinearGradient>
 	);
@@ -448,16 +548,31 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		marginBottom: 6,
+		mariginTop: 10,
+		justifyContent: 'center',
 	},
+	topRow: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginTop: 20,    // ← Increase this value for more space
+		marginBottom: 10,
+	},
+
 	logoutBtn: {
 		backgroundColor: '#FF8C00',
 		paddingHorizontal: 12,
 		paddingVertical: 6,
 		borderRadius: 8,
+		width: 100,
+		height: 40
 	},
 	logoutText: {
 		color: '#fff',
 		fontWeight: '600',
+		textAlign: 'center',
+		fontSize: 16,
+		fontWeight: '700',
 	},
 	header: {
 		flexDirection: 'row',
@@ -505,6 +620,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#ef4444',
 		marginLeft: 8,
+		paddingBottom: 4,
 	},
 	filterPanel: {
 		backgroundColor: '#F0F8FF',
@@ -568,6 +684,7 @@ const styles = StyleSheet.create({
 	},
 	tableList: {
 		flex: 1,
+		//borderColor: 'black',
 	},
 	row: {
 		flexDirection: 'row',
@@ -577,11 +694,14 @@ const styles = StyleSheet.create({
 		borderBottomColor: '#ADD8E6',
 		backgroundColor: '#ffffff',
 		alignItems: 'center',
+		borderColor: 'black',
 	},
 	cell: {
 		justifyContent: 'center',
 		alignItems: 'center',
 		paddingHorizontal: 4,
+		borderRadius: 3,
+
 	},
 	cellText: {
 		fontSize: 12,
@@ -603,10 +723,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		borderTopWidth: 1,
 		borderTopColor: '#ADD8E6',
+		borderRadius: 90,
+		paddingTop: 20,
 	},
 	resultsInfo: {
 		fontSize: 14,
-		color: '#6b7280',
+		color: '#000000ff',
 		marginBottom: 12,
 		textAlign: 'center',
 	},
@@ -639,7 +761,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 2,
 	},
 	activePage: {
-		backgroundColor: '#4682B4',
+		backgroundColor: '#FF8C00',
 	},
 	ellipsisPage: {
 		backgroundColor: 'transparent',

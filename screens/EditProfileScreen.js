@@ -52,14 +52,15 @@ const EditProfileScreen = ({ route, navigation }) => {
         const fetchAvatar = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                const response = await fetch(`${BASE_URL}/api/images`, {
+                const response = await fetch(`${BASE_URL}api/images`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                console.log('Avatar fetch response status:', response.status);
                 const data = await response.json();
-                //  console.log('Avatar data:', data);
+                  console.log('Avatar data:', data);
                 const imageUrls = Array.isArray(data)
                     ? data.map(file => `${BASE_URL}${file.path}`)
                     : [];
@@ -178,7 +179,7 @@ const EditProfileScreen = ({ route, navigation }) => {
         try {
             const token = await AsyncStorage.getItem('token');
             const response = await fetch("https://api.smile4kids.co.uk/signup/update-profile", {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -191,6 +192,7 @@ const EditProfileScreen = ({ route, navigation }) => {
                     avatar: selectedAvatar,
                 })
             });
+            console.log('update profile response', response);
             const text = await response.text();
             console.log('Raw backend response:', text);
             let data;
