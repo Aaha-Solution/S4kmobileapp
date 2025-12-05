@@ -107,7 +107,7 @@ const OTPVerificationScreen = ({ navigation }) => {
 					</View>
 
 					<Text style={styles.subtitle}>
-						We sent you 6 special numbers to
+						We sent verification code to your email:{"\n"}
 					</Text>
 					<Text style={styles.emailText}>{email}</Text>
 

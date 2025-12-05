@@ -62,10 +62,10 @@ const EditProfileScreen = ({ route, navigation }) => {
                 const data = await response.json();
                   console.log('Avatar data:', data);
                 const imageUrls = Array.isArray(data)
-                    ? data.map(file => `${BASE_URL}${file.path}`)
+                    ? data.map(file => `${BASE_URL.replace(/\/$/, '')}/${file.path.replace(/^\/+/, '')}`)
                     : [];
-                ///  console.log('First avatar object:', data[0]);
-                // console.log('Avatar URLs:', imageUrls);
+                  console.log('First avatar object:', data[0]);
+                 console.log('Avatar URLs:', imageUrls);
                 setImages(imageUrls);
                 setLoading(false);
             } catch (error) {
