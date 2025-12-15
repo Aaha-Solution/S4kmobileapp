@@ -235,7 +235,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			}
 
 			const response = await axios.get(
-				`http://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
+				`https ://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				}
