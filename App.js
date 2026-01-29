@@ -68,7 +68,7 @@ const App = () => {
 	
 	try {
 		return (
-			<SafeAreaView style={{ flex: 1 }}>
+			//<SafeAreaView style={{ flex: 1 }}>
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
@@ -134,7 +134,7 @@ const App = () => {
 											onPress={() => navigation.navigate("AccountScreen")} />
 										)
 									})}
-								/>
+								/> 
 								<Stack.Screen
 									name="AccountScreen"
 									component={AccountScreen}
@@ -201,7 +201,7 @@ const App = () => {
 				</Provider>
 			
 			</GestureHandlerRootView>
-			</SafeAreaView>
+			//</SafeAreaView>
 		);
 	} catch (err) {
 		//console.error("Error in App component:", err);

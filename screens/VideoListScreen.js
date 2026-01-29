@@ -235,7 +235,7 @@ const VideoListScreen = ({ navigation, route }) => {
 			}
 
 			const response = await axios.get(
-				`https ://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
+				`https://api.smile4kids.co.uk/payment/my-paid-videos?user_id=${users_id}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				}
@@ -350,7 +350,7 @@ const VideoListScreen = ({ navigation, route }) => {
 		}
 	}, [language, backendLevel, iapProducts]);
 
-	// IAP Initialization - FIXED FOR V13.0.4
+	// IAP Initialization - FOR V13.0.4
 	useFocusEffect(
 	useCallback(() => {
 		console.log("📌 VideoListScreen Focused — Initializing IAP…");
@@ -709,7 +709,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				} else {
 					Alert.alert(
 						"Locked Content",
-						`Pay ${productDetails?.localizedPrice || "£45"} to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
+						`Pay ${productDetails?.localizedPrice || "£60"} to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
 						[
 							{ text: "Cancel", style: "cancel" },
 							{ text: "Pay Now", onPress: handlePay }
@@ -722,8 +722,8 @@ const VideoListScreen = ({ navigation, route }) => {
 			<Image
 				source={
 					item.thumbnailUrl
-						? { uri: item.thumbnailUrl }
-						: require('../assets/image/splash.png')
+						? require('../assets/image/splash.png')
+						: { uri: item.thumbnailUrl }
 				}
 				style={{
 					width: imageWidth,
@@ -741,7 +741,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				]} numberOfLines={2}>
 					{item.title || `Video ${index + 1}`}
 				</Text>
-				<Text style={[
+				<Text style={[ 
 					styles.kidSubText,
 					!isCurrentCombinationPaid && styles.kidSubTextLocked
 				]}>

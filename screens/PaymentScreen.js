@@ -32,8 +32,6 @@ const productIdMap = [
 	'video_gujarati_junior',
 ];
 
-
-
 const PaymentScreen = ({ navigation }) => {
 	const selectedLevel = useSelector(state => state.user.selectedLevel);
 	const selectedLanguage = useSelector(state => state.user.selectedLanguage);

@@ -90,10 +90,10 @@ android {
         applicationId "com.smile4kids"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 104
+        versionCode 123
         versionName "1.0.4"
         missingDimensionStrategy 'store', 'play'
-        
+       
         // Support primary architectures only
         ndk {
             abiFilters "arm64-v8a", "armeabi-v7a"
@@ -109,7 +109,7 @@ android {
             include "arm64-v8a", "armeabi-v7a"
         }
     }
-    
+
     packagingOptions {
         // Only declare pickFirst for architectures we're actually building
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
@@ -126,7 +126,7 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
-        
+       
         // Exclude unnecessary files that might cause issues
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
