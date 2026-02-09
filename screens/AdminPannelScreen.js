@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import CustomAlert from '../component/CustomAlertMessage';
 import { useSelector } from 'react-redux';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const AdminPannel = () => {
 	const navigation = useNavigation();
@@ -252,15 +252,16 @@ const AdminPannel = () => {
 				style: "destructive",
 				onPress: async () => {
 					try {
-						console.log("Deleting user with ID:", userId,language,level);
-						
+						console.log("Deleting user with ID:", userId, language, level);
+
 						const res = await fetch(
 							`https://api.smile4kids.co.uk/admin/user/category/delete/`,
 							{
 								method: "DELETE",
-								headers: { 
+								headers: {
 									"Content-Type": "application/json",
-									Authorization: `Bearer ${token}` },
+									Authorization: `Bearer ${token}`
+								},
 								body: JSON.stringify({
 									user_id: userId,
 									language,
@@ -406,137 +407,142 @@ const AdminPannel = () => {
 	const handleCancelLogout = () => {
 		setShowAlert(false);
 	}
-	return (
-		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={{ flex: 1 }}>
-			<SafeAreaView style={styles.safeArea}>
-				<StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
+	const content = (
+		<View style={{ flex: 1 }}>
+			<View style={styles.header}>
+				<TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+					<Text style={styles.iconText}>🔍</Text>
+				</TouchableOpacity>
 
-				{/* <View style={styles.logoutRow}>
+				<Text style={styles.title}>Admin Panel</Text>
+
+				<TouchableOpacity style={styles.iconButton} onPress={() => setShowFilters(!showFilters)}>
+					<Icon name="filter" size={20} color="#1f2937" />
+				</TouchableOpacity>
+			</View>
+
+			{showSearch && (
+				<View style={styles.searchBar}>
+					<TextInput
+						placeholder="Search by name or email..."
+						value={search}
+						onChangeText={handleSearch}
+						style={styles.searchInput}
+						placeholderTextColor="#6b7280"
+					/>
+					<TouchableOpacity onPress={() => {
+						setSearch('');
+						setCurrentPage(1);
+						setShowSearch(false);
+					}}>
+						<Text style={styles.closeText}>✕</Text>
+					</TouchableOpacity>
+				</View>
+			)}
+
+			{showFilters && (
+				<View style={styles.filterPanel}>
+					<FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
+					<FilterButton title="Ages" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
+					<View style={styles.filterActions}>
+						<TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
+							<Text style={styles.btnText}>Apply</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
+							<Text style={styles.btnText}>Clear</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			)}
+
+			<ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
+				<View style={styles.tableContainer}>
+					{loading ? (
+						<ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
+					) : (
+						<>
+							{/* Fixed Table Header */}
+							<View style={styles.tableHeader}>
+
+								<View style={[styles.headerCell, { width: columnWidths.userId }]}>
+									<Text style={styles.headerText}>User ID</Text>
+								</View>
+								<View style={[styles.headerCell, { width: columnWidths.name }]}>
+									<Text style={styles.headerText}>Name</Text>
+								</View>
+								<View style={[styles.headerCell, { width: columnWidths.email }]}>
+									<Text style={styles.headerText}>Email</Text>
+								</View>
+								<View style={[styles.headerCell, { width: columnWidths.language }]}>
+									<Text style={styles.headerText}>Language</Text>
+								</View>
+								<View style={[styles.headerCell, { width: columnWidths.level }]}>
+									<Text style={styles.headerText}>Ages</Text>
+								</View>
+								{/* <View  style={[styles.headerCell, { width: columnWidths.action }]}>
+									<Text style={styles.headerText}>Edit</Text>
+								</View> */}
+								<View style={[styles.headerCell, { width: columnWidths.action }]}>
+									<Text style={styles.headerText}>Delete</Text>
+								</View>
+
+
+							</View>
+
+
+							<FlatList
+								data={filtered}
+								keyExtractor={(item, index) => `${item.users_id}-${index}`}
+								renderItem={renderItem}
+								ListEmptyComponent={
+									<View style={styles.emptyContainer}>
+										<Text style={styles.emptyText}>No users found</Text>
+									</View>
+								}
+								style={styles.tableList}
+								showsVerticalScrollIndicator={false}
+								scrollEnabled={!isLandscape}
+								onLayout={() => console.log("FlatList mounted")}
+								ListHeaderComponent={() => { console.log("ListHeader rendered"); return null; }}
+							/>
+
+
+						</>
+					)}
+				</View>
+			</ScrollView>
+			<View style={styles.logoutRow}>
+				<View style={styles.topRow}>
 					<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
 						<Text style={styles.logoutText}>Logout</Text>
 					</TouchableOpacity>
 
-				</View> */}
-
-				<View style={styles.header}>
-					<TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
-						<Text style={styles.iconText}>🔍</Text>
-					</TouchableOpacity>
-
-					<Text style={styles.title}>Admin Panel</Text>
-
-					<TouchableOpacity style={styles.iconButton} onPress={() => setShowFilters(!showFilters)}>
-						<Icon name="filter" size={20} color="#1f2937" />
-					</TouchableOpacity>
 				</View>
+			</View>
+			<PaginationControls />
+			<CustomAlert
+				visible={showalert}
+				title="Logout"
+				message="Are you sure you want to logout?"
+				onConfirm={loading ? (
+					<ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
+				) : (handleConfirmLogout)}
+				onCancel={handleCancelLogout}
+			/>
+		</View>
+	);
 
-				{showSearch && (
-					<View style={styles.searchBar}>
-						<TextInput
-							placeholder="Search by name or email..."
-							value={search}
-							onChangeText={handleSearch}
-							style={styles.searchInput}
-							placeholderTextColor="#6b7280"
-						/>
-						<TouchableOpacity onPress={() => {
-							setSearch('');
-							setCurrentPage(1);
-							setShowSearch(false);
-						}}>
-							<Text style={styles.closeText}>✕</Text>
-						</TouchableOpacity>
-					</View>
+	return (
+		<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={{ flex: 1 }}>
+			<SafeAreaView style={styles.safeArea}>
+				<StatusBar barStyle="dark-content" backgroundColor="#87CEEB" />
+				{isLandscape ? (
+					<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+						{content}
+					</ScrollView>
+				) : (
+					content
 				)}
-
-				{showFilters && (
-					<View style={styles.filterPanel}>
-						<FilterButton title="Language" options={languages} selected={selectedLanguage} onSelect={setSelectedLanguage} />
-						<FilterButton title="Ages" options={levels} selected={selectedLevel} onSelect={setSelectedLevel} />
-						<View style={styles.filterActions}>
-							<TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
-								<Text style={styles.btnText}>Apply</Text>
-							</TouchableOpacity>
-							<TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
-								<Text style={styles.btnText}>Clear</Text>
-							</TouchableOpacity>
-						</View>
-					</View>
-				)}
-
-				<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-					<View style={styles.tableContainer}>
-						{loading ? (
-							<ActivityIndicator size="large" color="#4682B4" style={{ marginTop: 50 }} />
-						) : (
-							<>
-								{/* Fixed Table Header */}
-								<View style={styles.tableHeader}>
-
-									<View style={[styles.headerCell, { width: columnWidths.userId }]}>
-										<Text style={styles.headerText}>User ID</Text>
-									</View>
-									<View style={[styles.headerCell, { width: columnWidths.name }]}>
-										<Text style={styles.headerText}>Name</Text>
-									</View>
-									<View style={[styles.headerCell, { width: columnWidths.email }]}>
-										<Text style={styles.headerText}>Email</Text>
-									</View>
-									<View style={[styles.headerCell, { width: columnWidths.language }]}>
-										<Text style={styles.headerText}>Language</Text>
-									</View>
-									<View style={[styles.headerCell, { width: columnWidths.level }]}>
-										<Text style={styles.headerText}>Ages</Text>
-									</View>
-									{/* <View  style={[styles.headerCell, { width: columnWidths.action }]}>
-										<Text style={styles.headerText}>Edit</Text>
-									</View> */}
-									<View style={[styles.headerCell, { width: columnWidths.action }]}>
-										<Text style={styles.headerText}>Delete</Text>
-									</View>
-
-
-								</View>
-
-
-								<FlatList
-									data={filtered}
-									keyExtractor={(item, index) => `${item.users_id}-${index}`}
-									renderItem={renderItem}
-									ListEmptyComponent={
-										<View style={styles.emptyContainer}>
-											<Text style={styles.emptyText}>No users found</Text>
-										</View>
-									}
-									style={styles.tableList}
-									showsVerticalScrollIndicator={false}
-									onLayout={() => console.log("FlatList mounted")}
-									ListHeaderComponent={() => { console.log("ListHeader rendered"); return null; }}
-								/>
-
-
-							</>
-						)}
-					</View>
-				</ScrollView>
-				<View style={styles.logoutRow}>
-					<View style={styles.topRow}>
-						<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-							<Text style={styles.logoutText}>Logout</Text>
-						</TouchableOpacity>
-
-					</View>
-				</View>
-				<PaginationControls />
-				<CustomAlert
-					visible={showalert}
-					title="Logout"
-					message="Are you sure you want to logout?"
-					onConfirm={loading ? (
-						<ActivityIndicator size="large" color="#FF8C00" style={styles.loadingIndicator} />
-					) : (handleConfirmLogout)}
-					onCancel={handleCancelLogout}
-				/>
 			</SafeAreaView>
 		</LinearGradient>
 	);

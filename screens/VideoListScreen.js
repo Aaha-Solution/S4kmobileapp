@@ -94,6 +94,7 @@ const VideoListScreen = ({ navigation, route }) => {
 	const backendLevel = selectedLevel ? getBackendLevel(selectedLevel) : 'Junior';
 	const { width, height } = useWindowDimensions();
 	const isTablet = width >= 700;
+	const isLandscape = width > height;
 	const headerWidth = isTablet ? Math.min(width * 0.5, 500) : 200;
 
 	const isCurrentCombinationPaid = paidAccess.some(
@@ -352,203 +353,203 @@ const VideoListScreen = ({ navigation, route }) => {
 
 	// IAP Initialization - FOR V13.0.4
 	useFocusEffect(
-	useCallback(() => {
-		console.log("📌 VideoListScreen Focused — Initializing IAP…");
+		useCallback(() => {
+			console.log("📌 VideoListScreen Focused — Initializing IAP…");
 
-		let isMounted = true;
-		let purchaseUpdateSubscription = null;
-		let purchaseErrorSubscription = null;
+			let isMounted = true;
+			let purchaseUpdateSubscription = null;
+			let purchaseErrorSubscription = null;
 
-		const initIAP = async () => {
-			// Avoid multiple re-initialization
-			if (iapInitializedRef.current || initializationAttemptedRef.current) {
-				console.log("⚠️ IAP already initialized for this session");
-				return;
-			}
-
-			initializationAttemptedRef.current = true;
-			setIapInitializing(true);
-			setIapError(null);
-
-			try {
-				console.log("========== IAP INIT START (v13) ==========");
-
-				// 1. INIT CONNECTION
-				const connected = await RNIap.initConnection();
-				console.log("🔌 Billing connected:", connected);
-
-				if (!connected) throw new Error("Billing connection failed");
-
-				// 2. CLEAR PENDING PURCHASES
-				try {
-					await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-				} catch (_) {}
-
-				await new Promise((res) => setTimeout(res, 1200)); // Let billing stabilize
-
-				if (!isMounted) return;
-
-				// 3. FETCH PRODUCTS (V13)
-				console.log("🛒 Fetching products:", newproductId);
-				const products = await RNIap.getProducts({ skus: newproductId });
-
-				if (!products?.length) {
-					throw new Error("No IAP products found in Play Console");
+			const initIAP = async () => {
+				// Avoid multiple re-initialization
+				if (iapInitializedRef.current || initializationAttemptedRef.current) {
+					console.log("⚠️ IAP already initialized for this session");
+					return;
 				}
 
-				setIapProducts(products);
-				setIapReady(true);
-				setIapInitializing(false);
-				iapInitializedRef.current = true;
+				initializationAttemptedRef.current = true;
+				setIapInitializing(true);
+				setIapError(null);
 
-				// Set current SKU
-				const sku = generateSKU(language, backendLevel);
-				setProductDetails(products.find(p => p.productId === sku) || null);
+				try {
+					console.log("========== IAP INIT START (v13) ==========");
 
-				// 4. SETUP IAP LISTENERS
-				console.log("🔔 Setting up purchase listeners…");
+					// 1. INIT CONNECTION
+					const connected = await RNIap.initConnection();
+					console.log("🔌 Billing connected:", connected);
 
-				purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+					if (!connected) throw new Error("Billing connection failed");
+
+					// 2. CLEAR PENDING PURCHASES
 					try {
-						await handlePurchaseUpdate(purchase);
-					} catch (err) {
-						console.error("Purchase handler error:", err);
+						await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+					} catch (_) { }
+
+					await new Promise((res) => setTimeout(res, 1200)); // Let billing stabilize
+
+					if (!isMounted) return;
+
+					// 3. FETCH PRODUCTS (V13)
+					console.log("🛒 Fetching products:", newproductId);
+					const products = await RNIap.getProducts({ skus: newproductId });
+
+					if (!products?.length) {
+						throw new Error("No IAP products found in Play Console");
 					}
-				});
 
-				purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
-					if (error.code !== 'E_USER_CANCELLED') {
-						Alert.alert('Purchase Error', error.message || "Unexpected error");
-					}
-				});
+					setIapProducts(products);
+					setIapReady(true);
+					setIapInitializing(false);
+					iapInitializedRef.current = true;
 
-				console.log("========== IAP INIT COMPLETE ==========");
+					// Set current SKU
+					const sku = generateSKU(language, backendLevel);
+					setProductDetails(products.find(p => p.productId === sku) || null);
 
-			} catch (err) {
-				console.error("❌ IAP INIT FAILED:", err);
+					// 4. SETUP IAP LISTENERS
+					console.log("🔔 Setting up purchase listeners…");
 
-				setIapError(err.message);
-				setIapReady(false);
-				setIapInitializing(false);
+					purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+						try {
+							await handlePurchaseUpdate(purchase);
+						} catch (err) {
+							console.error("Purchase handler error:", err);
+						}
+					});
 
-				initializationAttemptedRef.current = false;
-				iapInitializedRef.current = false;
+					purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+						if (error.code !== 'E_USER_CANCELLED') {
+							Alert.alert('Purchase Error', error.message || "Unexpected error");
+						}
+					});
 
-				Alert.alert("Billing Error", err.message, [
-					{
-						text: "Retry",
-						onPress: () => {
-							initializationAttemptedRef.current = false;
-							iapInitializedRef.current = false;
-							initIAP();
+					console.log("========== IAP INIT COMPLETE ==========");
+
+				} catch (err) {
+					console.error("❌ IAP INIT FAILED:", err);
+
+					setIapError(err.message);
+					setIapReady(false);
+					setIapInitializing(false);
+
+					initializationAttemptedRef.current = false;
+					iapInitializedRef.current = false;
+
+					Alert.alert("Billing Error", err.message, [
+						{
+							text: "Retry",
+							onPress: () => {
+								initializationAttemptedRef.current = false;
+								iapInitializedRef.current = false;
+								initIAP();
+							},
 						},
-					},
-					{ text: "Cancel", style: "cancel" },
-				]);
-			}
-		};
+						{ text: "Cancel", style: "cancel" },
+					]);
+				}
+			};
 
-		// ----------------------------
-		// PURCHASE HANDLER
-		// ----------------------------
-		const handlePurchaseUpdate = async (purchase) => {
-			console.log("🧾 Processing purchase:", purchase.productId);
+			// ----------------------------
+			// PURCHASE HANDLER
+			// ----------------------------
+			const handlePurchaseUpdate = async (purchase) => {
+				console.log("🧾 Processing purchase:", purchase.productId);
 
-			if (!purchase.transactionReceipt && !purchase.purchaseToken) {
-				console.log("⚠️ No token yet, waiting for next event");
-				return;
-			}
+				if (!purchase.transactionReceipt && !purchase.purchaseToken) {
+					console.log("⚠️ No token yet, waiting for next event");
+					return;
+				}
 
-			let purchaseToken;
-			try {
-				const json = JSON.parse(purchase.transactionReceipt);
-				purchaseToken = json.purchaseToken;
-			} catch {
-				purchaseToken = purchase.purchaseToken;
-			}
+				let purchaseToken;
+				try {
+					const json = JSON.parse(purchase.transactionReceipt);
+					purchaseToken = json.purchaseToken;
+				} catch {
+					purchaseToken = purchase.purchaseToken;
+				}
 
-			if (!purchaseToken) return;
+				if (!purchaseToken) return;
 
-			const token = await AsyncStorage.getItem("token");
-			if (!token) {
-				Alert.alert("Login Required", "Please login again");
-				return;
-			}
-			console.log("payloads in videolist screen",{
+				const token = await AsyncStorage.getItem("token");
+				if (!token) {
+					Alert.alert("Login Required", "Please login again");
+					return;
+				}
+				console.log("payloads in videolist screen", {
 					user_id: users_id,
 					productId: purchase.productId,
 					purchaseToken,
 					transactionReceipt: purchase.transactionReceipt,
-					
+
 				})
-			// VERIFY ON BACKEND
-			console.log("🌐 Verifying purchase…");
+				// VERIFY ON BACKEND
+				console.log("🌐 Verifying purchase…");
 
-			const response = await fetch("https://api.smile4kids.co.uk/payment/purchase", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					user_id: users_id,
-					productId: purchase.productId,
-					purchaseToken,
-					language,
-					level: backendLevel,
-				}),
-			});
+				const response = await fetch("https://api.smile4kids.co.uk/payment/purchase", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						user_id: users_id,
+						productId: purchase.productId,
+						purchaseToken,
+						language,
+						level: backendLevel,
+					}),
+				});
 
-			let result;
+				let result;
 
-			try {
-				result = await response.json();
-			} catch {
-				console.log("⚠️ Backend not ready — skipping for next event");
-				return;
-			}
+				try {
+					result = await response.json();
+				} catch {
+					console.log("⚠️ Backend not ready — skipping for next event");
+					return;
+				}
 
-			if (response.ok && result.success) {
-				console.log("✔ Verified by backend");
+				if (response.ok && result.success) {
+					console.log("✔ Verified by backend");
 
-				await RNIap.finishTransaction({ purchase, isConsumable: false });
+					await RNIap.finishTransaction({ purchase, isConsumable: false });
 
-				dispatch(addPaidAccess({ language, level: backendLevel }));
-				dispatch(setPaidStatus(true));
+					dispatch(addPaidAccess({ language, level: backendLevel }));
+					dispatch(setPaidStatus(true));
 
-				await fetchPaidCourses();
+					await fetchPaidCourses();
 
-				Alert.alert("Success", "Purchase successful!", [
-					{ text: "OK", onPress: fetchVideos },
-				]);
-			} else {
-				console.log("❌ Verification FAILED");
-				Alert.alert("Verification Failed", "Contact support");
-			}
-		};
+					Alert.alert("Success", "Purchase successful!", [
+						{ text: "OK", onPress: fetchVideos },
+					]);
+				} else {
+					console.log("❌ Verification FAILED");
+					Alert.alert("Verification Failed", "Contact support");
+				}
+			};
 
-		// RUN IAP INIT
-		initIAP();
+			// RUN IAP INIT
+			initIAP();
 
-		// 🔥 CLEANUP WHEN SCREEN GOES OUT OF FOCUS
-		return () => {
-			console.log("📤 VideoListScreen Blurred — Cleaning up IAP");
+			// 🔥 CLEANUP WHEN SCREEN GOES OUT OF FOCUS
+			return () => {
+				console.log("📤 VideoListScreen Blurred — Cleaning up IAP");
 
-			isMounted = false;
+				isMounted = false;
 
-			if (purchaseUpdateSubscription) purchaseUpdateSubscription.remove();
-			if (purchaseErrorSubscription) purchaseErrorSubscription.remove();
+				if (purchaseUpdateSubscription) purchaseUpdateSubscription.remove();
+				if (purchaseErrorSubscription) purchaseErrorSubscription.remove();
 
-			RNIap.endConnection()
-				.then(() => console.log("🔌 Billing connection closed"))
-				.catch(() => {});
-		};
-	}, [
-		language,
-		backendLevel,
-		users_id,
-	] // re-init ONLY when these change
-));
+				RNIap.endConnection()
+					.then(() => console.log("🔌 Billing connection closed"))
+					.catch(() => { });
+			};
+		}, [
+			language,
+			backendLevel,
+			users_id,
+		] // re-init ONLY when these change
+		));
 
 	// HandlePay function 
 	const handlePay = async () => {
@@ -706,14 +707,10 @@ const VideoListScreen = ({ navigation, route }) => {
 			onPress={() => {
 				if (isCurrentCombinationPaid) {
 					handleVideoPress(item);
-				} else {
+				} else {				
 					Alert.alert(
 						"Locked Content",
-						`Pay ${productDetails?.localizedPrice || "£60"} to unlock ${languageLabels[language]} videos for ${getDisplayLevel(selectedLevel)}`,
-						[
-							{ text: "Cancel", style: "cancel" },
-							{ text: "Pay Now", onPress: handlePay }
-						]
+						"please pay to unlock this content"
 					);
 				}
 			}}
@@ -741,7 +738,7 @@ const VideoListScreen = ({ navigation, route }) => {
 				]} numberOfLines={2}>
 					{item.title || `Video ${index + 1}`}
 				</Text>
-				<Text style={[ 
+				<Text style={[
 					styles.kidSubText,
 					!isCurrentCombinationPaid && styles.kidSubTextLocked
 				]}>
@@ -820,6 +817,35 @@ const VideoListScreen = ({ navigation, route }) => {
 	};
 
 
+	const renderHeader = useCallback(() => (
+		<>
+			<View style={[styles.languageRow, isTablet && styles.languageRowTablet, isTablet && { marginTop: 24 }]}>
+				{Object.keys(languageLabels).map((langKey, idx) => (
+					<TouchableOpacity
+						key={langKey}
+						style={[
+							styles.languageButton,
+							language === langKey && styles.languageButtonActive,
+							isTablet && styles.languageButtonTablet,
+							idx !== 0 && isTablet && { marginLeft: 32 },
+						]}
+						onPress={() => handleLanguageSelect(langKey)}
+					>
+						<Text style={styles.languageButtonText}>
+							{languageLabels[langKey]}
+						</Text>
+					</TouchableOpacity>
+				))}
+			</View>
+
+			<View style={[styles.languageHeader, isTablet && styles.languageHeaderTablet, { width: headerWidth, alignSelf: 'center', marginTop: isTablet ? 32 : 20 }]}>
+				<Text style={styles.ageGroupText}>
+					{selectedLevel ? getDisplayLevel(selectedLevel) : 'Loading...'}
+				</Text>
+			</View>
+		</>
+	), [language, selectedLevel, isTablet, headerWidth, handleLanguageSelect]);
+
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
@@ -832,32 +858,10 @@ const VideoListScreen = ({ navigation, route }) => {
 					</View>
 				)} */}
 
-				<View style={[styles.languageRow, isTablet && styles.languageRowTablet, isTablet && { marginTop: 24 }]}>
-					{Object.keys(languageLabels).map((langKey, idx) => (
-						<TouchableOpacity
-							key={langKey}
-							style={[
-								styles.languageButton,
-								language === langKey && styles.languageButtonActive,
-								isTablet && styles.languageButtonTablet,
-								idx !== 0 && isTablet && { marginLeft: 32 },
-							]}
-							onPress={() => handleLanguageSelect(langKey)}
-						>
-							<Text style={styles.languageButtonText}>
-								{languageLabels[langKey]}
-							</Text>
-						</TouchableOpacity>
-					))}
-				</View>
-
-				<View style={[styles.languageHeader, isTablet && styles.languageHeaderTablet, { width: headerWidth, alignSelf: 'center', marginTop: isTablet ? 32 : 20 }]}>
-					<Text style={styles.ageGroupText}>
-						{selectedLevel ? getDisplayLevel(selectedLevel) : 'Loading...'}
-					</Text>
-				</View>
+				{!isLandscape && renderHeader()}
 
 				<FlatList
+					ListHeaderComponent={isLandscape ? renderHeader : null}
 					data={videos}
 					keyExtractor={(item, index) => item._id || item.id || item.videoUrl || `video-${index}`}
 					contentContainerStyle={styles.listContainer}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import NoInternetScreen from './screens/NoInternetScreen'; 
+import NoInternetScreen from './screens/NoInternetScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './Store';
 import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 // Screens 
 import SplashScreen from './screens/SplashScreen';
@@ -43,12 +44,12 @@ const App = () => {
 		console.log("App: Setting up network listener");
 		const unsubscribe = NetInfo.addEventListener(state => {
 			console.log('App: Network state changed - type:', state.type, 'connected:', state.isConnected, 'reachable:', state.isInternetReachable);
-			setIsConnected(state.isConnected && state.isInternetReachable);
+			setIsConnected(state.isConnected); // && state.isInternetReachable
 		});
 
 		NetInfo.fetch().then(state => {
 			console.log('App: Initial network fetch - type:', state.type, 'connected:', state.isConnected, 'reachable:', state.isInternetReachable);
-			setIsConnected(state.isConnected && state.isInternetReachable);
+			setIsConnected(state.isConnected); // && state.isInternetReachable
 			setIsChecking(false);
 		});
 
@@ -65,141 +66,143 @@ const App = () => {
 		return <NoInternetScreen />;
 	}
 	console.log("App: Network check passed, rendering main app");
-	
+
 	try {
 		return (
 			//<SafeAreaView style={{ flex: 1 }}>
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<Provider store={store}>
 					<PersistGate loading={null} persistor={persistor}>
-						<NavigationContainer>
-							<Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
-								<Stack.Screen name="SplashScreen" component={SplashScreen} />
-								<Stack.Screen name="AdminPannel" component={AdminPannel} />
-								<Stack.Screen name="Login" component={LoginScreen} />
-								<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-								<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
-								<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-								<Stack.Screen name="Policy" component={Policy} 
-									options={({ navigation }) => ({
-										headerShown: true,
-										headerTitle: 'Policy',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#73c9ebff' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }}
-											 onPress={() => navigation.navigate("MainTabs",screen='Setting')} />
-										)
-									})}
-								/>
-								<Stack.Screen
-									name="LanguageSelectionScreen"
-									component={LanguageSelectionScreen}
-									options={{
-										headerShown: true,
-										title: 'Language',
-										headerTitleAlign: 'center',
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082', },
-										headerLeft: () => null,
-									}}
-								/>
-								<Stack.Screen
-									name="AgeSelectionScreen"
-									component={AgeSelectionScreen}
-									options={{
-										headerShown: true,
-										title: 'Age Group',
-										headerTitleAlign: 'center',
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
-									}}
-								/>
-								<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
-								<Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
-								<Stack.Screen
-									name="ViewProfile"
-									component={ViewProfileScreen}
-									options={({ navigation }) => ({
-										headerShown: true,
-										headerTitle: 'Profile',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} 
-											onPress={() => navigation.navigate("AccountScreen")} />
-										)
-									})}
-								/> 
-								<Stack.Screen
-									name="AccountScreen"
-									component={AccountScreen}
-									options={({ navigation }) => ({
-										headerShown: true,
-										headerTitle: 'Account',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082', },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('MainTabs', { screen: 'Setting' })} />
-										)
-									})}
-								/>
-								<Stack.Screen
-									name="ChangePasswordScreen"
-									component={ChangePasswordScreen}
-									options={({ navigation }) => ({
-										headerShown: true,
-										headerTitle: 'Change Password',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
-										)
-									})}
-								/>
-								<Stack.Screen
-									name="EditProfileScreen"
-									component={EditProfileScreen}
-									options={({ navigation }) => ({
-										headerShown: true,
-										headerTitle: 'Edit Profile',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB' },
-										headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('ViewProfile')} />
-										)
-									})}
-								/>
-								<Stack.Screen
-									name="SignupScreen"
-									component={SignupScreen}
-									options={({ navigation }) => ({
-										headerShown: false,
-										headerTitle: 'Signup',
-										headerTitleAlign: 'center',
-										headerTransparent: true,
-										headerStyle: { backgroundColor: '#87CEEB', color: '#4B0082', },
-										headerLeft: () => (
-											<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('Login')} />
-										)
-									})}
-								/>
-							</Stack.Navigator>
-						</NavigationContainer>
-						<Toast />
+						<BottomSheetModalProvider>
+							<NavigationContainer>
+								<Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F0F8FF' } }}>
+									<Stack.Screen name="SplashScreen" component={SplashScreen} />
+									<Stack.Screen name="AdminPannel" component={AdminPannel} />
+									<Stack.Screen name="Login" component={LoginScreen} />
+									<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+									<Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
+									<Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+									<Stack.Screen name="Policy" component={Policy}
+										options={({ navigation }) => ({
+											headerShown: true,
+											headerTitle: 'Policy',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#73c9ebff' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }}
+													onPress={() => navigation.navigate("MainTabs", screen = 'Setting')} />
+											)
+										})}
+									/>
+									<Stack.Screen
+										name="LanguageSelectionScreen"
+										component={LanguageSelectionScreen}
+										options={{
+											headerShown: true,
+											title: 'Language',
+											headerTitleAlign: 'center',
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082', },
+											headerLeft: () => null,
+										}}
+									/>
+									<Stack.Screen
+										name="AgeSelectionScreen"
+										component={AgeSelectionScreen}
+										options={{
+											headerShown: true,
+											title: 'Age Group',
+											headerTitleAlign: 'center',
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+										}}
+									/>
+									<Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+									<Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
+									<Stack.Screen
+										name="ViewProfile"
+										component={ViewProfileScreen}
+										options={({ navigation }) => ({
+											headerShown: true,
+											headerTitle: 'Profile',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }}
+													onPress={() => navigation.navigate("AccountScreen")} />
+											)
+										})}
+									/>
+									<Stack.Screen
+										name="AccountScreen"
+										component={AccountScreen}
+										options={({ navigation }) => ({
+											headerShown: true,
+											headerTitle: 'Account',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082', },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('MainTabs', { screen: 'Setting' })} />
+											)
+										})}
+									/>
+									<Stack.Screen
+										name="ChangePasswordScreen"
+										component={ChangePasswordScreen}
+										options={({ navigation }) => ({
+											headerShown: true,
+											headerTitle: 'Change Password',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate("AccountScreen")} />
+											)
+										})}
+									/>
+									<Stack.Screen
+										name="EditProfileScreen"
+										component={EditProfileScreen}
+										options={({ navigation }) => ({
+											headerShown: true,
+											headerTitle: 'Edit Profile',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#87CEEB' },
+											headerTitleStyle: { fontWeight: 'bold', color: '#4B0082' },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('ViewProfile')} />
+											)
+										})}
+									/>
+									<Stack.Screen
+										name="SignupScreen"
+										component={SignupScreen}
+										options={({ navigation }) => ({
+											headerShown: false,
+											headerTitle: 'Signup',
+											headerTitleAlign: 'center',
+											headerTransparent: true,
+											headerStyle: { backgroundColor: '#87CEEB', color: '#4B0082', },
+											headerLeft: () => (
+												<Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} onPress={() => navigation.navigate('Login')} />
+											)
+										})}
+									/>
+								</Stack.Navigator>
+							</NavigationContainer>
+							<Toast />
+						</BottomSheetModalProvider>
 					</PersistGate>
 				</Provider>
-			
+
 			</GestureHandlerRootView>
 			//</SafeAreaView>
 		);

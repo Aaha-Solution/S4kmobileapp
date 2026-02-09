@@ -40,9 +40,19 @@ const SignupScreen = ({ navigation }) => {
 
 	const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	const validatePassword = (password) => {
-		const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-		return regex.test(password);
-	};
+	const passwordRegex =
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,16}$/;
+
+	if (!passwordRegex.test(password)) {
+		setPasswordError(
+			'Password must contain uppercase, lowercase, number and special character'
+		);
+		return false;
+	}
+
+	return true;
+};
+
 
 	//  the handleLogin function to handle user login
 

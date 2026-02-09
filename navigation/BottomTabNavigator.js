@@ -4,33 +4,27 @@ import {
 	TouchableOpacity,
 	Text,
 	StyleSheet,
-	TouchableWithoutFeedback,
-	BackHandler,
-	SafeAreaView
+	Dimensions
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import VideoListScreen from '../screens/VideoListScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import SettingScreen from '../screens/SettingScreen';
-import LevelSelectorScreen from '../screens/LevelSelectorScreen';
 
 import { setLevel } from '../Store/userSlice';
 import { getBackendLevel, getDisplayLevel } from '../utils/levelUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dimensions } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = Math.min(screenWidth, screenHeight) >= 600;
 const scaleSize = (phoneSize, tabletSize) => (isTablet ? tabletSize : phoneSize);
-
-const dynamicMargin = screenHeight * 0.025; // 2.5% of screen height (adjust as needed)
 
 export const ICON_SIZE = scaleSize(24, 32);
 export const FONT_SIZE = scaleSize(12, 16);
@@ -40,160 +34,53 @@ const AGE_GROUP_ITEMS = [
 	{ label: 'Junior (7 & above years)', value: 'Junior (7 & above years)' },
 ];
 
-const CustomTabBar = ({ state, descriptors, navigation }) => {
-	 const insets = useSafeAreaInsets(); 
-	const dispatch = useDispatch();
+const CustomTabBar = ({ state, descriptors, navigation, onOpenLevel }) => {
+	const insets = useSafeAreaInsets();
 	const isPaid = useSelector(state => state.user.isPaid);
-	const selectedLevel = useSelector(state => state.user.selectedLevel);
-	//console.log("level", selectedLevel)
-	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
-	//console.log("value", value)
-	const [items, setItems] = useState(AGE_GROUP_ITEMS);
-	const currentRouteRef = useRef(state.routes[state.index].name);
-
-	//--- Sync value with selectedLevel from Redux store ---//
-	useEffect(() => {
-		if (selectedLevel) {
-			setValue(getDisplayLevel(selectedLevel));
-		}
-	}, [selectedLevel]);
-
-	useFocusEffect(() => {
-		currentRouteRef.current = state.routes[state.index].name;
-	});
-
-	const handleAgeSelect = (selectedDisplayValue) => {
-		if (!selectedDisplayValue) return;
-		try {
-			const backendLevel = getBackendLevel(selectedDisplayValue);
-			dispatch(setLevel(backendLevel));
-			setValue(selectedDisplayValue);
-			setOpen(false);
-
-			if (currentRouteRef.current !== 'Home') {
-				navigation.navigate('Home');
-			}
-		} catch (error) {
-			//console.error('Error in handleAgeSelect:', error);
-		}
-	};
-
-	const handleOutsidePress = () => {
-		if (open) {
-			setOpen(false);
-			if (currentRouteRef.current === 'level') {
-				navigation.navigate('Home');
-			}
-		}
-	};
 
 	const handleTabPress = (route) => {
-		//handleOutsidePress();
-		// 1. Close the dropdown if an active tab is pressed.
-		if (open && route.name !== 'level') {
-			setOpen(false);
-			// Do not return here, continue to navigate to the other tab
-		}
 		if (route.name === 'level') {
-			setOpen(prev => !prev);
+			if (!isPaid) return;
+			onOpenLevel?.();
 		} else {
 			navigation.navigate(route.name);
 		}
 	};
 
-	useEffect(() => {
-		const backAction = () => {
-			if (open) {
-				setOpen(false);
-				return true;
-			}
-			if (currentRouteRef.current === 'level') {
-				navigation.navigate('Home');
-				return true;
-			}
-			return false;
-		};
-
-		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-		return () => backHandler.remove();
-	}, [open]);
-
 	return (
-		<TouchableWithoutFeedback onPress={handleOutsidePress}>
-			<View  style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
-				{state.routes.map((route, index) => {
-					const { options } = descriptors[route.key];
-					const label = options.tabBarLabel ?? options.title ?? route.name;
-					const isFocused = open
-						? route.name === 'level'
-						: state.index === index;
+		<View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
+			{state.routes.map((route, index) => {
+				const { options } = descriptors[route.key];
+				const label = options.tabBarLabel ?? options.title ?? route.name;
+				const isFocused = state.index === index;
 
-					const iconName = getIconName(route.name, isFocused);
+				const iconName = getIconName(route.name, isFocused);
 
-					if (route.name === 'level') {
-						return (
-							<View key={route.key} style={styles.ageTabContainer}>
-								<TouchableOpacity onPress={() => handleTabPress(route)} style={styles.tabButton}>
-									<Icon name={iconName} size={ICON_SIZE} color={isFocused ? '#4CAF50' : 'gray'} />
-									<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
-								</TouchableOpacity>
-								{open && (
-									<View style={styles.dropdownWrapper}>
-										<DropDownPicker
-											open={open}
-											value={value}
-											items={items}
-											setOpen={setOpen}
-											setValue={setValue}
-											setItems={setItems}
-											placeholder="Select Age Group"
-											onChangeValue={(val) => handleAgeSelect(val)}
-											onSelectItem={(item) => handleAgeSelect(item.value)}
-											style={styles.dropdown}
-											dropDownContainerStyle={styles.dropdownContainer}
-											arrowIconStyle={{ tintColor: '#4CAF50' }}
-											textStyle={{ fontSize: FONT_SIZE, fontWeight: '500', color: '#333' }}
-											labelStyle={{ color: '#333'}}
-											listItemLabelStyle={{ color: '#333', fontSize: FONT_SIZE  }}
-											selectedItemContainerStyle={{
-												backgroundColor: '#E8F5E9',
-												borderLeftWidth: 4,
-												borderLeftColor: '#4CAF50',
-											}}
-											selectedItemLabelStyle={{
-												color: '#2E7D32',
-												fontWeight: 'bold',
-											}}
-											tickIconStyle={{
-												tintColor: '#4CAF50',
-												width: 20,
-												height: 20,
-											}}
-											//zIndex={9999}
-											//listMode="SCROLLVIEW"
-											//scrollViewProps={{ nestedScrollEnabled: true }}
-											disabled={!isPaid}
+				return (
+					<TouchableOpacity
+						key={route.key}
+						onPress={() => handleTabPress(route)}
+						style={styles.tabButton}
+					>
+						<Icon name={iconName} size={ICON_SIZE} color={isFocused ? '#4CAF50' : 'gray'} />
+						<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>
+							{label}
+						</Text>
+					</TouchableOpacity>
+				);
 
-										/>
-									</View>
-								)}
-							</View>
-						);
-					}
-					return (
-						<TouchableOpacity
-							key={route.key}
-							onPress={() => handleTabPress(route)}
-							style={styles.tabButton}
-						>
-							<Icon name={iconName} size={24} color={isFocused ? '#4CAF50' : 'gray'} />
-							<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
-						</TouchableOpacity>
-					);
-				})}
-			</View>
-		</TouchableWithoutFeedback>
+				// return (
+				// 	<TouchableOpacity
+				// 		key={route.key}
+				// 		onPress={() => handleTabPress(route)}
+				// 		style={styles.tabButton}
+				// 	>
+				// 		<Icon name={iconName} size={ICON_SIZE} color={isFocused ? '#4CAF50' : 'gray'} />
+				// 		<Text style={[styles.tabLabel, { color: isFocused ? '#4CAF50' : 'gray' }]}>{label}</Text>
+				// 	</TouchableOpacity>
+				// );
+			})}
+		</View>
 	);
 };
 
@@ -208,97 +95,183 @@ const getIconName = (routeName, focused) => {
 };
 
 const BottomTabNavigator = () => {
+	const navigation = useNavigation();
+	const dispatch = useDispatch();
+	const selectedLevel = useSelector(state => state.user.selectedLevel);
+	const [value, setValue] = useState(getDisplayLevel(selectedLevel));
+	const [items] = useState(AGE_GROUP_ITEMS);
+
+	// Ref for BottomSheetModal
+	const bottomSheetModalRef = useRef(null);
+
+	// Variables for snap points
+	const snapPoints = React.useMemo(() => ['25%'], []);
+
+	useEffect(() => {
+		if (selectedLevel) {
+			setValue(getDisplayLevel(selectedLevel));
+		}
+	}, [selectedLevel]);
+
+	const handleAgeSelect = (selectedDisplayValue) => {
+		if (!selectedDisplayValue) return;
+		try {
+			const backendLevel = getBackendLevel(selectedDisplayValue);
+			dispatch(setLevel(backendLevel));
+			setValue(selectedDisplayValue);
+			bottomSheetModalRef.current?.dismiss();
+
+			navigation.navigate('MainTabs', { screen: 'Home' });
+		} catch (error) {
+			//console.error('Error in handleAgeSelect:', error);
+		}
+	};
+
+	const renderBackdrop = React.useCallback(
+		(props) => (
+			<BottomSheetBackdrop
+				{...props}
+				disappearsOnIndex={-1}
+				appearsOnIndex={0}
+				onPress={() => bottomSheetModalRef.current?.dismiss()}
+			/>
+		),
+		[]
+	);
+
+	const onOpenLevel = () => {
+		bottomSheetModalRef.current?.present();
+	};
+
 	return (
-		
-		<Tab.Navigator
-			initialRouteName="Home"
-			tabBar={(props) => <CustomTabBar {...props} />}
-			screenOptions={{
-				headerShown: true,
-				headerTitleAlign: 'center',
-				headerStyle: { backgroundColor: '#87CEEB' },
-				headerTintColor: '#fff',
-				headerTitleStyle: {
-					color: '#4B0082',
-					fontWeight: 'bold',
-					fontFamily: 'Times New Roman',
-				},
-			}}
-		>
-			<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
-			<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} />
-			<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
-			<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Settings' }} />
-		</Tab.Navigator>
+		<View style={{ flex: 1 }}>
+			<Tab.Navigator
+				initialRouteName="Home"
+				tabBar={(props) => <CustomTabBar {...props} onOpenLevel={onOpenLevel} />}
+				screenOptions={{
+					headerShown: true,
+					headerTitleAlign: 'center',
+					headerStyle: { backgroundColor: '#87CEEB' },
+					headerTintColor: '#fff',
+					headerTitleStyle: {
+						color: '#4B0082',
+						fontWeight: 'bold',
+						fontFamily: 'Times New Roman',
+					},
+				}}
+			>
+				<Tab.Screen name="Home" component={VideoListScreen} options={{ title: 'Home' }} />
+				<Tab.Screen name="level" component={VideoListScreen} options={{ title: 'Age' }} listeners={{  tabPress: e => e.preventDefault(),}}/>
+				<Tab.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
+				<Tab.Screen name="Setting" component={SettingScreen} options={{ title: 'Settings' }} />
+			</Tab.Navigator>
+
+			<BottomSheetModal
+				ref={bottomSheetModalRef}
+				index={0}
+				snapPoints={snapPoints}
+				backdropComponent={renderBackdrop}
+				backgroundStyle={{ backgroundColor: '#F0F8FF' }}
+			>
+				<BottomSheetView style={styles.contentContainer}>
+					<Text style={styles.sheetTitle}>Select Age Group</Text>
+					{items.map((item) => (
+						<TouchableOpacity
+							key={item.value}
+							style={[
+								styles.sheetItem,
+								value === item.value && styles.selectedSheetItem
+							]}
+							onPress={() => handleAgeSelect(item.value)}
+						>
+							<Text style={[
+								styles.sheetItemText,
+								value === item.value && styles.selectedSheetItemText
+							]}>
+								{item.label}
+							</Text>
+							{value === item.value && (
+								<Icon name="checkmark-circle" size={20} color="#4CAF50" />
+							)}
+						</TouchableOpacity>
+					))}
+				</BottomSheetView>
+			</BottomSheetModal>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	tabBarContainer: {
 		flexDirection: 'row',
-		justifyContent: 'space-around',
+		justifyContent: 'space-between',
 		backgroundColor: '#F0F8FF',
-		height: scaleSize(screenHeight * 0.08, screenHeight * 0.1), // taller on tablet
-		paddingVertical: screenHeight * 0.01,
+		height: scaleSize(70, 90),
+		paddingVertical: 8,
+
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
-		position: 'relative',
-		zIndex: 1,
-		overflow: 'visible',   // <-- REQUIRED ON ANDROID 15
-   		elevation: 10,         // <-- REQUIRED FOR zIndex TO WORK
+		// position: 'relative',
+		// zIndex: 1,
+		// overflow: 'visible',   // <-- REQUIRED ON ANDROID 15
+		elevation: 10,         // <-- REQUIRED FOR zIndex TO WORK
 	},
-	ageTabContainer: {
-		alignItems: 'center',
-		position: 'relative',
-		justifyContent: 'center',
-		zIndex: 2,
-	    overflow: 'visible',   // <-- prevents clipping
-    	elevation: 20, 
-		paddingHorizontal: screenWidth * 0.02,
-		paddingVertical: screenHeight * 0.01,
-		
-	},
+	// ageTabContainer: {
+	// 	alignItems: 'center',
+	// 	position: 'relative',
+	// 	justifyContent: 'center',
+	// 	zIndex: 2,
+	// 	overflow: 'visible',   // <-- prevents clipping
+	// 	elevation: 20,
+	// 	paddingHorizontal: screenWidth * 0.02,
+	// 	paddingVertical: screenHeight * 0.01,
+
+	// },
 
 	tabButton: {
+		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		paddingHorizontal: screenWidth * 0.02,
-		
 	},
+
 
 	tabLabel: {
 		fontSize: FONT_SIZE,
 		marginTop: 2,
 	},
 
-	dropdownWrapper: {
-		position: 'absolute',
-		top: -scaleSize(screenHeight * 0.18, screenHeight * 0.12), // adjust for bigger screens
-		width: scaleSize(screenWidth * 0.5, screenWidth * 0.5),
-		left: -scaleSize(screenWidth * 0.22, screenWidth * 0.22), // center more properly on tablets
-		zIndex: 9999,
-		bottom:scaleSize(screenHeight*0.10),
+	contentContainer: {
+		flex: 1,
+		padding: 20,
 	},
-
-	dropdown: {
-		height: 0,
-		padding: 0,
-		margin: 0,
-		borderWidth: 0,
-		position: 'absolute',
-		top: -9999,
-		left: -scaleSize(screenWidth * 0.25, screenWidth * 0.25),
-		opacity: 0,
-		borderRadius: 5,
+	sheetTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#4B0082',
+		marginBottom: 20,
+		alignSelf: 'center',
 	},
-
-	dropdownContainer: {
-		borderColor: 'rgba(76, 175, 80, 0.9)',
-		borderWidth: 2,
-		borderRadius: 2,
-		marginLeft: scaleSize(screenWidth * 0.2),
-		minWidth: scaleSize(screenWidth * 0.4),
-		maxWidth: scaleSize(screenWidth * 0.7),
+	sheetItem: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingVertical: 15,
+		paddingHorizontal: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: '#eee',
+	},
+	selectedSheetItem: {
+		backgroundColor: '#E8F5E9',
+		borderRadius: 10,
+		borderBottomWidth: 0,
+	},
+	sheetItemText: {
+		fontSize: 16,
+		color: '#333',
+	},
+	selectedSheetItemText: {
+		color: '#2E7D32',
+		fontWeight: 'bold',
 	},
 });
 export default BottomTabNavigator;

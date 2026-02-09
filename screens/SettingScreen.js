@@ -8,7 +8,8 @@ import {
 	SafeAreaView,
 	Alert,
 	Platform,
-	BackHandler
+	BackHandler,
+	useWindowDimensions
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,20 +30,20 @@ const SettingsScreen = ({ route, navigation }) => {
 	const [showAlert, setShowAlert] = useState(false);
 	const [loading, setLoading] = useState(false);
 
-	const width = Dimensions.get('window').width;
-	const height = Dimensions.get('window').height;
+	const { width, height } = useWindowDimensions();
+	const isLandscape = width > height;
 	const resolveAvatar = (avatar) => {
 		if (typeof avatar === 'string') {
-		  if (avatar.startsWith('http') || avatar.startsWith('file')) {
-			return { uri: avatar };
-		  }
-		  return profile_avatar; // fallback if it's like "1"
+			if (avatar.startsWith('http') || avatar.startsWith('file')) {
+				return { uri: avatar };
+			}
+			return profile_avatar; // fallback if it's like "1"
 		} else if (avatar && typeof avatar === 'object' && avatar.uri) {
-		  return avatar;
+			return avatar;
 		} else {
-		  return profile_avatar;
+			return profile_avatar;
 		}
-	  };
+	};
 
 	//  Load avatar from AsyncStorage
 	const loadAvatar = async () => {
@@ -66,20 +67,20 @@ const SettingsScreen = ({ route, navigation }) => {
 
 	useEffect(() => {
 		if (selectedAvatar) {
-		  setTempSelectedAvatar(selectedAvatar);
-	  
-		  // only save if it's a string or uri object
-		  if (
-			(typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')) ||
-			(typeof selectedAvatar === 'object' && selectedAvatar.uri)
-		  ) {
-			AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
-		  } else {
-			AsyncStorage.removeItem('selectedAvatar'); // clean invalid old ones
-		  }
+			setTempSelectedAvatar(selectedAvatar);
+
+			// only save if it's a string or uri object
+			if (
+				(typeof selectedAvatar === 'string' && selectedAvatar.startsWith('http')) ||
+				(typeof selectedAvatar === 'object' && selectedAvatar.uri)
+			) {
+				AsyncStorage.setItem('selectedAvatar', JSON.stringify(selectedAvatar));
+			} else {
+				AsyncStorage.removeItem('selectedAvatar'); // clean invalid old ones
+			}
 		}
-	  }, [selectedAvatar]);
-	  
+	}, [selectedAvatar]);
+
 
 	//  Reload avatar when screen comes into focus
 	useEffect(() => {
@@ -139,29 +140,34 @@ const SettingsScreen = ({ route, navigation }) => {
 		{ icon: 'document-text-outline', label: 'Privacy Policy', screen: 'Policy' },
 		{ icon: 'log-out-outline', label: 'Log out', screen: 'Log out' },
 	];
-		//console.log('profile_avatar:', profile_avatar);
+	//console.log('profile_avatar:', profile_avatar);
+	const renderHeader = () => (
+		<View style={styles.header}>
+			<View style={styles.profileContainer}>
+				<Image
+					source={resolveAvatar(tempSelectedAvatar)}
+					style={styles.avatar}
+					resizeMode="cover"
+					onError={(e) => {
+						setTempSelectedAvatar(profile_avatar)
+					}}
+				/>
+				<View>
+					<Text style={styles.name}>{username}</Text>
+					<Text style={styles.email}>{email}</Text>
+				</View>
+			</View>
+		</View>
+	);
+
 	return (
 		<View style={{ flex: 1 }}>
 			<LinearGradient colors={['#87CEEB', '#ADD8E6', '#F0F8FF']} style={styles.container}>
 				<SafeAreaView style={styles.safeArea}>
-					<View style={styles.header}>
-						<View style={styles.profileContainer}>
-							<Image
-								source={resolveAvatar(tempSelectedAvatar)}
-								style={styles.avatar}
-								resizeMode="cover"
-								onError={(e) => {
-									 setTempSelectedAvatar(profile_avatar)
-								}}
-							/>
-							<View>
-								<Text style={styles.name}>{username}</Text>
-								<Text style={styles.email}>{email}</Text>
-							</View>
-						</View>
-					</View>
+					{!isLandscape && renderHeader()}
 
 					<ScrollView style={styles.menuContainer}>
+						{isLandscape && renderHeader()}
 						{menuItems.map((item, index) => (
 							<Pressable
 								key={index}
